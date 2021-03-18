@@ -6,9 +6,10 @@
 #ifndef _BASEEVENT_H
 #define _BASEEVENT_H
 
-#ifndef __LDEFIN2D_H
+#include "stdafx.h"
+#include <afxctl.h>
+#include <afxpriv.h>
 #include <ldefin2d.h>
-#endif      
    
 #if _MSC_VER > 1000
 #pragma once
@@ -35,14 +36,12 @@ protected:
           LPDISPATCH        m_doc;        // Документ
           long              m_objType;    // Тип объекта
           ksFeaturePtr      m_obj3D;      // Объект для 3D
-          bool              m_selfAdvise; // true - подписка пользователем
 public:
             BaseEvent( LPUNKNOWN pObject, 
                        IID iidEvents, 
                        LPDISPATCH doc     = NULL, 
                        long objType       = -1, 
-                       ksFeaturePtr obj3D = NULL,
-                       bool m_selfAdvise  = true );
+                       ksFeaturePtr obj3D = NULL);
   virtual ~ BaseEvent();
   
   virtual int  Advise  ();                          // Подписаться на получение событий
@@ -60,9 +59,7 @@ public:
                                      long objType       = -1, 
                                      ksFeaturePtr obj3D = NULL );
   static  void BaseEvent::ListEvents();
-          bool IsSelfAdvise() { return m_selfAdvise; }
-          void SetSelfAdvise( bool selfAdvise ) { m_selfAdvise = selfAdvise; }
-          CString GetDocName(); // Получить имя документа
+  CString GetDocName(); // Получить имя документа
 protected: 
   BEGIN_INTERFACE_PART(EventHandler, IDispatch)
     INIT_INTERFACE_PART(BaseEvent, EventHandler)

@@ -36,14 +36,5 @@ target_link_libraries(${PROJECT_NAME} ${KOMPAS_SDK}/lib64/kAPI7.lib)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".rtw")
 
-add_custom_command(OUTPUT 
-    ${CMAKE_CURRENT_SOURCE_DIR}/Kompas3DPrint.res
-    COMMAND "C:/Program Files (x86)/Windows Kits/10/bin/10.0.17134.0/x64/rc.exe" ${CMAKE_CURRENT_SOURCE_DIR}/Kompas3DPrint.rc)
-
 # include(build/cmake/libraries.cmake)
-
 # target_compile_options(Kompas3DPrint PRIVATE -Werror=return-type)
-
-# if(CMAKE_BUILD_TYPE STREQUAL "Release")
-# add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/lib/SiamsHWLib/HWLib/Ximea/libXimea.${LIBRARY_EXT} ${PROJECT_SOURCE_DIR}/modules/imlib_ximea/libXimea.imlib)
-# endif()

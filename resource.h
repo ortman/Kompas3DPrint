@@ -1,7 +1,3 @@
-//{{NO_DEPENDENCIES}}
-// Microsoft Visual C++ generated include file.
-// Used by Step2_API7_3D.rc
-//
  
 #define IDI_STEP2_API7_3D               1
 

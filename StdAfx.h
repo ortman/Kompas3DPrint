@@ -3,8 +3,8 @@
 //      are changed infrequently
 //
 
-#if !defined(AFX_STDAFX_H__200000C6_CD17_11D4_87AE_0050BABDCDF3__INCLUDED_)
-#define AFX_STDAFX_H__200000C6_CD17_11D4_87AE_0050BABDCDF3__INCLUDED_
+#ifndef _AFX_STDAFX_H_
+#define _AFX_STDAFX_H_
 
 #if _MSC_VER > 1000
 #pragma once
@@ -35,16 +35,9 @@
 #include <afxcmn.h>      // MFC support for Windows Common Controls
 #endif // _AFX_NO_AFXCMN_SUPPORT
 
-
-//-------------------------------------------------------------------------------
-// ksConstants.tlb
-// ---
 #import "ksConstants.tlb" no_namespace
 #import "ksConstants3D.tlb" no_namespace  
 
-//-------------------------------------------------------------------------------
-// kAPI5.tlb
-// ---
 #pragma warning( disable : 4278 )
 
 #import "ConvertLibInterfaces.tlb" no_namespace named_guids
@@ -60,7 +53,4 @@
 #import "VCHatch.tlb" no_namespace named_guids
 #pragma warning( once : 4278 ) 
 
-//{{AFX_INSERT_LOCATION}}
-// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
-
-#endif // !defined(AFX_STDAFX_H__200000C6_CD17_11D4_87AE_0050BABDCDF3__INCLUDED_)
+#endif // _AFX_STDAFX_H_

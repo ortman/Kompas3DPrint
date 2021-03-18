@@ -3,16 +3,10 @@
 // Базовый класс для обработчиков событий
 //
 /////////////////////////////////////////////////////////////////////////////
-#include "stdafx.h"
-#include <afxctl.h>
-#include <afxpriv.h>
 
-// #include "eventsAuto.h"
-#include "Kompas3DPrint.h"
-
-#ifndef _BASEEVENT_H
 #include "baseEvent.h"
-#endif
+
+#include "Kompas3DPrint.h"
  
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -34,68 +28,49 @@ CObList BaseEvent::m_EventList;
 //-------------------------------------------------------------------------------
 //
 // ---
-BaseEvent::BaseEvent( LPUNKNOWN pObject, 
-                      IID iidEvents,  
-                      LPDISPATCH doc, /*NULL*/ 
-                      long objType, /*-1*/ 
-                      ksFeaturePtr obj3D /*NULL*/,
-                      bool selfAdvise /*true*/) 
-  : CCmdTarget   (),
-    m_dwCookie   ( 0          ),
-    m_pContainer ( pObject    ), // Источник событий
-    m_iidEvents  ( iidEvents  ),
-    m_doc        ( doc        ), // Документ
-    m_objType    ( objType    ), // Тип объекта
-    m_obj3D      ( obj3D      ), // Объект для 3D
-    m_selfAdvise ( selfAdvise ), // Подписка пользователем
-    m_pConnPt    ( NULL       ) 
-{
-  m_libName.LoadString( IDR_LIBID );
-
-  m_EventList.AddTail( this );
-
-  if ( m_pContainer ) 
-    m_pContainer->AddRef();
-  
-  if ( m_doc )
-    m_doc->AddRef();
-    
-  if ( m_obj3D )
-    m_obj3D->AddRef();
-
+BaseEvent::BaseEvent(LPUNKNOWN pObject, 
+                     IID iidEvents,  
+                     LPDISPATCH doc, /*NULL*/ 
+                     long objType, /*-1*/ 
+                     ksFeaturePtr obj3D /*NULL*/):
+            CCmdTarget(),
+            m_dwCookie(0),
+            m_pContainer(pObject),  // Источник событий
+            m_iidEvents(iidEvents),
+            m_doc(doc),             // Документ
+            m_objType(objType),     // Тип объекта
+            m_obj3D(obj3D),         // Объект для 3D
+            m_pConnPt(NULL) {
+  m_libName.LoadString(IDR_LIBID);
+  m_EventList.AddTail(this);
+  if (m_pContainer) m_pContainer->AddRef();
+  if (m_doc) m_doc->AddRef();
+  if (m_obj3D) m_obj3D->AddRef();
   ASSERT( !IsEqualIID(m_iidEvents, GUID_NULL) ); // Прислали тип событий
 }
-
 
 //-------------------------------------------------------------------------------
 //
 // ---
-BaseEvent::~BaseEvent()
-{
+BaseEvent::~BaseEvent() {
   // Удалим себя из списка обработчиков событий
-  POSITION pos = m_EventList.Find( this );
-  if ( pos ) 
-  {
-    m_EventList.RemoveAt( pos );
-
-
+  POSITION pos = m_EventList.Find(this);
+  if (pos) {
+    m_EventList.RemoveAt(pos);
   }
 
   Unadvise(); // Отпишемся от получения событий
-  if ( m_pContainer ) 
-  {
+  if (m_pContainer) {
     m_pContainer->Release();
     m_pContainer = NULL;     
   }
 
-  if ( m_doc ) 
-  {
+  if (m_doc) {
     m_doc->Release();
     m_doc = NULL;
   }
 
-  if ( m_obj3D ) 
-  {
+  if (m_obj3D) {
     m_obj3D->Release();
     m_obj3D = NULL;
   }
@@ -105,45 +80,33 @@ BaseEvent::~BaseEvent()
 //-------------------------------------------------------------------------------
 // Получить имя документа
 // ---
-CString BaseEvent::GetDocName()
-{
+CString BaseEvent::GetDocName() {
   _bstr_t fileName;
-  if( m_doc )
-  { 
+  if (m_doc) { 
     ksDocument2DPtr doc2D;
-    m_doc->QueryInterface( DIID_ksDocument2D, (LPVOID*)&doc2D );
-    if( doc2D ) 
-    {
-      ksDocumentParamPtr docPar( kompas->GetParamStruct(ko_DocumentParam) );
-      doc2D->ksGetObjParam( doc2D->Getreference(), docPar, ALLPARAM );
+    m_doc->QueryInterface(DIID_ksDocument2D, (LPVOID*)&doc2D);
+    if (doc2D) {
+      ksDocumentParamPtr docPar(kompas->GetParamStruct(ko_DocumentParam));
+      doc2D->ksGetObjParam(doc2D->Getreference(), docPar, ALLPARAM);
       fileName = docPar->fileName;
-    }
-    else
-    {
+    } else {
       ksDocument3DPtr doc3D;
-      m_doc->QueryInterface( DIID_ksDocument3D, (LPVOID*)&doc3D );
-      if( doc3D ) 
-      {  
+      m_doc->QueryInterface(DIID_ksDocument3D, (LPVOID*)&doc3D);
+      if (doc3D) {  
         fileName = doc3D->fileName; 
-      }
-      else
-      {
-        ksSpcDocumentPtr docSpc( m_doc );
-        m_doc->QueryInterface( DIID_ksSpcDocument, (LPVOID*)&docSpc );
-        if( docSpc ) 
-        {   
-          ksDocumentParamPtr docPar( kompas->GetParamStruct(ko_DocumentParam) );
-          docSpc->ksGetObjParam( docSpc->Getreference(), docPar, ALLPARAM );
+      } else {
+        ksSpcDocumentPtr docSpc(m_doc);
+        m_doc->QueryInterface(DIID_ksSpcDocument, (LPVOID*)&docSpc);
+        if (docSpc) {   
+          ksDocumentParamPtr docPar(kompas->GetParamStruct(ko_DocumentParam));
+          docSpc->ksGetObjParam(docSpc->Getreference(), docPar, ALLPARAM);
           fileName = docPar->fileName;
-        }
-        else
-        {
-          ksDocumentTxtPtr docTxt( m_doc );
-          m_doc->QueryInterface( DIID_ksDocumentTxt, (LPVOID*)&docTxt );
-          if( docTxt ) 
-          {   
-            ksTextDocumentParamPtr docPar( kompas->GetParamStruct(ko_TextDocumentParam) );
-            docTxt->ksGetObjParam( docTxt->Getreference(), docPar, ALLPARAM );
+        } else {
+          ksDocumentTxtPtr docTxt(m_doc);
+          m_doc->QueryInterface(DIID_ksDocumentTxt, (LPVOID*)&docTxt);
+          if (docTxt) {   
+            ksTextDocumentParamPtr docPar(kompas->GetParamStruct(ko_TextDocumentParam));
+            docTxt->ksGetObjParam(docTxt->Getreference(), docPar, ALLPARAM);
             fileName = docPar->fileName;
           }
         }
@@ -153,12 +116,10 @@ CString BaseEvent::GetDocName()
   return (LPCTSTR)fileName;
 }
 
-
 //-------------------------------------------------------------------------------
 // Подписаться на получение событий
 // ---
-int BaseEvent::Advise() 
-{
+int BaseEvent::Advise() {
   ASSERT( m_dwCookie == 0 ); // Повторно подписываться нельзя
 
   // Подписаться на получение событий
@@ -183,88 +144,6 @@ int BaseEvent::Advise()
     return 0;
   }
 
-  if ( IsSelfAdvise() )
-  {
-    /*if( IsEqualIID(m_iidEvents, DIID_ksKompasObjectNotify) && theApp.m_mes_APP )
-    { 
-      CString str( _T("Подписаться на получение событий\n") + m_libName + _T(" --> ApplicationEvent::Advise") );
-      kompas->ksMessage( str.GetBuffer(0) );
-    }
-    else if( IsEqualIID(m_iidEvents, DIID_ksDocument2DNotify) && theApp.m_mes_2DDOC )
-    {
-      CString str( _T("Подписаться на получение событий\n") + m_libName + _T(" --> Document2DEvent::Advise\nИмя документа = ") + GetDocName() );
-      kompas->ksMessage( str.GetBuffer(0) );
-    }
-    else if( IsEqualIID(m_iidEvents, DIID_ksDocument3DNotify) && theApp.m_mes_3DDOC )
-    {
-      CString str( _T("Подписаться на получение событий\n") + m_libName + _T(" --> Document3DEvent::Advise\nИмя документа = ") + GetDocName() );
-      kompas->ksMessage( str.GetBuffer(0) );
-    }
-    else */if( IsEqualIID(m_iidEvents, DIID_ksDocumentFileNotify) /*&& theApp.m_mes_DOC*/ )
-    {
-      CString str( _T("Подписаться на получение событий\n") + m_libName + _T(" --> DocumentEvent::Advise\nИмя документа = ") + GetDocName() );
-      kompas->ksMessage( str.GetBuffer(0) );
-    }
-    // else if( IsEqualIID(m_iidEvents, DIID_ksObject2DNotify) && theApp.m_mes_OBJ_2DDOC )
-    // {
-    //   ksDocument2DPtr doc2D( m_doc );
-    //   if( doc2D != NULL && doc2D->ksExistObj(m_objType) ) 
-    //     doc2D->ksLightObj( m_objType, true );
-
-    //   CString strType;
-    //   strType.Format( _T("\nТип/указатель объекта = %i"), m_objType );
-    //   CString str( _T("Подписаться на получение событий\n") + m_libName + _T(" --> Object2DEvent::Advise\nИмя документа = ") + GetDocName() + strType );
-    //   kompas->ksMessage( str.GetBuffer(0) );
-      
-    //   if( doc2D != NULL && doc2D->ksExistObj(m_objType) ) 
-    //     doc2D->ksLightObj( m_objType, false );
-    // }
-    // else if( IsEqualIID(m_iidEvents, DIID_ksObject3DNotify) && theApp.m_mes_OBJ_3DDOC )
-    // {
-    //   ksDocument3DPtr doc3D( m_doc );
-    //   ksChooseMngPtr chooseMng;
-    //   if( doc3D != NULL  && m_obj3D != NULL && 
-    //       ( chooseMng = doc3D->GetChooseMng() ) != NULL )         
-    //     chooseMng->Choose( m_obj3D );
-
-    //   CString strType;
-    //   strType.Format( _T("\nТип объекта = %i"), m_objType );
-    //   CString strObj3DName;
-    //   if( m_obj3D )
-    //      strObj3DName = (LPCTSTR)m_obj3D->Getname();
-    //   CString str( _T("Подписаться на получение событий\n") + m_libName + _T(" --> Object3DEvent::Advise\nИмя документа = ") + GetDocName() + strType + "\nИмя 3D объекта = " + strObj3DName );
-    //   kompas->ksMessage( str.GetBuffer(0) );
-
-    //   if( chooseMng != NULL )
-    //     chooseMng->UnChoose( m_obj3D ); 
-    // }
-    // else if( IsEqualIID(m_iidEvents, DIID_ksSelectionMngNotify) && theApp.m_mes_SELECT )
-    // {
-    //   CString str( _T("Подписаться на получение событий\n") + m_libName + _T(" --> SelectMngEvent::Advise\nИмя документа = ") + GetDocName() );
-    //   kompas->ksMessage( str.GetBuffer(0) );
-    // }
-    // else if( IsEqualIID(m_iidEvents, DIID_ksSpcDocumentNotify) && theApp.m_mes_SPCDOC )
-    // {
-    //   CString str( _T("Подписаться на получение событий\n") + m_libName + _T(" --> SpcDocumentEvent::Advise\nИмя документа = ") + GetDocName() );
-    //   kompas->ksMessage( str.GetBuffer(0) );
-    // }
-    // else if( IsEqualIID(m_iidEvents, DIID_ksSpcObjectNotify) && theApp.m_mes_OBJ_SPC )
-    // {
-    //   CString str( _T("Подписаться на получение событий\n") + m_libName + _T(" --> SpcObjectEvent::Advise\nИмя документа = ") + GetDocName() );
-    //   kompas->ksMessage( str.GetBuffer(0) );
-    // }
-    // else if( IsEqualIID(m_iidEvents, DIID_ksSpecificationNotify) && theApp.m_mes_SPC )
-    // {
-    //   CString str( _T("Подписаться на получение событий\n") + m_libName + _T(" --> SpecificationEvent::Advise\nИмя документа = ") + GetDocName() );
-    //   kompas->ksMessage( str.GetBuffer(0) );
-    // }
-    // else if( IsEqualIID(m_iidEvents, DIID_ksStampNotify) && theApp.m_mes_STAMP )
-    // {
-    //   CString str( _T("Подписаться на получение событий\n") + m_libName + _T(" --> StampEvent::Advise\nИмя документа = ") + GetDocName() );
-    //   kompas->ksMessage( str.GetBuffer(0) );
-    // }
-  } 
-
   return m_dwCookie;
 }
 
@@ -272,8 +151,7 @@ int BaseEvent::Advise()
 //-------------------------------------------------------------------------------
 // Отписаться от получения событий
 // ---
-void BaseEvent::Unadvise()
-{
+void BaseEvent::Unadvise() {
   if ( m_pConnPt != NULL )              // Подписка была
   {
     m_pConnPt->Unadvise( m_dwCookie );  // Отписаться от получения событий
@@ -281,88 +159,6 @@ void BaseEvent::Unadvise()
     m_pConnPt  = NULL;
   } 
   m_dwCookie = 0;
-
-  if ( IsSelfAdvise() )
-  {
-    /*if( IsEqualIID(m_iidEvents, DIID_ksKompasObjectNotify) && theApp.m_mes_APP )
-    { 
-      CString str( _T("Отписаться от получения событий\n") + m_libName + _T(" --> ApplicationEvent::Unadvise") );
-      kompas->ksMessage( str.GetBuffer(0) );
-    }
-    else if( IsEqualIID(m_iidEvents, DIID_ksDocument2DNotify) && theApp.m_mes_2DDOC )
-    {
-      CString str( _T("Отписаться от получения событий\n") + m_libName + _T(" --> Document2DEvent::Unadvise\nИмя документа = ") + GetDocName() );
-      kompas->ksMessage( str.GetBuffer(0) );
-    }
-    else if( IsEqualIID(m_iidEvents, DIID_ksDocument3DNotify) && theApp.m_mes_3DDOC )
-    {
-      CString str( _T("Отписаться от получения событий\n") + m_libName + _T(" --> Document3DEvent::Unadvise\nИмя документа = ") + GetDocName() );
-      kompas->ksMessage( str.GetBuffer(0) );
-    }
-    else */if( IsEqualIID(m_iidEvents, DIID_ksDocumentFileNotify) /*&& theApp.m_mes_DOC*/ )
-    {
-      CString str( _T("Отписаться от получения событий\n") + m_libName + _T(" --> DocumentEvent::Unadvise\nИмя документа = ") + GetDocName() );
-      kompas->ksMessage( str.GetBuffer(0) );
-    }
-    // else if( IsEqualIID(m_iidEvents, DIID_ksObject2DNotify) && theApp.m_mes_OBJ_2DDOC )
-    // {
-    //   ksDocument2DPtr doc2D( m_doc );
-    //   if( doc2D != NULL  && doc2D->ksExistObj(m_objType) ) 
-    //     doc2D->ksLightObj( m_objType, true );
-
-    //   CString strType;
-    //   strType.Format( _T("\nТип объекта/указатель = %i"), m_objType );
-    //   CString str( _T("Отписаться от получения событий\n") + m_libName + _T(" --> Object2DEvent::Unadvise\nИмя документа = ") + GetDocName() + strType );
-    //   kompas->ksMessage( str.GetBuffer(0) );
-
-    //   if( doc2D != NULL && doc2D->ksExistObj(m_objType) ) 
-    //     doc2D->ksLightObj( m_objType, false );
-    // }
-    // else if( IsEqualIID(m_iidEvents, DIID_ksObject3DNotify) && theApp.m_mes_OBJ_3DDOC )
-    // {
-    //   ksDocument3DPtr doc3D( m_doc );
-    //   ksChooseMngPtr chooseMng;
-    //   if( doc3D != NULL  && m_obj3D != NULL && 
-    //       ( chooseMng = doc3D->GetChooseMng() ) != NULL )         
-    //     chooseMng->Choose( m_obj3D );
-
-    //   CString strType;
-    //   strType.Format( _T("\nТип объекта = %i"), m_objType );
-    //   CString strObj3DName;
-    //   if( m_obj3D )
-    //      strObj3DName = (LPCTSTR)m_obj3D->Getname();
-    //   CString str( _T("Отписаться от получения событий\n") + m_libName + _T(" --> Object3DEvent::Unadvise\nИмя документа = ") + GetDocName() + strType + _T("\nИмя 3D объекта = ") + strObj3DName );
-    //   kompas->ksMessage( str.GetBuffer(0) );
-
-    //   if( chooseMng != NULL )
-    //     chooseMng->UnChoose( m_obj3D );
-    // }
-    // else if( IsEqualIID(m_iidEvents, DIID_ksSelectionMngNotify) && theApp.m_mes_SELECT )
-    // {
-    //   CString str( _T("Отписаться от получения событий\n") + m_libName + _T(" --> SelectMngEvent::Unadvise\nИмя документа = ") + GetDocName() );
-    //   kompas->ksMessage( str.GetBuffer(0) );
-    // }
-    // else if( IsEqualIID(m_iidEvents, DIID_ksSpcDocumentNotify) && theApp.m_mes_SPCDOC )
-    // {
-    //   CString str( _T("Отписаться от получения событий\n") + m_libName + _T(" --> SpcDocumentEvent::Unadvise\nИмя документа = ") + GetDocName() );
-    //   kompas->ksMessage( str.GetBuffer(0) );
-    // }
-    // else if( IsEqualIID(m_iidEvents, DIID_ksSpcObjectNotify) && theApp.m_mes_OBJ_SPC )
-    // {
-    //   CString str( _T("Отписаться от получения событий\n") + m_libName + _T(" --> SpcObjectEvent::Unadvise\nИмя документа = ") + GetDocName() );
-    //   kompas->ksMessage( str.GetBuffer(0) );
-    // }
-    // else if( IsEqualIID(m_iidEvents, DIID_ksSpecificationNotify) && theApp.m_mes_SPC )
-    // {
-    //   CString str( _T("Отписаться от получения событий\n") + m_libName + _T(" --> SpecificationEvent::Unadvise\nИмя документа = ") + GetDocName() );
-    //   kompas->ksMessage( str.GetBuffer(0) );
-    // }
-    // else if( IsEqualIID(m_iidEvents, DIID_ksStampNotify) && theApp.m_mes_STAMP )
-    // {
-    //   CString str( _T("Отписаться от получения событий\n") + m_libName + _T(" --> StampEvent::Unadvise\nИмя документа = ") + GetDocName() );
-    //   kompas->ksMessage( str.GetBuffer(0) );
-    // }
-  } 
 }
 
 
@@ -477,74 +273,62 @@ void BaseEvent::ListEvents()
     
     if( IsEqualIID(event->m_iidEvents, DIID_ksKompasObjectNotify) )
     { 
-      str += _T("\nApplicationEvent, подписка пользователем: ");
-      str += event->IsSelfAdvise() ? _T("да,") : _T("нет,");
+      str += _T("\nApplicationEvent,");
       str += _T(" имя документа = ") + event->GetDocName();
     }
     else if( IsEqualIID(event->m_iidEvents, DIID_ksDocument2DNotify) )
     {
-      str += _T("\nDocument2DEvent, подписка пользователем: ");
-      str += event->IsSelfAdvise() ? _T("да,") : _T("нет,");
+      str += _T("\nDocument2DEvent,");
       str += " имя документа = " + event->GetDocName();
     }
     else if( IsEqualIID(event->m_iidEvents, DIID_ksDocument3DNotify) )
     {
-      str += _T("\nDocument3DEvent, подписка пользователем: ");
-      str += event->IsSelfAdvise() ? _T("да,") : _T("нет,");
+      str += _T("\nDocument3DEvent,");
       str += _T(" имя документа = ") + event->GetDocName(); 
     }
     else if( IsEqualIID(event->m_iidEvents, DIID_ksDocumentFileNotify) )
     {
-      str += "\nDocumentEvent, подписка пользователем: ";
-      str += event->IsSelfAdvise() ? "да," : "нет,";
+      str += "\nDocumentEvent,";
       str += " имя документа = " + event->GetDocName();
     }
     else if( IsEqualIID(event->m_iidEvents, DIID_ksObject2DNotify) )
     {
-      str += _T("\nObject2DEvent, подписка пользователем: ");
-      str += event->IsSelfAdvise() ? _T("да,") : _T("нет,");
+      str += _T("\nObject2DEvent,");
       str += _T(" имя документа = ") + event->GetDocName();
     }
     else if( IsEqualIID(event->m_iidEvents, DIID_ksObject3DNotify) )
     {
-      str += _T("\nObject3DEvent, подписка пользователем: ");
-      str += event->IsSelfAdvise() ? _T("да,") : _T("нет,");
+      str += _T("\nObject3DEvent,");
       str += " имя документа = " + event->GetDocName();       
     }
     else if( IsEqualIID(event->m_iidEvents, DIID_ksSelectionMngNotify) )
     {
-      str += "\nSelectMngEvent, подписка пользователем: ";
-      str += event->IsSelfAdvise() ? "да," : "нет,";
+      str += "\nSelectMngEvent,";
       str += _T(" имя документа = ") + event->GetDocName();
     }
     else if( IsEqualIID(event->m_iidEvents, DIID_ksSpcDocumentNotify) )
     {
-      str += _T("\nSpcDocumentEvent, подписка пользователем: ");
-      str += event->IsSelfAdvise() ? _T("да,") : _T("нет,");
+      str += _T("\nSpcDocumentEvent,");
       str += _T(" имя документа = ") + event->GetDocName();
     }
     else if( IsEqualIID(event->m_iidEvents, DIID_ksSpcObjectNotify) )
     {
-      str += _T("\nSpcObjectEvent, подписка пользователем: ");
-      str += event->IsSelfAdvise() ? "да," : "нет,";
+      str += _T("\nSpcObjectEvent,");
       str += _T(" имя документа = ") + event->GetDocName();  
     }
     else if( IsEqualIID(event->m_iidEvents, DIID_ksSpecificationNotify) )
     {
-      str += _T("\nSpecificationEvent, подписка пользователем: ");
-      str += event->IsSelfAdvise() ? _T("да,") : _T("нет,");
+      str += _T("\nSpecificationEvent,");
       str += _T(" имя документа = ") + event->GetDocName();
     }
     else if( IsEqualIID(event->m_iidEvents, DIID_ksStampNotify) )
     {
-      str += _T("\nStampEvent, подписка пользователем: ");
-      str += event->IsSelfAdvise() ? _T("да,") : _T("нет,");
+      str += _T("\nStampEvent,");
       str += _T(" имя документа = ") + event->GetDocName();
     }
   }
   kompas->ksMessage( str.GetBuffer(0) );
 }
-
 
 //-------------------------------------------------------------------------------
 //
