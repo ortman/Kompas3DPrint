@@ -1,0 +1,6 @@
+LIBRARY Kompas3DPrint.rtw
+EXPORTS
+ LIBRARYID               @1
+ LIBRARYENTRY            @2
+ LibInterfaceNotifyEntry @3
+

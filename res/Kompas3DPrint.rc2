@@ -1,0 +1,55 @@
+#ifdef APSTUDIO_INVOKED
+  #error this file is not editable by Microsoft Visual C++
+#endif //APSTUDIO_INVOKED
+
+
+// Иконки команд
+1001 BITMAP "res\\1001.bmp"
+
+// Строковые сообщения
+STRINGTABLE
+BEGIN
+	IDS_NODOC				"Документ не активизирован или\nне является документом 3D"
+	IDS_OBJ1				"Укажите ребро для построения размера"
+	IDS_PLANE				"Укажите направляющую плоскость"
+	IDS_NOCREATE		"Объект не создан"
+	IDS_LINEDIM3D		"Линейный размер 3D\n"
+	IDS_LENGTH			"Длина: %4.2f\n"
+	IDS_DIM					"Укажите линейный размер для редактирования"
+	IDS_NOTDIM			"Объект не является линейным размером"
+	IDS_NEWPLANE		"Укажите новую направляющую плоскость"
+	IDS_NOTSETPLANE	"Не удалось установить новую базовую плоскость"
+	IDS_DIMVAL			"Значение: %4.2f"
+	IDS_NOTCIRCLE		"Ребро не является круговым"
+	IDS_EDIT				"Объект создан. Редактировать?"
+	IDS_UNIT				" мм"
+	IDS_DIMTEXT			"2 отв."
+	IDS_OBJECT1			"Укажите первый объект"
+	IDS_OBJECT2			"Укажите второй объект"
+	IDS_NOACTIVEDOC	"Не могу получить активный 3D документ"
+END
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+STRINGTABLE 
+BEGIN
+   IDR_LIBID               "Kompas 3D Print"
+   IDR_API7                "kAPI7.dll"
+
+#ifdef __LIGHT_VERSION__
+    IDS_DLL_NAME            "klAPI5.dll"
+#else
+    IDS_DLL_NAME            "kAPI5.dll"
+#endif
+
+END
+
+// Меню
+IDR_LIBID MENU
+BEGIN
+	MENUITEM "Сохранить в STL",																				1
+END
+
+/////////////////////////////////////////////////////////////////////////////
