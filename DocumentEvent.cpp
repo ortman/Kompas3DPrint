@@ -25,17 +25,41 @@ afx_msg VARIANT_BOOL DocumentEvent::BeginCloseDocument() {
   return true;
 }
 
-afx_msg VARIANT_BOOL DocumentEvent::SaveDocument() {
-  // CString str( m_libName + " --> DocumentEvent::BeginCloseDocument" );
-  // str += "\nИмя документа = " + GetDocName();
-  // return !!kompas->ksYesNo( str.GetBuffer(0) );
-  CString str = GetDocName();
-  str += ".stl";
-  // kompas->ksMessage(str.GetBuffer(0));
+BOOL DirectoryExists(LPCTSTR szPath) {
+  DWORD dwAttrib = GetFileAttributes(szPath);
+  return (dwAttrib != INVALID_FILE_ATTRIBUTES && 
+         (dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
+}
 
-  ksDocument3DPtr doc3D( kompas->ActiveDocument3D());
+afx_msg VARIANT_BOOL DocumentEvent::SaveDocument() {
+  CString stlPath = _T("");
+  CString path = GetDocName();
+  int pathLen = path.GetLength();
+  if (pathLen < 5) return true;;
+  if (path.Right(4) != _T(".m3d")) return true;
+  int slash = path.ReverseFind('\\');
+  if (slash < 0) slash = path.ReverseFind('/');
+  if (slash > 0) {
+    // CString folderPath = 
+    CString STLfolder = path.Left(slash + 1) + _T("STL");
+    BOOL existSTLFolder = DirectoryExists(STLfolder);
+    if (!existSTLFolder) {
+      STLfolder = path.Left(slash + 1) + _T("stl");
+      existSTLFolder = DirectoryExists(STLfolder);
+    }
+    if (existSTLFolder) {
+
+      stlPath = STLfolder + '\\' + path.Mid(slash + 1, pathLen - slash - 5) + _T(".stl");
+    } else {
+      stlPath = path.Left(pathLen-4) + _T(".stl");
+    }
+  } else {
+    stlPath = path.Left(pathLen-4) + _T(".stl");
+  }
+
+  ksDocument3DPtr doc3D(kompas->ActiveDocument3D());
   if (doc3D) {
-    Save2STL(doc3D , str.GetBuffer(0));
+    Save2STL(doc3D , stlPath.GetBuffer(0));
   }
   return true;
 }
