@@ -78,19 +78,6 @@ unsigned int WINAPI LIBRARYID() {
 void WINAPI LIBRARYENTRY(unsigned int comm) {
 	// Получить текущий документ
   ::GetKompas();
-	
-	if (kompas) {
-    ksDocument3DPtr doc3D( kompas->ActiveDocument3D() );
-    if (doc3D) {
-      // switch (comm) {
-        // case 1: Save2STL( doc3D );										break;
-      // }
-    } else {
-		  MessageT((LPTSTR)(LPCTSTR)LoadStr(IDS_NOACTIVEDOC));
-    }
-	} else {
-		MessageT((LPTSTR)(LPCTSTR)LoadStr(IDS_NODOC));
-  }
 }
 
 void AdviseDocuments() {
