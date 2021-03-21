@@ -5,9 +5,9 @@
             "cStandard": "c11",
             "cppStandard": "c++17",
             "browse": {
-                "path": [                
+                "path": [
                     "${workspaceFolder}/**",
-                    "C:/Program Files/ASCON/KOMPAS-3D v19/SDK/Include"
+                    "C:/Program Files/ASCON/KOMPAS-3D v18 Home/SDK/Include"
                 ]
             },            
             "configurationProvider": "go2sh.cmake-integration",
