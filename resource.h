@@ -23,6 +23,15 @@
 #define IDC_RIDGE_VAL                   11016
 
 #define ABOUT_DIALOG                    12000
+#define IDC_SYSLINK_GITHUB              12001
+
+#define ABOUT_TEXT \
+"Модуль автоматического сохранения 3D моделей в формат STL.\n\
+\n\
+Автор Сергей Ортман.\n\
+GNU General Public License v3.0.\n\
+Скачать новую версию или исходный код можно по ссылке\n\
+<a>https://github.com/ortman/Kompas3DPrint</a>"
 
 #define MENU_SETTINGS                   1
 #define MENU_ABOUT                      2
