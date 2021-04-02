@@ -83,8 +83,11 @@
         "strstream": "cpp",
         "*.ipp": "cpp",
         "*.rh": "cpp",
+        "*.rc": "cpp",
         "*.rc2": "cpp",
-        "*.tlh": "cpp"
+        "*.tlh": "cpp",
+        "*.tli": "cpp",
+        "xtr1common": "cpp"
     },
     "files.encoding": "windows1251"
 }

@@ -1,9 +1,11 @@
 
 #include "Kompas3DPrint.h"
 #include <afxdllx.h>
-#include "LIBTOOL.H"
+#include <libtool.h>
 #include "DocumentEvent.h"
 #include "ApplicationEvent.h"
+#include "SettingsDlg.h"
+#include "AboutDlg.h"
 
 //-------------------------------------------------------------------------------
 // Специальная структура используемая в течении инициализации DLL
@@ -12,6 +14,7 @@ static AFX_EXTENSION_MODULE Kompas3DPrint_API7_3DDLL = {NULL, NULL};
 HINSTANCE g_hInstance = NULL;
 KompasObjectPtr kompas = NULL;
 ApplicationEvent *aplEvent = NULL;
+SettingsData userSettings;
 
 void OnProcessDetach();                 // Отключение библиотеки
 
@@ -61,6 +64,10 @@ KompasObjectPtr GetKompas() {
         ::FreeLibrary(hAppAuto);  
       }
     }
+    _bstr_t configPath = kompas->ksSystemPath(sptCONFIG_FILES);
+    configPath += "\\Kompas3DPrint.ini";
+    userSettings.SetPath((wchar_t*)configPath);
+    userSettings.read();
   }
   return kompas;
 }
@@ -78,6 +85,31 @@ unsigned int WINAPI LIBRARYID() {
 void WINAPI LIBRARYENTRY(unsigned int comm) {
 	// Получить текущий документ
   ::GetKompas();
+  if (kompas) {
+    switch (comm) {
+      case MENU_SETTINGS: {
+        TSettingsDlg *dlg = new TSettingsDlg();
+        if (dlg) {
+			    EnableTaskAccess(0);        // Закрыть доступ к компасу
+          dlg->DoModal();
+			    EnableTaskAccess(1);        // Открыть доступ к компасу
+          delete dlg;
+          userSettings.read();
+        }
+        break;
+      }
+      case MENU_ABOUT: {
+        TAboutDlg *dlg = new TAboutDlg();
+        if (dlg) {
+			    EnableTaskAccess(0);        // Закрыть доступ к компасу
+          dlg->DoModal();
+			    EnableTaskAccess(1);        // Открыть доступ к компасу
+          delete dlg;
+        }
+        break;
+      }
+    }
+  }
 }
 
 void AdviseDocuments() {
@@ -145,16 +177,19 @@ BOOL __stdcall  UserFilterProc( IEntity * e)
 }
 
 void Save2STL( ksDocument3DPtr doc, BSTR stlPath ) {
-	if (doc) {
+	if (doc && userSettings.autoexportEn) {
 		// Преобразовать интерфейс документа 3D из API7 в API5
-		IDocument3DPtr doc3D( IUnknownPtr(ksTransferInterface( doc, ksAPI3DCom, 0/*любой документ*/ ), false/*AddRef*/) );
+		IDocument3DPtr doc3D( IUnknownPtr(ksTransferInterface( doc, ksAPI3DCom, 0), false) );
 		if (doc3D) {
 			IAdditionFormatParam* formatParam = doc3D->AdditionFormatParam();
 			formatParam->Init();
 			formatParam->SetFormat(format_STL);
 			formatParam->SetTopolgyIncluded(false);
-			formatParam->SetFormatBinary(false);
-			formatParam->SetStep(0.001);
+      formatParam->SetLengthUnits(userSettings.units);
+			formatParam->SetFormatBinary(userSettings.formatBIN);
+      if (userSettings.isLinear) formatParam->SetStep(userSettings.linearVal);
+      if (userSettings.isAngle) formatParam->SetAngle(userSettings.angleVal);
+      if (userSettings.isRidge) formatParam->SetLength(userSettings.ridgeVal);
 			doc3D->SaveAsToAdditionFormat(stlPath, formatParam);
 		}
 	}
@@ -184,14 +219,7 @@ CString LoadStr( int strID ) {
 //-----------------------------------------------------------------------------
 // Подписка на события документа
 // ---
-void AdviseDoc(LPDISPATCH doc, long docType, 
-               bool fSelectMng /*true*/, 
-               bool fObject /*true*/, 
-               bool fStamp /*true*/,
-               bool fDocument/*true*/,
-               bool fSpecification/*true*/,
-               bool fSpcObject/*true*/,
-               long objType/*-1*/) { 
+void AdviseDoc(LPDISPATCH doc, long docType) { 
   if (!doc) return;
   // События документа, необходимы для своевременной отписки
   if (!BaseEvent::FindEvent(DIID_ksDocumentFileNotify, doc)) {

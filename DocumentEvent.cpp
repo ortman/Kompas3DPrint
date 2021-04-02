@@ -57,9 +57,12 @@ afx_msg VARIANT_BOOL DocumentEvent::SaveDocument() {
     stlPath = path.Left(pathLen-4) + _T(".stl");
   }
 
-  ksDocument3DPtr doc3D(kompas->ActiveDocument3D());
-  if (doc3D) {
-    Save2STL(doc3D , stlPath.GetBuffer(0));
+  if (m_doc) {
+    ksDocument3DPtr doc3D;
+    m_doc->QueryInterface(DIID_ksDocument3D, (LPVOID*)&doc3D);
+    if (doc3D) {
+      Save2STL(doc3D , stlPath.GetBuffer(0));
+    }
   }
   return true;
 }
