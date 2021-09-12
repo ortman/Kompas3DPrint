@@ -14,6 +14,9 @@ class TAboutDlg : public CDialog {
   public:
     TAboutDlg(CWnd* pParent = NULL);
     enum { IDD = ABOUT_DIALOG };
+  protected:
+    afx_msg void OnGithubSyslinkClick(NMHDR *pNMHDR, LRESULT *pResult);
+  DECLARE_MESSAGE_MAP()
 };
 
 #endif
