@@ -164,6 +164,7 @@ CString CIniFile::GetValue(CString keyname, CString valuename)
     error = "Unable to locate specified value.";
     return "";
   }
+  error = "";
   return keys[keynum].values[valuenum];
 }
 

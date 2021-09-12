@@ -73,13 +73,13 @@
                 BEGIN
                     VALUE "CompanyName", "Ortman Sergey\0"
                     VALUE "FileDescription", "Kompas 3D Print\0"
-                    VALUE "FileVersion", "0, 2, 0, 0\0"
+                    VALUE "FileVersion", "0, 3, 0, 0\0"
                     VALUE "InternalName", "Kompas 3D Print\0"
                     VALUE "LegalCopyright", "Copyright (C) Ortman Sergey 2021\0"
                     VALUE "LegalTrademarks", "\0"
                     VALUE "OriginalFilename", "Kompas 3D Print.rtw\0"
                     VALUE "ProductName", "Kompas 3D Print\0"
-                    VALUE "ProductVersion", "0, 2, 0, 0\0"
+                    VALUE "ProductVersion", "0, 3, 0, 0\0"
                 END
             END
             BLOCK "VarFileInfo"

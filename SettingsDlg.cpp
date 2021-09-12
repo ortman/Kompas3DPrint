@@ -12,18 +12,14 @@ ksLengthUnitsEnum _unitsData[] = {
 
 TSettingsDlg::TSettingsDlg(CWnd* pParent /*=NULL*/)
         : CDialog(TSettingsDlg::IDD, pParent) {
-  if (kompas) {
-    _bstr_t configPath = kompas->ksSystemPath(sptCONFIG_FILES);
-    configPath += "\\Kompas3DPrint.ini";
-    userSettings.SetPath((wchar_t*)configPath);
-    userSettings.read();
-  }
+  if (kompas) userSettings.readDefaultSettings(kompas);
 }
 
 void TSettingsDlg::DoDataExchange(CDataExchange* pDX) {
 	CDialog::DoDataExchange(pDX);
 
   DDX_Control(pDX, IDC_AUTOEXPORT_EN, cAutoexportEn);
+  DDX_Control(pDX, IDC_AUTOEXPORT_WHEN_EXISTS, cAutoexportWhenExists);
 
   DDX_Control(pDX, IDC_OBJ_BODY, cObjBody);
   DDX_Control(pDX, IDC_OBJ_SURFACE, cObjSurface);
@@ -58,6 +54,7 @@ BOOL TSettingsDlg::OnInitDialog() {
 	CDialog::OnInitDialog();
 
   cAutoexportEn.SetCheck(userSettings.autoexportEn);
+  cAutoexportWhenExists.SetCheck(userSettings.autoexportWhenExists);
 
   cObjBody.SetCheck(userSettings.objBody);
   cObjSurface.SetCheck(userSettings.objSurface);
@@ -156,6 +153,7 @@ void TSettingsDlg::OnRidgeValKillFocus() {
 void TSettingsDlg::OnOK() {
   CString sVal;
   userSettings.autoexportEn = cAutoexportEn.GetCheck();
+  userSettings.autoexportWhenExists = cAutoexportWhenExists.GetCheck();
   userSettings.objBody = cObjBody.GetCheck();
   userSettings.objSurface = cObjSurface.GetCheck();
   userSettings.units = *(ksLengthUnitsEnum*) cbUnits.GetItemDataPtr(cbUnits.GetCurSel());

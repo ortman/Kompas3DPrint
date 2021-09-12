@@ -36,7 +36,9 @@ BEGIN
     DEFPUSHBUTTON   "Отмена", IDCANCEL, 300, 229, 50, 14
 
     CONTROL         "Включить автоэкспорт", IDC_AUTOEXPORT_EN, "Button", BS_AUTOCHECKBOX | 
-                    WS_TABSTOP, 10, 10, 150, 10
+                    WS_TABSTOP, 10, 10, 100, 10
+    CONTROL         "Автоэкспорт только существующих STL", IDC_AUTOEXPORT_WHEN_EXISTS, "Button", BS_AUTOCHECKBOX | 
+                    WS_TABSTOP, 125, 10, 150, 10
 
     LTEXT           "Объекты", IDC_STATIC, 85, 24, 50, 8
     CONTROL         "Тела", IDC_OBJ_BODY, "Button", BS_AUTOCHECKBOX | 

@@ -1,4 +1,5 @@
 #include "SettingsData.h"
+#include <ldefin2d.h>
 
 SettingsData::SettingsData() {
   resetToDefault();
@@ -6,6 +7,7 @@ SettingsData::SettingsData() {
 
 void SettingsData::resetToDefault() {
   autoexportEn = SETTINGS_DEFAULT_AUTOEXPORT_EN;
+  autoexportWhenExists = SETTINGS_DEFAULT_AUTOEXPORT_WHEN_EXISTS;
   objBody = SETTINGS_DEFAULT_OBJ_BODY;
   objSurface = SETTINGS_DEFAULT_OBJ_SURFACE;
   units = SETTINGS_DEFAULT_UNITS;
@@ -33,6 +35,8 @@ CString SettingsData::GetError() {
 bool SettingsData::read() {
   if (!iniFile.ReadFile()) return false;
   autoexportEn  = iniFile.GetValueB(SETTINGS_INI_BLOCK_MAIN, SETTINGS_INI_AUTOEXPORT_EN, SETTINGS_DEFAULT_AUTOEXPORT_EN);
+  autoexportWhenExists = iniFile.GetValueB(SETTINGS_INI_BLOCK_MAIN, SETTINGS_INI_AUTOEXPORT_WHEN_EXISTS,
+      SETTINGS_DEFAULT_AUTOEXPORT_WHEN_EXISTS);
   objBody       = iniFile.GetValueB(SETTINGS_INI_BLOCK_MAIN, SETTINGS_INI_OBJ_BODY, SETTINGS_DEFAULT_OBJ_BODY);
   objSurface    = iniFile.GetValueB(SETTINGS_INI_BLOCK_MAIN, SETTINGS_INI_OBJ_SURFACE, SETTINGS_DEFAULT_OBJ_SURFACE);
   CString unitsStr = iniFile.GetValue(SETTINGS_INI_BLOCK_MAIN, SETTINGS_INI_UNITS);
@@ -53,9 +57,18 @@ bool SettingsData::read() {
   return true;
 }
 
+bool SettingsData::readDefaultSettings(KompasObjectPtr kompas) {
+  if (!kompas) return false;
+  _bstr_t configPath = kompas->ksSystemPath(sptCONFIG_FILES);
+  configPath += "\\Kompas3DPrint.ini";
+  SetPath((wchar_t*)configPath);
+  return read();
+}
+
 bool SettingsData::write() {
   iniFile.Reset();
   iniFile.SetValueB(SETTINGS_INI_BLOCK_MAIN, SETTINGS_INI_AUTOEXPORT_EN, autoexportEn, true);
+  iniFile.SetValueB(SETTINGS_INI_BLOCK_MAIN, SETTINGS_INI_AUTOEXPORT_WHEN_EXISTS, autoexportWhenExists, true);
   iniFile.SetValueB(SETTINGS_INI_BLOCK_MAIN, SETTINGS_INI_OBJ_BODY, objBody, true);
   iniFile.SetValueB(SETTINGS_INI_BLOCK_MAIN, SETTINGS_INI_OBJ_SURFACE, objSurface, true);
   if (units == ksLUnSM) iniFile.SetValue(SETTINGS_INI_BLOCK_MAIN, SETTINGS_INI_UNITS, "см", true);

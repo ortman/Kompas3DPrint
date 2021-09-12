@@ -64,10 +64,7 @@ KompasObjectPtr GetKompas() {
         ::FreeLibrary(hAppAuto);  
       }
     }
-    _bstr_t configPath = kompas->ksSystemPath(sptCONFIG_FILES);
-    configPath += "\\Kompas3DPrint.ini";
-    userSettings.SetPath((wchar_t*)configPath);
-    userSettings.read();
+    userSettings.readDefaultSettings(kompas);
   }
   return kompas;
 }
@@ -145,6 +142,7 @@ bool WINAPI LibInterfaceNotifyEntry(IDispatch *application) {
   if (kompas == NULL && application) {
     kompas = application;
     kompas.AddRef();
+    userSettings.readDefaultSettings(kompas);
   }
 
   if (kompas && aplEvent == NULL) {
@@ -177,7 +175,7 @@ BOOL __stdcall  UserFilterProc( IEntity * e)
 }
 
 void Save2STL( ksDocument3DPtr doc, BSTR stlPath ) {
-	if (doc && userSettings.autoexportEn) {
+	if (doc) {
 		// Преобразовать интерфейс документа 3D из API7 в API5
 		IDocument3DPtr doc3D( IUnknownPtr(ksTransferInterface( doc, ksAPI3DCom, 0), false) );
 		if (doc3D) {
