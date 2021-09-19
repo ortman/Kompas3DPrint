@@ -22,6 +22,10 @@ set(SOURCES
   DocumentEvent.cpp
   ApplicationEvent.cpp
   Kompas3DPrint.cpp
+  iniFile.cpp
+  SettingsData.cpp
+  SettingsDlg.cpp
+  AboutDlg.cpp
   Kompas3DPrint.def
   Kompas3DPrint.rc
 )

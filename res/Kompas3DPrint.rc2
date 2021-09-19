@@ -2,10 +2,6 @@
   #error this file is not editable by Microsoft Visual C++
 #endif //APSTUDIO_INVOKED
 
-
-// Иконки команд
-1001 BITMAP "res\\1001.bmp"
-
 /////////////////////////////////////////////////////////////////////////////
 //
 // String Table
@@ -24,9 +20,66 @@ BEGIN
 END
 
 // Меню
-// IDR_LIBID MENU
-// BEGIN
-// 	MENUITEM "Сохранить в STL",																				1
-// END
+IDR_LIBID MENU
+BEGIN
+ 	MENUITEM "Настройки",  MENU_SETTINGS
+ 	MENUITEM "О программе", MENU_ABOUT
+END
 
-/////////////////////////////////////////////////////////////////////////////
+// Dialog Settings
+SETTINGS_DIALOG DIALOGEX DISCARDABLE  0, 0, 370, 250
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Настройки автоэкспорта в STL"
+FONT 8, "Tahoma", 0, 0, 0x1
+BEGIN
+    PUSHBUTTON      "Сохранить", IDOK, 230, 229, 50, 14
+    DEFPUSHBUTTON   "Отмена", IDCANCEL, 300, 229, 50, 14
+
+    CONTROL         "Включить автоэкспорт", IDC_AUTOEXPORT_EN, "Button", BS_AUTOCHECKBOX | 
+                    WS_TABSTOP, 10, 10, 100, 10
+    CONTROL         "Автоэкспорт только существующих STL", IDC_AUTOEXPORT_WHEN_EXISTS, "Button", BS_AUTOCHECKBOX | 
+                    WS_TABSTOP, 125, 10, 150, 10
+
+    LTEXT           "Объекты", IDC_STATIC, 85, 24, 50, 8
+    CONTROL         "Тела", IDC_OBJ_BODY, "Button", BS_AUTOCHECKBOX | 
+                    WS_TABSTOP, 85, 38, 70, 10
+    CONTROL         "Поверхности", IDC_OBJ_SURFACE, "Button", BS_AUTOCHECKBOX | 
+                    WS_TABSTOP, 85, 52, 70, 10
+                    
+    LTEXT           "Параметры", IDC_STATIC, 200, 24, 50, 8
+    RTEXT           "Единицы длины:", IDC_STATIC, 200, 40, 70, 8
+    COMBOBOX        IDC_UNITS, 275, 38, 85, 60, CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    RTEXT           "Формат:", IDC_STATIC, 200, 52, 70, 8
+    CONTROL         "Текстовый", IDC_FORMAT_TXT, "Button", BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,
+                    275, 52, 74, 10
+    CONTROL         "Двоичный", IDC_FORMAT_BIN, "Button", BS_AUTORADIOBUTTON,
+                    275, 66, 75, 10
+                    
+    LTEXT           "Точность аппроксимации", IDC_STATIC, 85, 85, 150, 8
+
+    CONTROL         "Максимальное линейное отклонение", IDC_LINEAR_CHECK, "Button", BS_AUTOCHECKBOX | 
+                    WS_TABSTOP, 85, 100, 150, 10
+    CONTROL         "", IDC_LINEAR_TRACKBAR,
+                    "msctls_trackbar32", WS_TABSTOP | 0x21, 85, 114, 190, 25
+    EDITTEXT        IDC_LINEAR_VAL, 275, 114, 50, 13, ES_AUTOHSCROLL
+
+    CONTROL         "Максимальное угловое отклонение", IDC_ANGLE_CHECK, "Button", BS_AUTOCHECKBOX | 
+                    WS_TABSTOP, 85, 150, 150, 10
+    CONTROL         "", IDC_ANGLE_TRACKBAR,
+                    "msctls_trackbar32", WS_TABSTOP | 0x21, 85, 164, 190, 25
+    EDITTEXT        IDC_ANGLE_VAL, 275, 164, 50, 13, ES_AUTOHSCROLL
+                    
+    CONTROL         "Максимальная длина ребра", IDC_RIDGE_CHECK, "Button", BS_AUTOCHECKBOX | 
+                    WS_TABSTOP, 85, 200, 150, 10
+    EDITTEXT        IDC_RIDGE_VAL, 275, 200, 50, 13, ES_AUTOHSCROLL
+END
+
+// Dialog About
+ABOUT_DIALOG DIALOGEX DISCARDABLE  0, 0, 250, 125
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "О программе"
+FONT 8, "Tahoma", 0, 0, 0x1
+BEGIN
+    CONTROL         ABOUT_TEXT, IDC_SYSLINK_GITHUB, "SysLink", WS_TABSTOP, 7, 7, 240, 115
+END

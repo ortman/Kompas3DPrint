@@ -1,9 +1,3 @@
-////////////////////////////////////////////////////////////////////////////////
-//
-// ApplicationEvent  - обработчик событий от приложения
-//
-////////////////////////////////////////////////////////////////////////////////
-
 #include "ApplicationEvent.h"
 #include "stdafx.h"
 #include "Kompas3DPrint.h"
@@ -21,12 +15,6 @@ BEGIN_EVENTSINK_MAP(ApplicationEvent, BaseEvent)
 END_EVENTSINK_MAP()
 
 afx_msg VARIANT_BOOL ApplicationEvent::CreateDocument(LPDISPATCH newDoc, long docType) {    
-  // if ( IsSelfAdvise() /*&& theApp.m_mes_APP*/ )
-  // {
-  //   CString str;
-  //   str.Format( _T("%s --> ApplicationEvent::CreateDocument\nnewDoc = %i\ndocType = %i"), (LPCTSTR)m_libName, newDoc, docType );
-  //   kompas->ksMessage( (LPCTSTR)str );
-  // }
   AdviseDoc( newDoc, docType );
   return true;
 }
@@ -35,12 +23,6 @@ afx_msg VARIANT_BOOL ApplicationEvent::CreateDocument(LPDISPATCH newDoc, long do
 // koOpenDocumen - Документ открыт
 // ---
 afx_msg VARIANT_BOOL ApplicationEvent::OpenDocumen(LPDISPATCH newDoc, long docType) {
-  // if ( IsSelfAdvise() /*&& theApp.m_mes_APP*/ )
-  // {
-  //   CString str;
-  //   str.Format( _T("%s --> ApplicationEvent::OpenDocumen\nnewDoc = %i\ndocType = %i"), (LPCTSTR)m_libName, newDoc, docType );
-  //   kompas->ksMessage( (LPCTSTR)str );
-  // }
   AdviseDoc(newDoc, docType);
   return true;
 }

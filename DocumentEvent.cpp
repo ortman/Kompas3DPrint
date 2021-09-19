@@ -7,6 +7,9 @@
 #include "stdafx.h"
 #include "DocumentEvent.h"
 #include "Kompas3DPrint.h"
+#include "SettingsData.h"
+
+extern SettingsData userSettings;
 
 DocumentEvent::DocumentEvent(LPDISPATCH doc)
   : BaseEvent(doc, DIID_ksDocumentFileNotify, doc, -1, NULL) {
@@ -60,8 +63,12 @@ afx_msg VARIANT_BOOL DocumentEvent::SaveDocument() {
   if (m_doc) {
     ksDocument3DPtr doc3D;
     m_doc->QueryInterface(DIID_ksDocument3D, (LPVOID*)&doc3D);
-    if (doc3D) {
-      Save2STL(doc3D , stlPath.GetBuffer(0));
+    if (doc3D && userSettings.autoexportEn) {
+      CStdioFile file;
+      CFileStatus status;
+      if (!userSettings.autoexportWhenExists || file.GetStatus(stlPath,status)) {
+        Save2STL(doc3D , stlPath.GetBuffer(0));
+      }
     }
   }
   return true;

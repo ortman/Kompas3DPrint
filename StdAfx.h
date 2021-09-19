@@ -10,6 +10,9 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+#define _USE_MATH_DEFINES
+#include <cmath>
+
 #define VC_EXTRALEAN    // Exclude rarely-used stuff from Windows headers
 
 #include <afxwin.h>         // MFC core and standard components
@@ -20,7 +23,6 @@
 #include <afxodlgs.h>       // MFC OLE dialog classes
 #include <afxdisp.h>        // MFC Automation classes
 #endif // _AFX_NO_OLE_SUPPORT
-
 
 #ifndef _AFX_NO_DB_SUPPORT
 #include <afxdb.h>      // MFC ODBC database classes
@@ -35,22 +37,24 @@
 #include <afxcmn.h>      // MFC support for Windows Common Controls
 #endif // _AFX_NO_AFXCMN_SUPPORT
 
+
+//{{AFX_INSERT_LOCATION}}
+// Microsoft Visual C++ will insert additional declarations immediately before the previous line.
+
+//-------------------------------------------------------------------------------
+// ksConstants.tlb
+// ---
 #import "ksConstants.tlb" no_namespace
 #import "ksConstants3D.tlb" no_namespace  
 
+//-------------------------------------------------------------------------------
+// kAPI5.tlb
+// ---
 #pragma warning( disable : 4278 )
-
-#import "ConvertLibInterfaces.tlb" no_namespace named_guids
-#import "kAPI2D5COM.tlb" no_namespace named_guids
-#import "kAPI3D5COM.tlb" no_namespace named_guids
-
 #import "kAPI5.tlb" no_namespace named_guids
-#import "kAPI7.tlb" /*no_namespace*/ named_guids
-
-#import "KGAX.tlb" no_namespace named_guids
-#import "ksTreeView.tlb" no_namespace named_guids
-#import "MyConverter.tlb" no_namespace named_guids
-#import "VCHatch.tlb" no_namespace named_guids
+//#import "kAPI7.tlb" no_namespace named_guids
 #pragma warning( once : 4278 ) 
+
+#include <ldefin2d.h>
 
 #endif // _AFX_STDAFX_H_

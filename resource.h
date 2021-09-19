@@ -1,18 +1,39 @@
- 
 #define IDI_STEP2_API7_3D               1
 
 #define IDR_LIBID                       100 // Идентификатор ресурсов библиотеки
 #define IDR_API7                        102
 #define IDS_DLL_NAME                    10001
 
-// Next default values for new objects
-//
-#ifdef APSTUDIO_INVOKED
-#ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_3D_CONTROLS                1
-#define _APS_NEXT_RESOURCE_VALUE        117
-#define _APS_NEXT_COMMAND_VALUE         40001
-#define _APS_NEXT_CONTROL_VALUE         1000
-#define _APS_NEXT_SYMED_VALUE           101
-#endif
-#endif
+#define SETTINGS_DIALOG                 11000
+#define IDC_SAVE_BUTTON                 11001
+#define IDC_HELP_BUTTON                 11002
+#define IDC_AUTOEXPORT_EN               11003
+#define IDC_OBJ_BODY                    11004
+#define IDC_OBJ_SURFACE                 11005
+#define IDC_UNITS                       11006
+#define IDC_FORMAT_TXT                  11007
+#define IDC_FORMAT_BIN                  11008
+#define IDC_LINEAR_CHECK                11009
+#define IDC_LINEAR_TRACKBAR             11010
+#define IDC_LINEAR_VAL                  11011
+#define IDC_ANGLE_CHECK                 11012
+#define IDC_ANGLE_TRACKBAR              11013
+#define IDC_ANGLE_VAL                   11014
+#define IDC_RIDGE_CHECK                 11015
+#define IDC_RIDGE_VAL                   11016
+#define IDC_AUTOEXPORT_WHEN_EXISTS      11017
+
+#define ABOUT_DIALOG                    12000
+#define IDC_SYSLINK_GITHUB              12001
+
+#define ABOUT_TEXT \
+"Модуль автоматического сохранения 3D моделей в формат STL.\n\
+Версия 0.3.1\n\
+\n\
+Автор Сергей Ортман.\n\
+GNU General Public License v3.0.\n\
+Скачать новую версию или исходный код можно по ссылке\n\
+<a>https://github.com/ortman/Kompas3DPrint</a>"
+
+#define MENU_SETTINGS                   1
+#define MENU_ABOUT                      2

@@ -1,9 +1,11 @@
 
 #include "Kompas3DPrint.h"
 #include <afxdllx.h>
-#include "LIBTOOL.H"
+#include <libtool.h>
 #include "DocumentEvent.h"
 #include "ApplicationEvent.h"
+#include "SettingsDlg.h"
+#include "AboutDlg.h"
 
 //-------------------------------------------------------------------------------
 // Специальная структура используемая в течении инициализации DLL
@@ -12,6 +14,7 @@ static AFX_EXTENSION_MODULE Kompas3DPrint_API7_3DDLL = {NULL, NULL};
 HINSTANCE g_hInstance = NULL;
 KompasObjectPtr kompas = NULL;
 ApplicationEvent *aplEvent = NULL;
+SettingsData userSettings;
 
 void OnProcessDetach();                 // Отключение библиотеки
 
@@ -61,6 +64,7 @@ KompasObjectPtr GetKompas() {
         ::FreeLibrary(hAppAuto);  
       }
     }
+    userSettings.readDefaultSettings(kompas);
   }
   return kompas;
 }
@@ -78,6 +82,31 @@ unsigned int WINAPI LIBRARYID() {
 void WINAPI LIBRARYENTRY(unsigned int comm) {
 	// Получить текущий документ
   ::GetKompas();
+  if (kompas) {
+    switch (comm) {
+      case MENU_SETTINGS: {
+        TSettingsDlg *dlg = new TSettingsDlg();
+        if (dlg) {
+			    EnableTaskAccess(0);        // Закрыть доступ к компасу
+          dlg->DoModal();
+			    EnableTaskAccess(1);        // Открыть доступ к компасу
+          delete dlg;
+          userSettings.read();
+        }
+        break;
+      }
+      case MENU_ABOUT: {
+        TAboutDlg *dlg = new TAboutDlg();
+        if (dlg) {
+			    EnableTaskAccess(0);        // Закрыть доступ к компасу
+          dlg->DoModal();
+			    EnableTaskAccess(1);        // Открыть доступ к компасу
+          delete dlg;
+        }
+        break;
+      }
+    }
+  }
 }
 
 void AdviseDocuments() {
@@ -113,6 +142,7 @@ bool WINAPI LibInterfaceNotifyEntry(IDispatch *application) {
   if (kompas == NULL && application) {
     kompas = application;
     kompas.AddRef();
+    userSettings.readDefaultSettings(kompas);
   }
 
   if (kompas && aplEvent == NULL) {
@@ -124,40 +154,44 @@ bool WINAPI LibInterfaceNotifyEntry(IDispatch *application) {
   return false;
 }
 
-//-------------------------------------------------------------------------------
-// Получить контейнер обозначений 3D
-// ---
-KompasAPI7::ISymbols3DContainerPtr GetSymbols3DContainer(KompasAPI7::IKompasDocument3DPtr & doc) {
-  if (doc) return doc->GetTopPart();
-  return NULL;
-}
-
-
-//-----------------------------------------------------------------------------
-// Функция фильтрации
-// ---
-BOOL __stdcall  UserFilterProc( IEntity * e)
-{
-  if( e && (!oType || e->GetType() == oType) )
-    return TRUE;
-  else
-    return FALSE;
-}
-
 void Save2STL( ksDocument3DPtr doc, BSTR stlPath ) {
 	if (doc) {
-		// Преобразовать интерфейс документа 3D из API7 в API5
-		IDocument3DPtr doc3D( IUnknownPtr(ksTransferInterface( doc, ksAPI3DCom, 0/*любой документ*/ ), false/*AddRef*/) );
-		if (doc3D) {
-			IAdditionFormatParam* formatParam = doc3D->AdditionFormatParam();
-			formatParam->Init();
-			formatParam->SetFormat(format_STL);
-			formatParam->SetTopolgyIncluded(false);
-			formatParam->SetFormatBinary(false);
-			formatParam->SetStep(0.001);
-			doc3D->SaveAsToAdditionFormat(stlPath, formatParam);
-		}
-	}
+    ksAdditionFormatParamPtr formatParam = doc->AdditionFormatParam();
+    formatParam->Init();
+    formatParam->SetObjectsOptions(ksD3COBodyes, userSettings.objBody);
+    formatParam->SetObjectsOptions(ksD3COSurfaces, userSettings.objSurface);
+    formatParam->format = format_STL;
+    formatParam->topolgyIncluded = false;
+    formatParam->lengthUnits = userSettings.units;
+    /// TODO: Почему-то при установке formatBinary=true, сохраняется в текстовый. О_о?! 
+    // false - бинарный, что противоречит документации kompas API, поэтому инвертирую свойство
+    formatParam->formatBinary = !userSettings.formatBIN;
+    long stepType = 0;
+    if (userSettings.isLinear) {
+      stepType |= ksSpaceStep;
+      formatParam->step = userSettings.linearVal;
+    } else {
+      formatParam->step = SETTINGS_LINEAR_MAX;
+    }
+    if (userSettings.isAngle) {
+      stepType |= ksDeviationStep;
+      formatParam->angle = userSettings.angleVal * M_PI / 180.0;
+    } else {
+      formatParam->angle = SETTINGS_ANGLE_MAX * M_PI / 180.0;
+    }
+    if (userSettings.isRidge) {
+      stepType |= ksMetricStep;
+      formatParam->length = userSettings.ridgeVal;
+    } else {
+      formatParam->length = SETTINGS_RIDGE_MAX;
+    }
+    formatParam->stepType = stepType;
+    if (!doc->SaveAsToAdditionFormat(stlPath, formatParam)) {
+      CString str;
+      str.Format( _T("Ошибка автосохранения STL, не удалось сохранить файл '%s'"), stlPath);
+      kompas->ksMessage(str.GetBuffer(0));
+    }
+  }
 }
 
 //-------------------------------------------------------------------------------
@@ -184,14 +218,7 @@ CString LoadStr( int strID ) {
 //-----------------------------------------------------------------------------
 // Подписка на события документа
 // ---
-void AdviseDoc(LPDISPATCH doc, long docType, 
-               bool fSelectMng /*true*/, 
-               bool fObject /*true*/, 
-               bool fStamp /*true*/,
-               bool fDocument/*true*/,
-               bool fSpecification/*true*/,
-               bool fSpcObject/*true*/,
-               long objType/*-1*/) { 
+void AdviseDoc(LPDISPATCH doc, long docType) { 
   if (!doc) return;
   // События документа, необходимы для своевременной отписки
   if (!BaseEvent::FindEvent(DIID_ksDocumentFileNotify, doc)) {
