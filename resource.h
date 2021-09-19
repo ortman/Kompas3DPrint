@@ -28,6 +28,7 @@
 
 #define ABOUT_TEXT \
 "Модуль автоматического сохранения 3D моделей в формат STL.\n\
+Версия 0.3.1\n\
 \n\
 Автор Сергей Ортман.\n\
 GNU General Public License v3.0.\n\

@@ -15,7 +15,7 @@
 #define SETTINGS_ANGLE_MAX 90.0
 #define SETTINGS_ANGLE_MIN 0.1
 #define SETTINGS_RIDGE_MIN 0.01
-#define SETTINGS_RIDGE_MAX 1000
+#define SETTINGS_RIDGE_MAX 100
 
 #define SETTINGS_INI_BLOCK_MAIN                 "STL"
 #define SETTINGS_INI_AUTOEXPORT_EN              "Включить_автоэкспорт"

@@ -154,43 +154,44 @@ bool WINAPI LibInterfaceNotifyEntry(IDispatch *application) {
   return false;
 }
 
-//-------------------------------------------------------------------------------
-// Получить контейнер обозначений 3D
-// ---
-KompasAPI7::ISymbols3DContainerPtr GetSymbols3DContainer(KompasAPI7::IKompasDocument3DPtr & doc) {
-  if (doc) return doc->GetTopPart();
-  return NULL;
-}
-
-
-//-----------------------------------------------------------------------------
-// Функция фильтрации
-// ---
-BOOL __stdcall  UserFilterProc( IEntity * e)
-{
-  if( e && (!oType || e->GetType() == oType) )
-    return TRUE;
-  else
-    return FALSE;
-}
-
 void Save2STL( ksDocument3DPtr doc, BSTR stlPath ) {
 	if (doc) {
-		// Преобразовать интерфейс документа 3D из API7 в API5
-		IDocument3DPtr doc3D( IUnknownPtr(ksTransferInterface( doc, ksAPI3DCom, 0), false) );
-		if (doc3D) {
-			IAdditionFormatParam* formatParam = doc3D->AdditionFormatParam();
-			formatParam->Init();
-			formatParam->SetFormat(format_STL);
-			formatParam->SetTopolgyIncluded(false);
-      formatParam->SetLengthUnits(userSettings.units);
-			formatParam->SetFormatBinary(userSettings.formatBIN);
-      if (userSettings.isLinear) formatParam->SetStep(userSettings.linearVal);
-      if (userSettings.isAngle) formatParam->SetAngle(userSettings.angleVal);
-      if (userSettings.isRidge) formatParam->SetLength(userSettings.ridgeVal);
-			doc3D->SaveAsToAdditionFormat(stlPath, formatParam);
-		}
-	}
+    ksAdditionFormatParamPtr formatParam = doc->AdditionFormatParam();
+    formatParam->Init();
+    formatParam->SetObjectsOptions(ksD3COBodyes, userSettings.objBody);
+    formatParam->SetObjectsOptions(ksD3COSurfaces, userSettings.objSurface);
+    formatParam->format = format_STL;
+    formatParam->topolgyIncluded = false;
+    formatParam->lengthUnits = userSettings.units;
+    /// TODO: Почему-то при установке formatBinary=true, сохраняется в текстовый. О_о?! 
+    // false - бинарный, что противоречит документации kompas API, поэтому инвертирую свойство
+    formatParam->formatBinary = !userSettings.formatBIN;
+    long stepType = 0;
+    if (userSettings.isLinear) {
+      stepType |= ksSpaceStep;
+      formatParam->step = userSettings.linearVal;
+    } else {
+      formatParam->step = SETTINGS_LINEAR_MAX;
+    }
+    if (userSettings.isAngle) {
+      stepType |= ksDeviationStep;
+      formatParam->angle = userSettings.angleVal * M_PI / 180.0;
+    } else {
+      formatParam->angle = SETTINGS_ANGLE_MAX * M_PI / 180.0;
+    }
+    if (userSettings.isRidge) {
+      stepType |= ksMetricStep;
+      formatParam->length = userSettings.ridgeVal;
+    } else {
+      formatParam->length = SETTINGS_RIDGE_MAX;
+    }
+    formatParam->stepType = stepType;
+    if (!doc->SaveAsToAdditionFormat(stlPath, formatParam)) {
+      CString str;
+      str.Format( _T("Ошибка автосохранения STL, не удалось сохранить файл '%s'"), stlPath);
+      kompas->ksMessage(str.GetBuffer(0));
+    }
+  }
 }
 
 //-------------------------------------------------------------------------------
