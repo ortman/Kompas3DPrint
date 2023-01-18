@@ -20,6 +20,7 @@ void TSettingsDlg::DoDataExchange(CDataExchange* pDX) {
 
   DDX_Control(pDX, IDC_AUTOEXPORT_EN, cAutoexportEn);
   DDX_Control(pDX, IDC_AUTOEXPORT_WHEN_EXISTS, cAutoexportWhenExists);
+  DDX_Control(pDX, IDC_CREATE_STL_FOLDER, cCreateStlFolder);
 
   DDX_Control(pDX, IDC_OBJ_BODY, cObjBody);
   DDX_Control(pDX, IDC_OBJ_SURFACE, cObjSurface);
@@ -55,6 +56,7 @@ BOOL TSettingsDlg::OnInitDialog() {
 
   cAutoexportEn.SetCheck(userSettings.autoexportEn);
   cAutoexportWhenExists.SetCheck(userSettings.autoexportWhenExists);
+  cCreateStlFolder.SetCheck(userSettings.createStlFolder);
 
   cObjBody.SetCheck(userSettings.objBody);
   cObjSurface.SetCheck(userSettings.objSurface);
@@ -154,6 +156,7 @@ void TSettingsDlg::OnOK() {
   CString sVal;
   userSettings.autoexportEn = cAutoexportEn.GetCheck();
   userSettings.autoexportWhenExists = cAutoexportWhenExists.GetCheck();
+  userSettings.createStlFolder = cCreateStlFolder.GetCheck();
   userSettings.objBody = cObjBody.GetCheck();
   userSettings.objSurface = cObjSurface.GetCheck();
   userSettings.units = *(ksLengthUnitsEnum*) cbUnits.GetItemDataPtr(cbUnits.GetCurSel());

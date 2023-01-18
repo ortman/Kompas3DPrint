@@ -20,6 +20,7 @@
 #define SETTINGS_INI_BLOCK_MAIN                 "STL"
 #define SETTINGS_INI_AUTOEXPORT_EN              "¬ключить_автоэкспорт"
 #define SETTINGS_INI_AUTOEXPORT_WHEN_EXISTS     "јвтоэкспорт_только_в_существующие_STL"
+#define SETTINGS_INI_CREATE_STL_FOLDER          "—оздавать_папку_STL_р€дом_с_моделью"
 #define SETTINGS_INI_OBJ_BODY                   "Ёкспортировать_тела"
 #define SETTINGS_INI_OBJ_SURFACE                "Ёкспортировать_поверхности"
 #define SETTINGS_INI_UNITS                      "≈диницы_измерени€"
@@ -33,6 +34,7 @@
 
 #define SETTINGS_DEFAULT_AUTOEXPORT_EN          true
 #define SETTINGS_DEFAULT_AUTOEXPORT_WHEN_EXISTS false
+#define SETTINGS_DEFAULT_CREATE_STL_FOLDER      false
 #define SETTINGS_DEFAULT_OBJ_BODY               true
 #define SETTINGS_DEFAULT_OBJ_SURFACE            false
 #define SETTINGS_DEFAULT_UNITS                  ksLUnMM
@@ -50,6 +52,7 @@ class SettingsData {
   public:
     bool autoexportEn;
     bool autoexportWhenExists;
+    bool createStlFolder;
     bool objBody, objSurface;
     ksLengthUnitsEnum units;
     bool formatBIN;

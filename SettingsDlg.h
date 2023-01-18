@@ -21,6 +21,7 @@ class TSettingsDlg : public CDialog {
 
     CButton cAutoexportEn;
     CButton cAutoexportWhenExists;
+    CButton cCreateStlFolder;
     CButton cObjBody;
     CButton cObjSurface;
     CComboBox cbUnits;

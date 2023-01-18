@@ -27,52 +27,54 @@ BEGIN
 END
 
 // Dialog Settings
-SETTINGS_DIALOG DIALOGEX DISCARDABLE  0, 0, 370, 250
+SETTINGS_DIALOG DIALOGEX DISCARDABLE  0, 0, 370, 264
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Настройки автоэкспорта в STL"
 FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
-    PUSHBUTTON      "Сохранить", IDOK, 230, 229, 50, 14
-    DEFPUSHBUTTON   "Отмена", IDCANCEL, 300, 229, 50, 14
+    PUSHBUTTON      "Сохранить", IDOK, 230, 243, 50, 14
+    DEFPUSHBUTTON   "Отмена", IDCANCEL, 300, 243, 50, 14
 
     CONTROL         "Включить автоэкспорт", IDC_AUTOEXPORT_EN, "Button", BS_AUTOCHECKBOX | 
                     WS_TABSTOP, 10, 10, 100, 10
     CONTROL         "Автоэкспорт только существующих STL", IDC_AUTOEXPORT_WHEN_EXISTS, "Button", BS_AUTOCHECKBOX | 
                     WS_TABSTOP, 125, 10, 150, 10
+    CONTROL         "Создавать папку STL рядом с моделью", IDC_CREATE_STL_FOLDER, "Button", BS_AUTOCHECKBOX | 
+                    WS_TABSTOP, 125, 24, 150, 10
 
-    LTEXT           "Объекты", IDC_STATIC, 85, 24, 50, 8
+    LTEXT           "Объекты", IDC_STATIC, 85, 38, 50, 8
     CONTROL         "Тела", IDC_OBJ_BODY, "Button", BS_AUTOCHECKBOX | 
-                    WS_TABSTOP, 85, 38, 70, 10
-    CONTROL         "Поверхности", IDC_OBJ_SURFACE, "Button", BS_AUTOCHECKBOX | 
                     WS_TABSTOP, 85, 52, 70, 10
+    CONTROL         "Поверхности", IDC_OBJ_SURFACE, "Button", BS_AUTOCHECKBOX | 
+                    WS_TABSTOP, 85, 66, 70, 10
                     
-    LTEXT           "Параметры", IDC_STATIC, 200, 24, 50, 8
-    RTEXT           "Единицы длины:", IDC_STATIC, 200, 40, 70, 8
-    COMBOBOX        IDC_UNITS, 275, 38, 85, 60, CBS_DROPDOWNLIST | WS_VSCROLL | 
+    LTEXT           "Параметры", IDC_STATIC, 200, 38, 50, 8
+    RTEXT           "Единицы длины:", IDC_STATIC, 200, 52, 70, 8
+    COMBOBOX        IDC_UNITS, 275, 50, 85, 60, CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
-    RTEXT           "Формат:", IDC_STATIC, 200, 52, 70, 8
+    RTEXT           "Формат:", IDC_STATIC, 200, 66, 70, 8
     CONTROL         "Текстовый", IDC_FORMAT_TXT, "Button", BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,
-                    275, 52, 74, 10
+                    275, 66, 74, 10
     CONTROL         "Двоичный", IDC_FORMAT_BIN, "Button", BS_AUTORADIOBUTTON,
-                    275, 66, 75, 10
+                    275, 80, 75, 10
                     
-    LTEXT           "Точность аппроксимации", IDC_STATIC, 85, 85, 150, 8
+    LTEXT           "Точность аппроксимации", IDC_STATIC, 85, 99, 150, 8
 
     CONTROL         "Максимальное линейное отклонение", IDC_LINEAR_CHECK, "Button", BS_AUTOCHECKBOX | 
-                    WS_TABSTOP, 85, 100, 150, 10
+                    WS_TABSTOP, 85, 114, 150, 10
     CONTROL         "", IDC_LINEAR_TRACKBAR,
-                    "msctls_trackbar32", WS_TABSTOP | 0x21, 85, 114, 190, 25
-    EDITTEXT        IDC_LINEAR_VAL, 275, 114, 50, 13, ES_AUTOHSCROLL
+                    "msctls_trackbar32", WS_TABSTOP | 0x21, 85, 128, 190, 25
+    EDITTEXT        IDC_LINEAR_VAL, 275, 128, 50, 13, ES_AUTOHSCROLL
 
     CONTROL         "Максимальное угловое отклонение", IDC_ANGLE_CHECK, "Button", BS_AUTOCHECKBOX | 
-                    WS_TABSTOP, 85, 150, 150, 10
+                    WS_TABSTOP, 85, 164, 150, 10
     CONTROL         "", IDC_ANGLE_TRACKBAR,
-                    "msctls_trackbar32", WS_TABSTOP | 0x21, 85, 164, 190, 25
-    EDITTEXT        IDC_ANGLE_VAL, 275, 164, 50, 13, ES_AUTOHSCROLL
+                    "msctls_trackbar32", WS_TABSTOP | 0x21, 85, 178, 190, 25
+    EDITTEXT        IDC_ANGLE_VAL, 275, 178, 50, 13, ES_AUTOHSCROLL
                     
     CONTROL         "Максимальная длина ребра", IDC_RIDGE_CHECK, "Button", BS_AUTOCHECKBOX | 
-                    WS_TABSTOP, 85, 200, 150, 10
-    EDITTEXT        IDC_RIDGE_VAL, 275, 200, 50, 13, ES_AUTOHSCROLL
+                    WS_TABSTOP, 85, 214, 150, 10
+    EDITTEXT        IDC_RIDGE_VAL, 275, 214, 50, 13, ES_AUTOHSCROLL
 END
 
 // Dialog About

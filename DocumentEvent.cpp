@@ -43,15 +43,17 @@ afx_msg VARIANT_BOOL DocumentEvent::SaveDocument() {
   int slash = path.ReverseFind('\\');
   if (slash < 0) slash = path.ReverseFind('/');
   if (slash > 0) {
-    // CString folderPath = 
     CString STLfolder = path.Left(slash + 1) + _T("STL");
     BOOL existSTLFolder = DirectoryExists(STLfolder);
     if (!existSTLFolder) {
       STLfolder = path.Left(slash + 1) + _T("stl");
       existSTLFolder = DirectoryExists(STLfolder);
     }
+    if (!existSTLFolder && userSettings.createStlFolder) {
+      STLfolder = path.Left(slash + 1) + _T("STL");
+      existSTLFolder = CreateDirectory(STLfolder, NULL);
+    }
     if (existSTLFolder) {
-
       stlPath = STLfolder + '\\' + path.Mid(slash + 1, pathLen - slash - 5) + _T(".stl");
     } else {
       stlPath = path.Left(pathLen-4) + _T(".stl");
