@@ -20,8 +20,9 @@ class TSettingsDlg : public CDialog {
     enum { IDD = SETTINGS_DIALOG };
 
     CButton cAutoexportEn;
+    CComboBox cbFormat;
     CButton cAutoexportWhenExists;
-    CButton cCreateStlFolder;
+    CButton cCreateFolder;
     CButton cObjBody;
     CButton cObjSurface;
     CComboBox cbUnits;

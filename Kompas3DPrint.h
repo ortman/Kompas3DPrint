@@ -13,6 +13,6 @@ extern KompasObjectPtr kompas;
 
 CString LoadStr(int strID);
 void AdviseDoc(LPDISPATCH doc, long docType);
-void Save2STL(ksDocument3DPtr doc3D,  BSTR stlPath);
+bool Save(ksDocument3DPtr doc3D,  BSTR path);
 
 #endif // _KAMPAS_3D_PRINT_H_

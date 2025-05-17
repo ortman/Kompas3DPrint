@@ -17,24 +17,26 @@
 #define SETTINGS_RIDGE_MIN 0.01
 #define SETTINGS_RIDGE_MAX 100
 
-#define SETTINGS_INI_BLOCK_MAIN                 "STL"
-#define SETTINGS_INI_AUTOEXPORT_EN              "Включить_автоэкспорт"
-#define SETTINGS_INI_AUTOEXPORT_WHEN_EXISTS     "Автоэкспорт_только_в_существующие_STL"
-#define SETTINGS_INI_CREATE_STL_FOLDER          "Создавать_папку_STL_рядом_с_моделью"
-#define SETTINGS_INI_OBJ_BODY                   "Экспортировать_тела"
-#define SETTINGS_INI_OBJ_SURFACE                "Экспортировать_поверхности"
-#define SETTINGS_INI_UNITS                      "Единицы_измерения"
-#define SETTINGS_INI_FORMAT_BIN                 "Бинарный_формат"
-#define SETTINGS_INI_IS_LINEAR                  "Использовать_линейное_отклонение"
-#define SETTINGS_INI_LINEAR_VAL                 "Максимальное_линейное_отклонение"
-#define SETTINGS_INI_IS_ANGLE                   "Использовать_угловое_отклонение"
-#define SETTINGS_INI_ANGLE_VAL                  "Максимальное_угловое_отклонение"
-#define SETTINGS_INI_IS_RIDGE                   "Использовать_длину_ребра"
-#define SETTINGS_INI_RIDGE_VAL                  "Максимальная_длина_ребра"
+#define SETTINGS_INI_BLOCK_MAIN                 "Autoexport"
+#define SETTINGS_INI_AUTOEXPORT_EN              "AutoexportOn"
+#define SETTINGS_INI_FORMAT                     "Format"
+#define SETTINGS_INI_AUTOEXPORT_WHEN_EXISTS     "AutoexportWhenExist"
+#define SETTINGS_INI_CREATE_FOLDER              "CreateFolder"
+#define SETTINGS_INI_OBJ_BODY                   "ExportBody"
+#define SETTINGS_INI_OBJ_SURFACE                "ExportSurface"
+#define SETTINGS_INI_UNITS                      "Units"
+#define SETTINGS_INI_FORMAT_BIN                 "Binary"
+#define SETTINGS_INI_IS_LINEAR                  "LinearUse"
+#define SETTINGS_INI_LINEAR_VAL                 "LinearVal"
+#define SETTINGS_INI_IS_ANGLE                   "AngleUse"
+#define SETTINGS_INI_ANGLE_VAL                  "AngleVal"
+#define SETTINGS_INI_IS_RIDGE                   "RidgeUse"
+#define SETTINGS_INI_RIDGE_VAL                  "RidgeVal"
 
 #define SETTINGS_DEFAULT_AUTOEXPORT_EN          true
+#define SETTINGS_DEFAULT_FORMAT                 format_STL
 #define SETTINGS_DEFAULT_AUTOEXPORT_WHEN_EXISTS false
-#define SETTINGS_DEFAULT_CREATE_STL_FOLDER      false
+#define SETTINGS_DEFAULT_CREATE_FOLDER          false
 #define SETTINGS_DEFAULT_OBJ_BODY               true
 #define SETTINGS_DEFAULT_OBJ_SURFACE            false
 #define SETTINGS_DEFAULT_UNITS                  ksLUnMM
@@ -51,8 +53,9 @@ class SettingsData {
     CIniFile iniFile;
   public:
     bool autoexportEn;
+    D3FormatConvType format;
     bool autoexportWhenExists;
-    bool createStlFolder;
+    bool createFolder;
     bool objBody, objSurface;
     ksLengthUnitsEnum units;
     bool formatBIN;
@@ -65,9 +68,13 @@ class SettingsData {
 
     SettingsData();
     void resetToDefault();
-    void SetPath(CString iniFilePath);
-    CString GetPath();
-    CString GetError();
+    void setPath(CString iniFilePath);
+    CString getPath();
+    CString getError();
+    static CString format2Str(D3FormatConvType format);
+    CString format2Str();
+    static CString getExt(D3FormatConvType format);
+    CString getExt();
     bool read();
     bool readDefaultSettings(KompasObjectPtr kompas);
     bool write();

@@ -35,31 +35,30 @@ BOOL DirectoryExists(LPCTSTR szPath) {
 }
 
 afx_msg VARIANT_BOOL DocumentEvent::SaveDocument() {
-  CString stlPath = _T("");
-  CString path = GetDocName();
-  int pathLen = path.GetLength();
+  CString savePath = _T("");
+  CString m3dPath = GetDocName();
+  int pathLen = m3dPath.GetLength();
   if (pathLen < 5) return true;;
-  if (path.Right(4) != _T(".m3d")) return true;
-  int slash = path.ReverseFind('\\');
-  if (slash < 0) slash = path.ReverseFind('/');
-  if (slash > 0) {
-    CString STLfolder = path.Left(slash + 1) + _T("STL");
-    BOOL existSTLFolder = DirectoryExists(STLfolder);
-    if (!existSTLFolder) {
-      STLfolder = path.Left(slash + 1) + _T("stl");
-      existSTLFolder = DirectoryExists(STLfolder);
+  if (m3dPath.Right(4) != _T(".m3d")) return true;
+  char slash = '\\';
+  int slashPos = m3dPath.ReverseFind(slash);
+  if (slashPos < 0) {
+    slash = '/';
+    slashPos = m3dPath.ReverseFind(slash);
+  }
+  if (slashPos > 0) {
+    CString folder = m3dPath.Left(slashPos + 1) + userSettings.format2Str();
+    BOOL existFolder = DirectoryExists(folder);
+    if (!existFolder && userSettings.createFolder) {
+      existFolder = CreateDirectory(folder, NULL);
     }
-    if (!existSTLFolder && userSettings.createStlFolder) {
-      STLfolder = path.Left(slash + 1) + _T("STL");
-      existSTLFolder = CreateDirectory(STLfolder, NULL);
-    }
-    if (existSTLFolder) {
-      stlPath = STLfolder + '\\' + path.Mid(slash + 1, pathLen - slash - 5) + _T(".stl");
+    if (existFolder) {
+      savePath = folder + slash + m3dPath.Mid(slashPos + 1, pathLen - slashPos - 5) + userSettings.getExt();
     } else {
-      stlPath = path.Left(pathLen-4) + _T(".stl");
+      savePath = m3dPath.Left(pathLen-4) + userSettings.getExt();
     }
   } else {
-    stlPath = path.Left(pathLen-4) + _T(".stl");
+    savePath = m3dPath.Left(pathLen-4) + userSettings.getExt();
   }
 
   if (m_doc) {
@@ -68,8 +67,11 @@ afx_msg VARIANT_BOOL DocumentEvent::SaveDocument() {
     if (doc3D && userSettings.autoexportEn) {
       CStdioFile file;
       CFileStatus status;
-      if (!userSettings.autoexportWhenExists || file.GetStatus(stlPath,status)) {
-        Save2STL(doc3D , stlPath.GetBuffer(0));
+      if (!userSettings.autoexportWhenExists || file.GetStatus(savePath, status)) {
+        if (!Save(doc3D , savePath.GetBuffer(0))) {
+          _bstr_t msg = L"Kompas3DPrint: Не удалось сохранить файл :\"" + savePath + L"\"";
+          kompas->ksError(msg);
+        }
       }
     }
   }

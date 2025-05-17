@@ -154,44 +154,39 @@ bool WINAPI LibInterfaceNotifyEntry(IDispatch *application) {
   return false;
 }
 
-void Save2STL( ksDocument3DPtr doc, BSTR stlPath ) {
-	if (doc) {
-    ksAdditionFormatParamPtr formatParam = doc->AdditionFormatParam();
-    formatParam->Init();
-    formatParam->SetObjectsOptions(ksD3COBodyes, userSettings.objBody);
-    formatParam->SetObjectsOptions(ksD3COSurfaces, userSettings.objSurface);
-    formatParam->format = format_STL;
-    formatParam->topolgyIncluded = false;
-    formatParam->lengthUnits = userSettings.units;
-    /// TODO: Почему-то при установке formatBinary=true, сохраняется в текстовый. О_о?! 
-    // false - бинарный, что противоречит документации kompas API, поэтому инвертирую свойство
-    formatParam->formatBinary = !userSettings.formatBIN;
-    long stepType = 0;
-    if (userSettings.isLinear) {
-      stepType |= ksSpaceStep;
-      formatParam->step = userSettings.linearVal;
-    } else {
-      formatParam->step = SETTINGS_LINEAR_MAX;
-    }
-    if (userSettings.isAngle) {
-      stepType |= ksDeviationStep;
-      formatParam->angle = userSettings.angleVal * M_PI / 180.0;
-    } else {
-      formatParam->angle = SETTINGS_ANGLE_MAX * M_PI / 180.0;
-    }
-    if (userSettings.isRidge) {
-      stepType |= ksMetricStep;
-      formatParam->length = userSettings.ridgeVal;
-    } else {
-      formatParam->length = SETTINGS_RIDGE_MAX;
-    }
-    formatParam->stepType = stepType;
-    if (!doc->SaveAsToAdditionFormat(stlPath, formatParam)) {
-      CString str;
-      str.Format( _T("Ошибка автосохранения STL, не удалось сохранить файл '%s'"), stlPath);
-      kompas->ksMessage(str.GetBuffer(0));
-    }
+bool Save(ksDocument3DPtr doc, BSTR path) {
+	if (! doc) return false;
+  ksAdditionFormatParamPtr formatParam = doc->AdditionFormatParam();
+  formatParam->Init();
+  formatParam->SetObjectsOptions(ksD3COBodyes, userSettings.objBody);
+  formatParam->SetObjectsOptions(ksD3COSurfaces, userSettings.objSurface);
+  formatParam->format = userSettings.format;
+  formatParam->topolgyIncluded = false;
+  formatParam->lengthUnits = userSettings.units;
+  /// TODO: Почему-то при установке formatBinary=true, сохраняется в текстовый. О_о?! 
+  // false - бинарный, что противоречит документации kompas API, поэтому инвертирую свойство
+  formatParam->formatBinary = !userSettings.formatBIN;
+  long stepType = 0;
+  if (userSettings.isLinear) {
+    stepType |= ksSpaceStep;
+    formatParam->step = userSettings.linearVal;
+  } else {
+    formatParam->step = SETTINGS_LINEAR_MAX;
   }
+  if (userSettings.isAngle) {
+    stepType |= ksDeviationStep;
+    formatParam->angle = userSettings.angleVal * M_PI / 180.0;
+  } else {
+    formatParam->angle = SETTINGS_ANGLE_MAX * M_PI / 180.0;
+  }
+  if (userSettings.isRidge) {
+    stepType |= ksMetricStep;
+    formatParam->length = userSettings.ridgeVal;
+  } else {
+    formatParam->length = SETTINGS_RIDGE_MAX;
+  }
+  formatParam->stepType = stepType;
+  return doc->SaveAsToAdditionFormat(path, formatParam);
 }
 
 //-------------------------------------------------------------------------------

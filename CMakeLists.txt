@@ -1,8 +1,8 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.10)
 
-SET(KOMPAS_SDK "C:/Program Files/ASCON/KOMPAS-3D v21 Home/SDK")
+SET(KOMPAS_SDK "C:/Program Files/ASCON/KOMPAS-3D v23 Home/SDK")
 
-SET(KOMPAS3DPRINT_VERSION 0.3.2)
+SET(KOMPAS3DPRINT_VERSION 0.3.3)
 add_definitions(-DKOMPAS3DPRINT_VERSION="${KOMPAS3DPRINT_VERSION}")
 add_definitions(-DUNICODE -D_UNICODE)
 add_definitions(-D_AFXDLL)
@@ -40,5 +40,6 @@ target_link_libraries(${PROJECT_NAME} ${KOMPAS_SDK}/lib64/kAPI7.lib)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".rtw")
 
-# include(build/cmake/libraries.cmake)
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:Kompas3DPrint> "${PROJECT_SOURCE_DIR}/bin/")
+
 # target_compile_options(Kompas3DPrint PRIVATE -Werror=return-type)

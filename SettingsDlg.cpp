@@ -10,6 +10,17 @@ ksLengthUnitsEnum _unitsData[] = {
   ksLUnM
 };
 
+D3FormatConvType _formatData[] = {
+  format_STL,
+  format_STEP_AP203,
+  format_STEP_AP214,
+  format_STEP_AP242,
+  format_IGES,
+  format_SAT,
+  format_XT,
+  format_VRML
+};
+
 TSettingsDlg::TSettingsDlg(CWnd* pParent /*=NULL*/)
         : CDialog(TSettingsDlg::IDD, pParent) {
   if (kompas) userSettings.readDefaultSettings(kompas);
@@ -19,8 +30,9 @@ void TSettingsDlg::DoDataExchange(CDataExchange* pDX) {
 	CDialog::DoDataExchange(pDX);
 
   DDX_Control(pDX, IDC_AUTOEXPORT_EN, cAutoexportEn);
+  DDX_Control(pDX, IDC_FORMAT, cbFormat);
   DDX_Control(pDX, IDC_AUTOEXPORT_WHEN_EXISTS, cAutoexportWhenExists);
-  DDX_Control(pDX, IDC_CREATE_STL_FOLDER, cCreateStlFolder);
+  DDX_Control(pDX, IDC_CREATE_FOLDER, cCreateFolder);
 
   DDX_Control(pDX, IDC_OBJ_BODY, cObjBody);
   DDX_Control(pDX, IDC_OBJ_SURFACE, cObjSurface);
@@ -55,8 +67,22 @@ BOOL TSettingsDlg::OnInitDialog() {
 	CDialog::OnInitDialog();
 
   cAutoexportEn.SetCheck(userSettings.autoexportEn);
+  
+  int i = 0;
+  cbFormat.Clear();
+  for (int i = 0; i < 8; i++) {
+    cbFormat.AddString(SettingsData::format2Str(_formatData[i]));
+    cbFormat.SetItemDataPtr(i, &_formatData[i]);
+  }
+  for (int i = 0; i < cbFormat.GetCount(); i++) {
+    if (*(D3FormatConvType*)cbFormat.GetItemDataPtr(i) == userSettings.format) {
+        cbFormat.SetCurSel(i);
+        break;
+    }
+  }
+
   cAutoexportWhenExists.SetCheck(userSettings.autoexportWhenExists);
-  cCreateStlFolder.SetCheck(userSettings.createStlFolder);
+  cCreateFolder.SetCheck(userSettings.createFolder);
 
   cObjBody.SetCheck(userSettings.objBody);
   cObjSurface.SetCheck(userSettings.objSurface);
@@ -155,8 +181,9 @@ void TSettingsDlg::OnRidgeValKillFocus() {
 void TSettingsDlg::OnOK() {
   CString sVal;
   userSettings.autoexportEn = cAutoexportEn.GetCheck();
+  userSettings.format = *(D3FormatConvType*) cbFormat.GetItemDataPtr(cbFormat.GetCurSel());
   userSettings.autoexportWhenExists = cAutoexportWhenExists.GetCheck();
-  userSettings.createStlFolder = cCreateStlFolder.GetCheck();
+  userSettings.createFolder = cCreateFolder.GetCheck();
   userSettings.objBody = cObjBody.GetCheck();
   userSettings.objSurface = cObjSurface.GetCheck();
   userSettings.units = *(ksLengthUnitsEnum*) cbUnits.GetItemDataPtr(cbUnits.GetCurSel());
@@ -174,8 +201,8 @@ void TSettingsDlg::OnOK() {
   if (userSettings.write()) {
     CDialog::OnOK();
   } else if (kompas) {
-    _bstr_t msg = L"Не удалось сохранить настройки в файл :\"" + userSettings.GetPath() + 
-        L"\". \nОшибка: \"" + userSettings.GetError() + L"\"";
+    _bstr_t msg = L"Не удалось сохранить настройки в файл :\"" + userSettings.getPath() + 
+        L"\". \nОшибка: \"" + userSettings.getError() + L"\"";
     kompas->ksError(msg);
   }
 }

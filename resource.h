@@ -22,14 +22,15 @@
 #define IDC_RIDGE_CHECK                 11015
 #define IDC_RIDGE_VAL                   11016
 #define IDC_AUTOEXPORT_WHEN_EXISTS      11017
-#define IDC_CREATE_STL_FOLDER           11018
+#define IDC_CREATE_FOLDER               11018
+#define IDC_FORMAT                      11019
 
 #define ABOUT_DIALOG                    12000
 #define IDC_SYSLINK_GITHUB              12001
 
 #define ABOUT_TEXT \
-"Модуль автоматического сохранения 3D моделей в формат STL.\n\
-Версия 0.3.2\n\
+"Модуль автоматического сохранения 3D моделей в формат STL/STEP/IGES/SAT/XT/X_B/VRML.\n\
+Версия 0.3.3\n\
 \n\
 Автор Сергей Ортман.\n\
 GNU General Public License v3.0.\n\
