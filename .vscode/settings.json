@@ -7,6 +7,7 @@
     "editor.tabSize": 2,
     "C_Cpp.intelliSenseEngine": "Tag Parser",
     "cmake.buildDirectory": "${workspaceRoot}/build/${buildType}",
+    "cmake.outputLogEncoding": "UTF-8",
     "files.associations": {
         "functional": "cpp",
         "system_error": "cpp",
