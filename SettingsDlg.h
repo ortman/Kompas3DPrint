@@ -36,6 +36,7 @@ class TSettingsDlg : public CDialog {
     CEdit eAngleVal;
     CButton cRidge;
     CEdit eRidgeVal;
+    CEdit eCuraPath;
 
   protected:
     int m_bitMapId;

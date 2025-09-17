@@ -32,6 +32,7 @@
 #define SETTINGS_INI_ANGLE_VAL                  "AngleVal"
 #define SETTINGS_INI_IS_RIDGE                   "RidgeUse"
 #define SETTINGS_INI_RIDGE_VAL                  "RidgeVal"
+#define SETTINGS_INI_CURA_PATH                  "CuraPath"
 
 #define SETTINGS_DEFAULT_AUTOEXPORT_EN          true
 #define SETTINGS_DEFAULT_FORMAT                 format_STL
@@ -65,6 +66,7 @@ class SettingsData {
     double angleVal;
     bool isRidge;
     double ridgeVal;
+    CString curaPath;
 
     SettingsData();
     void resetToDefault();
@@ -78,6 +80,7 @@ class SettingsData {
     bool read();
     bool readDefaultSettings(KompasObjectPtr kompas);
     bool write();
+    static CString FindCuraPath();
 };
 
 #endif // _SETTINGS_DATA_H_

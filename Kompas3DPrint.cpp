@@ -95,6 +95,45 @@ void WINAPI LIBRARYENTRY(unsigned int comm) {
         }
         break;
       }
+      case MENU_EXPORT_STL: {
+        CString m3dPath = BaseEvent::GetDocName(kompas->ActiveDocument3D());
+        if (m3dPath == "") m3dPath = "Деталь.m3d";
+        CFileDialog fileDlg(FALSE, NULL, m3dPath.Mid(0, m3dPath.GetLength() - 4) + ".stl", OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, CString("STL Models (*.stl)|*.stl|"));
+        if (fileDlg.DoModal() == IDOK) {
+          ksDocument3DPtr doc3D;
+          kompas->ActiveDocument3D()->QueryInterface(DIID_ksDocument3D, (LPVOID*)&doc3D);
+          if (doc3D) {
+            if (!Save(doc3D, fileDlg.GetPathName().GetBuffer(0))) {
+              Message("Не могу сохранить STL");
+            }
+          }
+        }
+        break;
+      }
+      case MENU_EXPORT_STEP: {
+
+        Message("Функция еще не реализована");
+        break;
+      }
+      case MENU_OPEN_CURA: {
+        ksDocument3DPtr doc3D;
+        kompas->ActiveDocument3D()->QueryInterface(DIID_ksDocument3D, (LPVOID*)&doc3D);
+        if (doc3D) {
+          CString tempStl = GetTmpSTLPath();
+          if (Save(doc3D, tempStl.GetBuffer(0))) {
+            TCHAR szPath[] = _T("");
+            SHELLEXECUTEINFO ExecInfo;
+            memset(&ExecInfo, 0, sizeof(SHELLEXECUTEINFO));
+            ExecInfo.cbSize = sizeof(SHELLEXECUTEINFO); 
+            ExecInfo.fMask = SEE_MASK_NOCLOSEPROCESS; 
+            ExecInfo.lpVerb = _T("open"); 
+            ExecInfo.lpFile = userSettings.curaPath;
+            ExecInfo.lpParameters = tempStl;
+            ShellExecuteEx(&ExecInfo);
+          }
+        }
+        break;
+      }
       case MENU_ABOUT: {
         TAboutDlg *dlg = new TAboutDlg();
         if (dlg) {
@@ -153,6 +192,26 @@ bool WINAPI LibInterfaceNotifyEntry(IDispatch *application) {
 
   return false;
 }
+
+CString GetTmpSTLPath() {
+  wchar_t wcharPath[MAX_PATH];
+  if (kompas && GetTempPath(MAX_PATH, wcharPath)) {
+    CString m3dPath = BaseEvent::GetDocName(kompas->ActiveDocument3D());
+    int pathLen = m3dPath.GetLength();
+    if (pathLen < 5) return CString(wcharPath) + "Деталь.stl";
+    char slash = '\\';
+    int slashPos = m3dPath.ReverseFind(slash);
+    if (slashPos < 0) {
+      slash = '/';
+      slashPos = m3dPath.ReverseFind(slash);
+    }
+    if (slashPos > 0) {
+      return CString(wcharPath) + m3dPath.Mid(slashPos + 1, pathLen - slashPos - 5) + ".stl";
+    }
+  }
+  return "";
+}
+
 
 bool Save(ksDocument3DPtr doc, BSTR path) {
 	if (! doc) return false;

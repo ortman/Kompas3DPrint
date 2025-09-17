@@ -80,30 +80,30 @@ BaseEvent::~BaseEvent() {
 //-------------------------------------------------------------------------------
 // Получить имя документа
 // ---
-CString BaseEvent::GetDocName() {
+CString BaseEvent::GetDocName(LPDISPATCH doc) {
   _bstr_t fileName;
-  if (m_doc) { 
+  if (doc) { 
     ksDocument2DPtr doc2D;
-    m_doc->QueryInterface(DIID_ksDocument2D, (LPVOID*)&doc2D);
+    doc->QueryInterface(DIID_ksDocument2D, (LPVOID*)&doc2D);
     if (doc2D) {
       ksDocumentParamPtr docPar(kompas->GetParamStruct(ko_DocumentParam));
       doc2D->ksGetObjParam(doc2D->Getreference(), docPar, ALLPARAM);
       fileName = docPar->fileName;
     } else {
       ksDocument3DPtr doc3D;
-      m_doc->QueryInterface(DIID_ksDocument3D, (LPVOID*)&doc3D);
+      doc->QueryInterface(DIID_ksDocument3D, (LPVOID*)&doc3D);
       if (doc3D) {  
         fileName = doc3D->fileName; 
       } else {
-        ksSpcDocumentPtr docSpc(m_doc);
-        m_doc->QueryInterface(DIID_ksSpcDocument, (LPVOID*)&docSpc);
+        ksSpcDocumentPtr docSpc(doc);
+        doc->QueryInterface(DIID_ksSpcDocument, (LPVOID*)&docSpc);
         if (docSpc) {   
           ksDocumentParamPtr docPar(kompas->GetParamStruct(ko_DocumentParam));
           docSpc->ksGetObjParam(docSpc->Getreference(), docPar, ALLPARAM);
           fileName = docPar->fileName;
         } else {
-          ksDocumentTxtPtr docTxt(m_doc);
-          m_doc->QueryInterface(DIID_ksDocumentTxt, (LPVOID*)&docTxt);
+          ksDocumentTxtPtr docTxt(doc);
+          doc->QueryInterface(DIID_ksDocumentTxt, (LPVOID*)&docTxt);
           if (docTxt) {   
             ksTextDocumentParamPtr docPar(kompas->GetParamStruct(ko_TextDocumentParam));
             docTxt->ksGetObjParam(docTxt->Getreference(), docPar, ALLPARAM);
@@ -274,57 +274,57 @@ void BaseEvent::ListEvents()
     if( IsEqualIID(event->m_iidEvents, DIID_ksKompasObjectNotify) )
     { 
       str += _T("\nApplicationEvent,");
-      str += _T(" имя документа = ") + event->GetDocName();
+      str += _T(" имя документа = ") + GetDocName(event->m_doc);
     }
     else if( IsEqualIID(event->m_iidEvents, DIID_ksDocument2DNotify) )
     {
       str += _T("\nDocument2DEvent,");
-      str += " имя документа = " + event->GetDocName();
+      str += " имя документа = " + GetDocName(event->m_doc);
     }
     else if( IsEqualIID(event->m_iidEvents, DIID_ksDocument3DNotify) )
     {
       str += _T("\nDocument3DEvent,");
-      str += _T(" имя документа = ") + event->GetDocName(); 
+      str += _T(" имя документа = ") + GetDocName(event->m_doc); 
     }
     else if( IsEqualIID(event->m_iidEvents, DIID_ksDocumentFileNotify) )
     {
       str += "\nDocumentEvent,";
-      str += " имя документа = " + event->GetDocName();
+      str += " имя документа = " + GetDocName(event->m_doc);
     }
     else if( IsEqualIID(event->m_iidEvents, DIID_ksObject2DNotify) )
     {
       str += _T("\nObject2DEvent,");
-      str += _T(" имя документа = ") + event->GetDocName();
+      str += _T(" имя документа = ") + GetDocName(event->m_doc);
     }
     else if( IsEqualIID(event->m_iidEvents, DIID_ksObject3DNotify) )
     {
       str += _T("\nObject3DEvent,");
-      str += " имя документа = " + event->GetDocName();       
+      str += " имя документа = " + GetDocName(event->m_doc);       
     }
     else if( IsEqualIID(event->m_iidEvents, DIID_ksSelectionMngNotify) )
     {
       str += "\nSelectMngEvent,";
-      str += _T(" имя документа = ") + event->GetDocName();
+      str += _T(" имя документа = ") + GetDocName(event->m_doc);
     }
     else if( IsEqualIID(event->m_iidEvents, DIID_ksSpcDocumentNotify) )
     {
       str += _T("\nSpcDocumentEvent,");
-      str += _T(" имя документа = ") + event->GetDocName();
+      str += _T(" имя документа = ") + GetDocName(event->m_doc);
     }
     else if( IsEqualIID(event->m_iidEvents, DIID_ksSpcObjectNotify) )
     {
       str += _T("\nSpcObjectEvent,");
-      str += _T(" имя документа = ") + event->GetDocName();  
+      str += _T(" имя документа = ") + GetDocName(event->m_doc);  
     }
     else if( IsEqualIID(event->m_iidEvents, DIID_ksSpecificationNotify) )
     {
       str += _T("\nSpecificationEvent,");
-      str += _T(" имя документа = ") + event->GetDocName();
+      str += _T(" имя документа = ") + GetDocName(event->m_doc);
     }
     else if( IsEqualIID(event->m_iidEvents, DIID_ksStampNotify) )
     {
       str += _T("\nStampEvent,");
-      str += _T(" имя документа = ") + event->GetDocName();
+      str += _T(" имя документа = ") + GetDocName(event->m_doc);
     }
   }
   kompas->ksMessage( str.GetBuffer(0) );

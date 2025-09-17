@@ -20,6 +20,7 @@ void SettingsData::resetToDefault() {
   angleVal = SETTINGS_DEFAULT_ANGLE_VAL;
   isRidge = SETTINGS_DEFAULT_IS_RIDGE;
   ridgeVal = SETTINGS_DEFAULT_RIDGE_VAL;
+  curaPath = FindCuraPath();
 }
 
 void SettingsData::setPath(CString iniFilePath) {
@@ -100,6 +101,8 @@ bool SettingsData::read() {
   isRidge    = iniFile.GetValueB(SETTINGS_INI_BLOCK_MAIN, SETTINGS_INI_IS_RIDGE, SETTINGS_DEFAULT_IS_RIDGE);
   ridgeVal   = iniFile.GetValueF(SETTINGS_INI_BLOCK_MAIN, SETTINGS_INI_RIDGE_VAL, SETTINGS_DEFAULT_RIDGE_VAL,
       SETTINGS_RIDGE_MIN, SETTINGS_RIDGE_MAX);
+  curaPath   = iniFile.GetValue(SETTINGS_INI_BLOCK_MAIN, SETTINGS_INI_CURA_PATH);
+  if (curaPath.IsEmpty()) curaPath = FindCuraPath();
   return true;
 }
 
@@ -130,5 +133,29 @@ bool SettingsData::write() {
   iniFile.SetValueF(SETTINGS_INI_BLOCK_MAIN, SETTINGS_INI_ANGLE_VAL, angleVal, true);
   iniFile.SetValueB(SETTINGS_INI_BLOCK_MAIN, SETTINGS_INI_IS_RIDGE, isRidge, true);
   iniFile.SetValueF(SETTINGS_INI_BLOCK_MAIN, SETTINGS_INI_RIDGE_VAL, ridgeVal, true);
+  iniFile.SetValue( SETTINGS_INI_BLOCK_MAIN, SETTINGS_INI_CURA_PATH, curaPath, true);
   return iniFile.WriteFile();
+}
+
+CString SettingsData::FindCuraPath() {
+  TCHAR programFilesPath[MAX_PATH];
+  if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_PROGRAM_FILES, NULL, 0, programFilesPath))) {
+    CFileFind findCuraDir;
+    bool isFindedDir = findCuraDir.FindFile(CString(programFilesPath) + "\\*Cura*");
+    while (isFindedDir) {
+      isFindedDir = findCuraDir.FindNextFile();
+      if (findCuraDir.IsDirectory()) {
+        CFileFind findCuraExe;
+        bool isFindedExe = findCuraExe.FindFile(findCuraDir.GetFilePath() + "\\*ura.exe");
+        while (isFindedExe) {
+          isFindedExe = findCuraExe.FindNextFile();
+          if (!findCuraExe.IsDirectory()) {
+            return findCuraExe.GetFilePath();
+          }
+        }
+      }
+    }
+    return CString(programFilesPath) + "\\UltiMaker Cura X.XX\\UltiMaker-Cura.exe";
+  }
+  return "C:\\Program Files\\UltiMaker Cura X.XX\\UltiMaker-Cura.exe";
 }

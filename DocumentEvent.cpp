@@ -36,9 +36,9 @@ BOOL DirectoryExists(LPCTSTR szPath) {
 
 afx_msg VARIANT_BOOL DocumentEvent::SaveDocument() {
   CString savePath = _T("");
-  CString m3dPath = GetDocName();
+  CString m3dPath = GetDocName(m_doc);
   int pathLen = m3dPath.GetLength();
-  if (pathLen < 5) return true;;
+  if (pathLen < 5) return true;
   if (m3dPath.Right(4) != _T(".m3d")) return true;
   char slash = '\\';
   int slashPos = m3dPath.ReverseFind(slash);

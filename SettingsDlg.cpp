@@ -52,6 +52,8 @@ void TSettingsDlg::DoDataExchange(CDataExchange* pDX) {
   
   DDX_Control(pDX, IDC_RIDGE_CHECK, cRidge);
   DDX_Control(pDX, IDC_RIDGE_VAL, eRidgeVal);
+
+  DDX_Control(pDX, IDC_CURA_PATH, eCuraPath);
 }
 
 BEGIN_MESSAGE_MAP( TSettingsDlg, CDialog )
@@ -120,6 +122,8 @@ BOOL TSettingsDlg::OnInitDialog() {
   cRidge.SetCheck(userSettings.isRidge);
   swprintf(textVal, 32, L"%f", userSettings.ridgeVal);
   eRidgeVal.SetWindowText(textVal);
+  
+  eCuraPath.SetWindowText(userSettings.curaPath);
 
   UpdateData(FALSE);
   ksConvertLangWindow(m_hWnd);
@@ -197,6 +201,8 @@ void TSettingsDlg::OnOK() {
   userSettings.isRidge = cRidge.GetCheck();
   eRidgeVal.GetWindowText(sVal);
   userSettings.ridgeVal = wcstod(sVal, NULL);
+  eCuraPath.GetWindowText(sVal);
+  userSettings.curaPath = sVal;
 
   if (userSettings.write()) {
     CDialog::OnOK();
