@@ -4,12 +4,9 @@
             "name": "Windows",
             "cStandard": "c11",
             "cppStandard": "c++17",
-            "browse": {
-                "path": [
-                    "${workspaceFolder}/**",
-                    "C:/Program Files/ASCON/KOMPAS-3D v18 Home/SDK/Include"
-                ]
-            },            
+            "includePath": [
+                "${KOMPAS_SDK}/Include"
+            ],        
             "configurationProvider": "go2sh.cmake-integration",
             "intelliSenseMode": "msvc-x64"
         }

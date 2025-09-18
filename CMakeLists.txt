@@ -1,6 +1,30 @@
 cmake_minimum_required(VERSION 3.10)
 
-SET(KOMPAS_SDK "C:/Program Files/ASCON/KOMPAS-3D v23 Home/SDK")
+MACRO(SUBDIRLIST result curdir)
+  FILE(GLOB children RELATIVE ${curdir} ${curdir}/*)
+  SET(dirlist "")
+  FOREACH(child ${children})
+    IF(IS_DIRECTORY ${curdir}/${child})
+      LIST(APPEND dirlist "${curdir}/${child}")
+    ENDIF()
+  ENDFOREACH()
+  SET(${result} ${dirlist})
+ENDMACRO()
+
+SUBDIRLIST(ASCON_PROGRAMS "C:/Program Files/ASCON")
+
+find_path(
+  KOMPAS_SDK
+  NAMES "Include/kapi7.h"
+  PATHS ${ASCON_PROGRAMS}
+  PATH_SUFFIXES "SDK"
+)
+
+if (NOT KOMPAS_SDK)
+  message("KOMPAS_SDK not found!")
+else()
+  message("KOMPAS SDK found ${KOMPAS_SDK}")
+endif()
 
 SET(KOMPAS3DPRINT_VERSION 0.4.0)
 add_definitions(-DKOMPAS3DPRINT_VERSION="${KOMPAS3DPRINT_VERSION}")
