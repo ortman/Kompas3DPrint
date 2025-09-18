@@ -1,9 +1,9 @@
 SplineFontDB: 3.2
-FontName: AsconIconsSDK-Base
-FullName: Ascon Icons SDK Base
-FamilyName: Ascon Icons SDK Base
+FontName: Kompas3DPrint-Base
+FullName: Kompas 3D Print Base
+FamilyName: Kompas 3D Print Base
 Weight: Regular
-Copyright: \\(c\\) 2018 Ascon. All Rights Reserved.
+Copyright: 
 Version: 001.000
 ItalicAngle: 0
 UnderlinePosition: -128
@@ -22,7 +22,7 @@ OS2Version: 3
 OS2_WeightWidthSlopeOnly: 0
 OS2_UseTypoMetrics: 0
 CreationTime: 1708525868
-ModificationTime: 1758111444
+ModificationTime: 1758201001
 PfmFamily: 81
 TTFWeight: 400
 TTFWidth: 5
@@ -57,15 +57,16 @@ OS2XHeight: 1024
 OS2Vendor: 'UKWN'
 OS2CodePages: 00000001.00000000
 OS2UnicodeRanges: 00000000.00000000.00000000.00000000
+MarkAttachClasses: 1
 DEI: 91125
-LangName: 1033 "(c) 2018 Ascon. All Rights Reserved." "" "Regular" "1.000;UKWN;AsconIconsSDK-Base" "" "Version 1.000;hotconv 1.0.109;makeotfexe 2.5.65596" "" "" "Ascon" "Sergey Shvetsov" "" "" "" "" "" "" "Ascon Icons SDK" "Base"
+LangName: 1033 "" "" "Regular" "1.000;UKWN;Kompas3DPrint-Base" "" "Version 1.000;hotconv 1.0.109;makeotfexe 2.5.65596" "" "" "Ascon" "Sergey Ortman" "" "" "" "" "" "" "Kompas 3D Print" "Base"
 Encoding: UnicodeBmp
 UnicodeInterp: none
 NameList: AGL For New Fonts
 DisplaySize: -48
 AntiAlias: 1
 FitToEm: 0
-WinInfo: 57018 39 14
+WinInfo: 56979 39 14
 BeginPrivate: 7
 BlueScale 5 0.037
 BlueShift 2 14
@@ -75,6 +76,7 @@ StdVW 5 [128]
 StemSnapH 28 [128 256 512 1024 1280 2048]
 StemSnapV 28 [128 256 512 1024 1280 2048]
 EndPrivate
+TeXData: 1 0 0 307200 153600 102400 0 -1048576 102400 783286 444596 497025 792723 393216 433062 380633 303038 157286 324010 404750 52429 2506097 1059062 262144
 BeginChars: 65537 12
 
 StartChar: .notdef
@@ -269,7 +271,7 @@ SplineSet
  1408 1562 l 1
  1408 1050 l 1
 EndSplineSet
-Validated: 8912897
+Validated: 1
 EndChar
 
 StartChar: uniE003
@@ -354,7 +356,7 @@ SplineSet
  1408 1562 l 1
  1408 1050 l 1
 EndSplineSet
-Validated: 8912897
+Validated: 1
 EndChar
 
 StartChar: uniE004
@@ -465,7 +467,7 @@ SplineSet
  1408 1562 l 1
  1408 1050 l 1
 EndSplineSet
-Validated: 8912897
+Validated: 1
 EndChar
 
 StartChar: uniE005
@@ -568,7 +570,7 @@ SplineSet
  1408 1562 l 1
  1408 1050 l 1
 EndSplineSet
-Validated: 8912897
+Validated: 1
 EndChar
 
 StartChar: uniE010
@@ -689,7 +691,7 @@ SplineSet
  1408 1562 l 1
  1408 1050 l 1
 EndSplineSet
-Validated: 524289
+Validated: 1
 EndChar
 
 StartChar: uniE007
@@ -780,7 +782,7 @@ SplineSet
  1408 1562 l 1
  1408 1050 l 1
 EndSplineSet
-Validated: 524289
+Validated: 1
 EndChar
 
 StartChar: uniE008
@@ -899,7 +901,7 @@ SplineSet
  1408 1562 l 1
  1408 1050 l 1
 EndSplineSet
-Validated: 524289
+Validated: 1
 EndChar
 
 StartChar: uniE009
@@ -1015,7 +1017,7 @@ SplineSet
  1408 1562 l 1
  1408 1050 l 1
 EndSplineSet
-Validated: 524289
+Validated: 1
 EndChar
 EndChars
 EndSplineFont
