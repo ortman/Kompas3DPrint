@@ -76,6 +76,31 @@ unsigned int WINAPI LIBRARYID() {
   return IDR_LIBID;
 }
 
+CString getFileDlgFilter(D3FormatConvType format) {
+  switch (format) {
+    case format_STEP:
+    case format_STEP_AP203:
+    case format_STEP_AP214:
+    case format_STEP_AP242: return _T("STEP Models (*.stp)|*.stp|");
+    case format_IGES: return _T("IGES Models (*.igs)|*.igs|");
+    case format_SAT: return _T("SAT Models (*.sat)|*.sat|");
+    case format_XT: return userSettings.formatBIN ? _T("Parasolid Models (*.x_b)|*.x_b|") : _T("Parasolid Models (*.x_t)|*.x_t|");
+    case format_VRML: return _T("VRLM Models (*.wrl)|*.wrl|");
+    default: return _T("STL Models (*.stl)|*.stl|");
+  }
+}
+
+bool CommandSaveAs(D3FormatConvType format) {
+  CString m3dPath = BaseEvent::GetDocName(kompas->ActiveDocument3D());
+  if (m3dPath == "") m3dPath = "Деталь.m3d";
+  CFileDialog fileDlg(FALSE, NULL, m3dPath.Mid(0, m3dPath.GetLength() - 4) + SettingsData::getExt(format), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, getFileDlgFilter(format));
+  if (fileDlg.DoModal() == IDOK) {
+    if (!Save(kompas->ActiveDocument3D(), format_STL, fileDlg.GetPathName())) {
+      Message("Не могу сохранить STL");
+    }
+  }
+}
+
 //-------------------------------------------------------------------------------
 // Головная функция библиотеки
 // ---
@@ -95,42 +120,36 @@ void WINAPI LIBRARYENTRY(unsigned int comm) {
         }
         break;
       }
-      case MENU_EXPORT_STL: {
-        CString m3dPath = BaseEvent::GetDocName(kompas->ActiveDocument3D());
-        if (m3dPath == "") m3dPath = "Деталь.m3d";
-        CFileDialog fileDlg(FALSE, NULL, m3dPath.Mid(0, m3dPath.GetLength() - 4) + ".stl", OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, CString("STL Models (*.stl)|*.stl|"));
-        if (fileDlg.DoModal() == IDOK) {
-          ksDocument3DPtr doc3D;
-          kompas->ActiveDocument3D()->QueryInterface(DIID_ksDocument3D, (LPVOID*)&doc3D);
-          if (doc3D) {
-            if (!Save(doc3D, fileDlg.GetPathName().GetBuffer(0))) {
-              Message("Не могу сохранить STL");
-            }
-          }
-        }
+      case MENU_EXPORT_STL: 
+        CommandSaveAs(format_STL);
         break;
-      }
-      case MENU_EXPORT_STEP: {
-
-        Message("Функция еще не реализована");
+      case MENU_EXPORT_STEP:
+        CommandSaveAs(format_STEP_AP214);
         break;
-      }
+      case MENU_EXPORT_IGS:
+        CommandSaveAs(format_IGES);
+        break;
+      case MENU_EXPORT_ACIS:
+        CommandSaveAs(format_SAT);
+        break;
+      case MENU_EXPORT_X_T:
+        CommandSaveAs(format_XT);
+        break;
+      case MENU_EXPORT_VRLM:
+        CommandSaveAs(format_VRML);
+        break;
       case MENU_OPEN_CURA: {
-        ksDocument3DPtr doc3D;
-        kompas->ActiveDocument3D()->QueryInterface(DIID_ksDocument3D, (LPVOID*)&doc3D);
-        if (doc3D) {
-          CString tempStl = GetTmpSTLPath();
-          if (Save(doc3D, tempStl.GetBuffer(0))) {
-            TCHAR szPath[] = _T("");
-            SHELLEXECUTEINFO ExecInfo;
-            memset(&ExecInfo, 0, sizeof(SHELLEXECUTEINFO));
-            ExecInfo.cbSize = sizeof(SHELLEXECUTEINFO); 
-            ExecInfo.fMask = SEE_MASK_NOCLOSEPROCESS; 
-            ExecInfo.lpVerb = _T("open"); 
-            ExecInfo.lpFile = userSettings.curaPath;
-            ExecInfo.lpParameters = tempStl;
-            ShellExecuteEx(&ExecInfo);
-          }
+        CString tempStl = GetTmpSTLPath();
+        if (Save(kompas->ActiveDocument3D(), format_STL, tempStl)) {
+          TCHAR szPath[] = _T("");
+          SHELLEXECUTEINFO ExecInfo;
+          memset(&ExecInfo, 0, sizeof(SHELLEXECUTEINFO));
+          ExecInfo.cbSize = sizeof(SHELLEXECUTEINFO); 
+          ExecInfo.fMask = SEE_MASK_NOCLOSEPROCESS; 
+          ExecInfo.lpVerb = _T("open"); 
+          ExecInfo.lpFile = userSettings.curaPath;
+          ExecInfo.lpParameters = tempStl;
+          ShellExecuteEx(&ExecInfo);
         }
         break;
       }
@@ -213,13 +232,16 @@ CString GetTmpSTLPath() {
 }
 
 
-bool Save(ksDocument3DPtr doc, BSTR path) {
-	if (! doc) return false;
+bool Save(LPDISPATCH doc3d, D3FormatConvType format, CString &path) {
+	if (!doc3d) return false;
+  ksDocument3DPtr doc;
+  doc3d->QueryInterface(DIID_ksDocument3D, (LPVOID*)&doc);
+	if (!doc) return false;
   ksAdditionFormatParamPtr formatParam = doc->AdditionFormatParam();
   formatParam->Init();
   formatParam->SetObjectsOptions(ksD3COBodyes, userSettings.objBody);
   formatParam->SetObjectsOptions(ksD3COSurfaces, userSettings.objSurface);
-  formatParam->format = userSettings.format;
+  formatParam->format = format;
   formatParam->topolgyIncluded = false;
   formatParam->lengthUnits = userSettings.units;
   /// TODO: Почему-то при установке formatBinary=true, сохраняется в текстовый. О_о?! 
@@ -245,7 +267,7 @@ bool Save(ksDocument3DPtr doc, BSTR path) {
     formatParam->length = SETTINGS_RIDGE_MAX;
   }
   formatParam->stepType = stepType;
-  return doc->SaveAsToAdditionFormat(path, formatParam);
+  return doc->SaveAsToAdditionFormat(path.GetBuffer(0), formatParam);
 }
 
 //-------------------------------------------------------------------------------

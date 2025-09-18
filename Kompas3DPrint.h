@@ -13,7 +13,7 @@ extern KompasObjectPtr kompas;
 
 CString LoadStr(int strID);
 void AdviseDoc(LPDISPATCH doc, long docType);
-bool Save(ksDocument3DPtr doc3D,  BSTR path);
+bool Save(LPDISPATCH doc3d, D3FormatConvType format, CString &path);
 CString GetTmpSTLPath();
 
 #endif // _KAMPAS_3D_PRINT_H_
