@@ -39,7 +39,12 @@ GNU General Public License v3.0.\n\
 <a>https://github.com/ortman/Kompas3DPrint</a>"
 
 #define MENU_SETTINGS                   1
-#define MENU_EXPORT_STL                 2
-#define MENU_EXPORT_STEP                3
-#define MENU_OPEN_CURA                  4
-#define MENU_ABOUT                      5
+#define MENU_OPEN_CURA                  2
+#define MENU_EXPORT_STL                 3
+#define MENU_EXPORT_STEP                4
+#define MENU_EXPORT_IGS                 5
+#define MENU_EXPORT_X_T                 6
+#define MENU_EXPORT_X_B                 7
+#define MENU_EXPORT_ACIS                8
+#define MENU_EXPORT_VRLM                9
+#define MENU_ABOUT                      20

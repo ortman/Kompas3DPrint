@@ -22,17 +22,22 @@ END
 // Меню
 IDR_LIBID MENU
 BEGIN
- 	MENUITEM "Настройки автоэкспорта",  MENU_SETTINGS
+ 	MENUITEM "Настройки",  MENU_SETTINGS
+ 	MENUITEM "Отправить в Cura",  MENU_OPEN_CURA
  	MENUITEM "Экспорт в STL",  MENU_EXPORT_STL
  	MENUITEM "Экспорт в STEP",  MENU_EXPORT_STEP
- 	MENUITEM "Отправить в Cura",  MENU_OPEN_CURA
+ 	MENUITEM "Экспорт в IGS",  MENU_EXPORT_IGS
+ 	MENUITEM "Экспорт в X_T",  MENU_EXPORT_X_T
+ 	MENUITEM "Экспорт в X_B",  MENU_EXPORT_X_B
+ 	MENUITEM "Экспорт в ACIS",  MENU_EXPORT_ACIS
+ 	MENUITEM "Экспорт в VRLM",  MENU_EXPORT_VRLM
  	MENUITEM "О программе", MENU_ABOUT
 END
 
 // Dialog Settings
 SETTINGS_DIALOG DIALOGEX DISCARDABLE  0, 0, 370, 292
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Настройки автоэкспорта"
+CAPTION "Настройки"
 FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     PUSHBUTTON      "Сохранить", IDOK, 245, 271, 50, 14
@@ -71,7 +76,7 @@ BEGIN
     EDITTEXT        IDC_RIDGE_VAL, 275, 228, 50, 13, ES_AUTOHSCROLL
 
     RTEXT           "Путь до Cura", IDC_STATIC, 10, 254, 65, 8
-    EDITTEXT        IDC_CURA_PATH, 85, 252, 200, 13, ES_AUTOHSCROLL
+    EDITTEXT        IDC_CURA_PATH, 85, 252, 250, 13, ES_AUTOHSCROLL
 END
 
 // Dialog About
