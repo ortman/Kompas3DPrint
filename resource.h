@@ -24,13 +24,14 @@
 #define IDC_AUTOEXPORT_WHEN_EXISTS      11017
 #define IDC_CREATE_FOLDER               11018
 #define IDC_FORMAT                      11019
+#define IDC_CURA_PATH                   11020
 
 #define ABOUT_DIALOG                    12000
 #define IDC_SYSLINK_GITHUB              12001
 
 #define ABOUT_TEXT \
 "Модуль автоматического сохранения 3D моделей в формат STL/STEP/IGES/SAT/XT/X_B/VRML.\n\
-Версия 0.3.3\n\
+Версия 0.4.0\n\
 \n\
 Автор Сергей Ортман.\n\
 GNU General Public License v3.0.\n\
@@ -38,4 +39,11 @@ GNU General Public License v3.0.\n\
 <a>https://github.com/ortman/Kompas3DPrint</a>"
 
 #define MENU_SETTINGS                   1
-#define MENU_ABOUT                      2
+#define MENU_OPEN_CURA                  2
+#define MENU_EXPORT_STL                 3
+#define MENU_EXPORT_STEP                4
+#define MENU_EXPORT_IGS                 5
+#define MENU_EXPORT_X_T                 6
+#define MENU_EXPORT_ACIS                7
+#define MENU_EXPORT_VRLM                8
+#define MENU_ABOUT                      20

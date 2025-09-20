@@ -59,7 +59,7 @@ public:
                                      long objType       = -1, 
                                      ksFeaturePtr obj3D = NULL );
   static  void BaseEvent::ListEvents();
-  CString GetDocName(); // Получить имя документа
+  static CString GetDocName(LPDISPATCH doc); // Получить имя документа
 protected: 
   BEGIN_INTERFACE_PART(EventHandler, IDispatch)
     INIT_INTERFACE_PART(BaseEvent, EventHandler)

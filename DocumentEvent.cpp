@@ -36,9 +36,9 @@ BOOL DirectoryExists(LPCTSTR szPath) {
 
 afx_msg VARIANT_BOOL DocumentEvent::SaveDocument() {
   CString savePath = _T("");
-  CString m3dPath = GetDocName();
+  CString m3dPath = GetDocName(m_doc);
   int pathLen = m3dPath.GetLength();
-  if (pathLen < 5) return true;;
+  if (pathLen < 5) return true;
   if (m3dPath.Right(4) != _T(".m3d")) return true;
   char slash = '\\';
   int slashPos = m3dPath.ReverseFind(slash);
@@ -61,17 +61,13 @@ afx_msg VARIANT_BOOL DocumentEvent::SaveDocument() {
     savePath = m3dPath.Left(pathLen-4) + userSettings.getExt();
   }
 
-  if (m_doc) {
-    ksDocument3DPtr doc3D;
-    m_doc->QueryInterface(DIID_ksDocument3D, (LPVOID*)&doc3D);
-    if (doc3D && userSettings.autoexportEn) {
-      CStdioFile file;
-      CFileStatus status;
-      if (!userSettings.autoexportWhenExists || file.GetStatus(savePath, status)) {
-        if (!Save(doc3D , savePath.GetBuffer(0))) {
-          _bstr_t msg = L"Kompas3DPrint: Не удалось сохранить файл :\"" + savePath + L"\"";
-          kompas->ksError(msg);
-        }
+  if (m_doc && userSettings.autoexportEn) {
+    CStdioFile file;
+    CFileStatus status;
+    if (!userSettings.autoexportWhenExists || file.GetStatus(savePath, status)) {
+      if (!Save(m_doc, userSettings.format, savePath)) {
+        _bstr_t msg = L"Kompas3DPrint: Не удалось сохранить файл :\"" + savePath + L"\"";
+        kompas->ksError(msg);
       }
     }
   }
