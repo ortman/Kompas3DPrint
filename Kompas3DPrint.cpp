@@ -95,8 +95,8 @@ bool CommandSaveAs(D3FormatConvType format) {
   if (m3dPath == "") m3dPath = "Деталь.m3d";
   CFileDialog fileDlg(FALSE, NULL, m3dPath.Mid(0, m3dPath.GetLength() - 4) + SettingsData::getExt(format), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, getFileDlgFilter(format));
   if (fileDlg.DoModal() == IDOK) {
-    if (!Save(kompas->ActiveDocument3D(), format_STL, fileDlg.GetPathName())) {
-      Message("Не могу сохранить STL");
+    if (!Save(kompas->ActiveDocument3D(), format, fileDlg.GetPathName())) {
+      Message("Не могу экспортировать модель.");
     }
   }
 }

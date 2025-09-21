@@ -31,7 +31,7 @@
 
 #define ABOUT_TEXT \
 "Модуль автоматического сохранения 3D моделей в формат STL/STEP/IGES/SAT/XT/X_B/VRML.\n\
-Версия 0.4.0\n\
+Версия 0.4.1\n\
 \n\
 Автор Сергей Ортман.\n\
 GNU General Public License v3.0.\n\
