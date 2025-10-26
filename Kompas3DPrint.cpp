@@ -267,6 +267,10 @@ bool Save(LPDISPATCH doc3d, D3FormatConvType format, CString &path) {
     formatParam->length = SETTINGS_RIDGE_MAX;
   }
   formatParam->stepType = stepType;
+  CString ext = SettingsData::getExt(format);
+  if (path.Right(ext.GetLength()) != ext) {
+    path += ext;
+  }
   return doc->SaveAsToAdditionFormat(path.GetBuffer(0), formatParam);
 }
 
