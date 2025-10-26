@@ -74,7 +74,7 @@ BEGIN
     CONTROL         "Максимальная длина ребра", IDC_RIDGE_CHECK, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 85, 228, 150, 10
     EDITTEXT        IDC_RIDGE_VAL, 275, 228, 50, 13, ES_AUTOHSCROLL
 
-    RTEXT           "Путь до Cura", IDC_STATIC, 10, 254, 65, 8
+    RTEXT           "Путь до слайсера", IDC_STATIC, 10, 254, 65, 8
     EDITTEXT        IDC_CURA_PATH, 85, 252, 250, 13, ES_AUTOHSCROLL
 END
 
@@ -84,5 +84,6 @@ STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "О программе"
 FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
-    CONTROL         ABOUT_TEXT, IDC_SYSLINK_GITHUB, "SysLink", WS_TABSTOP, 7, 7, 240, 115
+    LTEXT           ABOUT_TEXT1, IDC_STATIC, 7, 7, 240, 30
+    CONTROL         ABOUT_TEXT2, IDC_SYSLINK_GITHUB, "SysLink", WS_TABSTOP, 7, 37, 240, 90
 END

@@ -29,14 +29,15 @@
 #define ABOUT_DIALOG                    12000
 #define IDC_SYSLINK_GITHUB              12001
 
-#define ABOUT_TEXT \
+#define ABOUT_TEXT1 \
 "Модуль автоматического сохранения 3D моделей в формат STL/STEP/IGES/SAT/XT/X_B/VRML.\n\
-Версия 0.4.2\n\
-\n\
-Автор Сергей Ортман.\n\
+Версия 0.4.3\n"
+
+#define ABOUT_TEXT2 \
+"Автор Сергей Ортман.\n\
 GNU General Public License v3.0.\n\
 Скачать новую версию или исходный код можно по ссылке\n\
-<a>https://github.com/ortman/Kompas3DPrint</a>"
+<a>https://github.com/ortman/Kompas3DPrint/releases</a>"
 
 #define MENU_SETTINGS                   1
 #define MENU_OPEN_CURA                  2
