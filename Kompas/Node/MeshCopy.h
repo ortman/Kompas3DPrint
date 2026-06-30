@@ -1,0 +1,15 @@
+#ifndef _ComTest_MeshCopy_h_
+#define _ComTest_MeshCopy_h_
+
+#pragma once
+#include "../Node.h"
+#include <vector>
+
+class MeshCopy : public Node {
+public:
+	static int TYPE;
+	MeshCopy(IUnknown* pMesh, int count1, double step1, int count2, double step2, const std::vector<std::unique_ptr<Node>>& nodes, const std::optional<std::string>& name = std::nullopt);
+	MeshCopy(IUnknown* pMesh, int count1, double step1, int count2, double step2, const std::unique_ptr<Node> node, const std::optional<std::string>& name = std::nullopt);
+};
+
+#endif

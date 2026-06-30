@@ -1,0 +1,4 @@
+LAYOUT(AboutLay, 220, 156)
+	ITEM(Upp::Button, bOk, SetLabel(t_("Кнопка!")).LeftPosZ(44, 104).TopPosZ(28, 44))
+END_LAYOUT
+

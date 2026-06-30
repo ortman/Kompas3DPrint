@@ -1,19 +1,22 @@
-////////////////////////////////////////////////////////////////////////////////
-//
-// Kompas 3D Print
-//
-////////////////////////////////////////////////////////////////////////////////
-#ifndef _KAMPAS_3D_PRINT_H_
-#define _KAMPAS_3D_PRINT_H_
+#ifndef _Kompas3DPrint_Kompas3DPrint_h
+#define _Kompas3DPrint_Kompas3DPrint_h
+#include "Kompas/Kompas3D.h"
 
-#include "stdafx.h"
-#include "resource.h"       // main symbols
+#define IDR_LIBID 100
+#define MENU_SETTINGS                   1
+#define MENU_OPEN_CURA                  2
+#define MENU_EXPORT_STL                 3
+#define MENU_EXPORT_STEP                4
+#define MENU_EXPORT_IGS                 5
+#define MENU_EXPORT_X_T                 6
+#define MENU_EXPORT_ACIS                7
+#define MENU_EXPORT_VRLM                8
+#define MENU_ABOUT                      20
+#define DllExport extern "C" __declspec(dllexport)
 
-extern KompasObjectPtr kompas;
+DllExport int DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved);
+DllExport int LIBRARYID();
+DllExport void LIBRARYENTRY(unsigned int comm);
+DllExport bool LibInterfaceNotifyEntry(IDispatch *application);
 
-CString LoadStr(int strID);
-void AdviseDoc(LPDISPATCH doc, long docType);
-bool Save(LPDISPATCH doc3d, D3FormatConvType format, CString &path);
-CString GetTmpSTLPath();
-
-#endif // _KAMPAS_3D_PRINT_H_
+#endif

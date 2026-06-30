@@ -1,6 +1,4 @@
-LIBRARY Kompas3DPrint.rtw
+LIBRARY Kompas3DPrint.dll
 EXPORTS
  LIBRARYID               @1
  LIBRARYENTRY            @2
- LibInterfaceNotifyEntry @3
-
