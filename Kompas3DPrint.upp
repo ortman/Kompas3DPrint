@@ -14,7 +14,6 @@ include
 	C:/PROJECTS/UPP/out/gitProjects/Kompas3DPrint/MSVS22x64.Debug.Debug_Full.Dll.Gui.Main;
 
 file
-	Command/Export.hpp,
 	Kompas3DPrint.cpp,
 	Resources.h,
 	Kompas3DPrint.h,
@@ -25,6 +24,7 @@ file
 	Command/Gear.hpp,
 	Command/SettingsDlg.hpp,
 	Command/AboutDlg.hpp,
+	Command/Export.hpp,
 	Kompas readonly separator,
 	Kompas/ComKompas.h,
 	Kompas/ComKompas.cpp,

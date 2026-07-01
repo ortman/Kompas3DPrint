@@ -63,3 +63,19 @@ std::unique_ptr<NodeMacro> Doc3D::GetEditMacroObject() {
 	if (!macro) return nullptr;
 	return std::make_unique<NodeMacro>(macro);
 }
+
+
+std::string_view Doc3D::GetExt(Format format) {
+	switch(format) {
+		case SAT : return "sat";
+		case XT  : return "x_t";
+		case IGES: return "igs";
+		case VRLM: return "vrlm";
+		case JT  : return "jt";
+		case STL : return "stl";
+		case STEP:
+		case STEP_AP214:
+		case STEP_AP242: return "step";
+		default: return "";
+	}
+}

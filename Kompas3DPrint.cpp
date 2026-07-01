@@ -8,6 +8,7 @@ using namespace Upp;
 #include "Command/Gear.hpp"
 #include "Command/Export.hpp"
 
+
 std::unique_ptr<AboutDlg>    aboutDlg;
 std::unique_ptr<SettingsDlg> settingsDlg;
 std::unique_ptr<Rack>        rack;
@@ -28,9 +29,9 @@ void LIBRARYENTRY(unsigned int comm) {
 		case MENU_OPEN_SLICER: exportTo->Slicer(); break;
 		case MENU_EXPORT_STL:  exportTo->STL(); break;
 		case MENU_EXPORT_STEP: exportTo->STEP(); break;
-		case MENU_EXPORT_IGS:  exportTo->IGS(); break;
-		case MENU_EXPORT_X_T:  exportTo->X_T(); break;
-		case MENU_EXPORT_ACIS: exportTo->ACIS(); break;
+		case MENU_EXPORT_IGS:  exportTo->IGES(); break;
+		case MENU_EXPORT_X_T:  exportTo->XT(); break;
+		case MENU_EXPORT_ACIS: exportTo->SAT(); break;
 		case MENU_EXPORT_VRLM: exportTo->VRLM(); break;
 		case MENU_ABOUT:       aboutDlg->Run(); break;
 		case MENU_RACK:        rack->Start(); break;
