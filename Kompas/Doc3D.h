@@ -4,6 +4,7 @@
 #pragma once
 #include "Part.h"
 #include "KompasEvent.h"
+#include "Node/NodeMacro.h"
 
 class DocumentFileNotifyLoc;
 class Doc3D {
@@ -19,7 +20,7 @@ public:
 	~Doc3D();
 	std::string GetPath();
 	std::unique_ptr<Part> GetTopPart();
-	
+	std::unique_ptr<NodeMacro> GetEditMacroObject();
 };
 
 #endif

@@ -2,8 +2,9 @@
 #include "Sketch.h"
 #include "Kompas3D.h"
 
-Sketch::Sketch(IUnknown* p, std::unique_ptr<Plane> plane, double angle, double locX, double locY) : Node(p) {
+Sketch::Sketch(IUnknown* p, std::unique_ptr<Plane> plane, double angle, double locX, double locY, const std::optional<std::string>& name) : Node(p) {
 	K5::ksEntityPtr entity = pEntity;
+	if (name.has_value()) entity->name = Utf8ToCp1251(name.value()).c_str();
 	K5::ksSketchDefinitionPtr def = entity->GetDefinition();
 	if (!def) throw Kompas3DException("Не могу получить SketchDefinition, entityType=" + std::to_string(entity->type));
 	K5::ksEntityPtr planeEntity = plane->GetEntity();
@@ -38,6 +39,16 @@ void Sketch::EndEdit() {
 		eDef->Release();
 		eDef = nullptr;
 	}
+}
+
+Sketch& Sketch::Clear() {
+	BeginEdit();
+	K5::ksDocument2DPtr doc2D = eDef;
+	doc2D->ksSelectGroup(0, 2, -1, -1, 1, 1);
+	doc2D->ksDeleteObj(0);
+	doc2D->ksSelectGroup(0, 3, -2, -2, 2, 2);
+	doc2D->ksDeleteObj(0);
+	return *this;
 }
 
 Sketch& Sketch::Line(double x1, double y1, double x2, double y2, LineStyle style) {

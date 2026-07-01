@@ -2,26 +2,48 @@
 #include "Kompas3DPrint.h"
 
 using namespace Upp;
-#define LAYOUTFILE <Kompas3DPrint/Layouts.lay>
-#include <CtrlCore/lay.h>
+#include "Command/AboutDlg.hpp"
+#include "Command/SettingsDlg.hpp"
+#include "Command/Rack.hpp"
+#include "Command/Gear.hpp"
+#include "Command/Export.hpp"
 
-class AboutDlg : public WithAboutLay<TopWindow> {
-public:
-	AboutDlg() {
-		CtrlLayout(*this, t_("About"));
-		bOk << [=]() {
-			PromptOK("Кнопка нажата!");
-		};
+std::unique_ptr<AboutDlg>    aboutDlg;
+std::unique_ptr<SettingsDlg> settingsDlg;
+std::unique_ptr<Rack>        rack;
+std::unique_ptr<Gear>        gear;
+std::unique_ptr<Export>      exportTo;
+
+void MainStart() {
+	aboutDlg = std::make_unique<AboutDlg>();
+	settingsDlg = std::make_unique<SettingsDlg>();
+	rack = std::make_unique<Rack>();
+	gear = std::make_unique<Gear>();
+	exportTo = std::make_unique<Export>();
+}
+
+void LIBRARYENTRY(unsigned int comm) {
+	switch (comm) {
+		case MENU_SETTINGS:    settingsDlg->Run(); break;
+		case MENU_OPEN_SLICER: exportTo->Slicer(); break;
+		case MENU_EXPORT_STL:  exportTo->STL(); break;
+		case MENU_EXPORT_STEP: exportTo->STEP(); break;
+		case MENU_EXPORT_IGS:  exportTo->IGS(); break;
+		case MENU_EXPORT_X_T:  exportTo->X_T(); break;
+		case MENU_EXPORT_ACIS: exportTo->ACIS(); break;
+		case MENU_EXPORT_VRLM: exportTo->VRLM(); break;
+		case MENU_ABOUT:       aboutDlg->Run(); break;
+		case MENU_RACK:        rack->Start(); break;
+		case MENU_GEAR:        gear->Start(); break;
 	}
-};
-
-AboutDlg* aboutDlg = nullptr;
+}
 
 int DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved) {
 	if (dwReason == DLL_PROCESS_ATTACH) {
 		AppInitEnvironment__();
 		GUI_APP_MAIN_HOOK
 		UPP::Ctrl::InitWin32(hInstance);
+		MainStart();
 	} else if (dwReason == DLL_PROCESS_DETACH) {
 		UPP::Ctrl::CloseTopCtrls();
 		UPP::Ctrl::ExitWin32();
@@ -30,17 +52,25 @@ int DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved) {
 	return 1;
 }
 
-int LIBRARYID() {
-    return IDR_LIBID;
-}
-
-void LIBRARYENTRY(unsigned int comm) {
-	if (!aboutDlg) {
-		aboutDlg = new AboutDlg();
-		aboutDlg->Run(true);
+class App : public WithAppLay<TopWindow> {
+public:
+	App() {
+		CtrlLayout(*this, LIB_NAME);
+		bSettings   << [=]() { LIBRARYENTRY(MENU_SETTINGS); };
+		bOpenSlicer << [=]() { LIBRARYENTRY(MENU_OPEN_SLICER); };
+		bExportSTL  << [=]() { LIBRARYENTRY(MENU_EXPORT_STL); };
+		bExportSTEP << [=]() { LIBRARYENTRY(MENU_EXPORT_STEP); };
+		bExportIGS  << [=]() { LIBRARYENTRY(MENU_EXPORT_IGS); };
+		bExportX_T  << [=]() { LIBRARYENTRY(MENU_EXPORT_X_T); };
+		bExportACIS << [=]() { LIBRARYENTRY(MENU_EXPORT_ACIS); };
+		bExportVRLM << [=]() { LIBRARYENTRY(MENU_EXPORT_VRLM); };
+		bAbout      << [=]() { LIBRARYENTRY(MENU_ABOUT); };
+		bGear       << [=]() { LIBRARYENTRY(MENU_GEAR); };
+		bRack       << [=]() { LIBRARYENTRY(MENU_RACK); };
 	}
-}
+};
 
-bool LibInterfaceNotifyEntry(IDispatch *application) {
-	return false;
+GUI_APP_MAIN {
+	MainStart();
+	App().Run();
 }

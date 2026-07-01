@@ -1,26 +1,19 @@
-#define IDR_LIBID                       100
-#define MENU_SETTINGS                   1
-#define MENU_OPEN_CURA                  2
-#define MENU_EXPORT_STL                 3
-#define MENU_EXPORT_STEP                4
-#define MENU_EXPORT_IGS                 5
-#define MENU_EXPORT_X_T                 6
-#define MENU_EXPORT_ACIS                7
-#define MENU_EXPORT_VRLM                8
-#define MENU_ABOUT                      20
+#include "Resources.h"
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
-    IDR_LIBID               "Kompas 3D Print"
+    IDR_LIBID                         LIB_NAME
 END
 
 IDR_LIBID MENU
 BEGIN
-    MENUITEM "Настройки",         MENU_SETTINGS
-    MENUITEM "Отправить в Cura",  MENU_OPEN_CURA
-    MENUITEM "Экспорт в STL",     MENU_EXPORT_STL
-    MENUITEM "Экспорт в STEP",    MENU_EXPORT_STEP
-    MENUITEM "Экспорт в X_T",     MENU_EXPORT_X_T
-    MENUITEM "Экспорт в VRLM",    MENU_EXPORT_VRLM
-    MENUITEM "О программе",       MENU_ABOUT
+    MENUITEM "Настройки",            MENU_SETTINGS
+    MENUITEM "Отправить в слайсере", MENU_OPEN_SLICER
+    MENUITEM "Экспорт в STL",        MENU_EXPORT_STL
+    MENUITEM "Экспорт в STEP",       MENU_EXPORT_STEP
+    MENUITEM "Экспорт в X_T",        MENU_EXPORT_X_T
+    MENUITEM "Экспорт в VRLM",       MENU_EXPORT_VRLM
+    MENUITEM "Создать шестерню",     MENU_GEAR
+    MENUITEM "Создать рейку",        MENU_RACK
+    MENUITEM "О программе",          MENU_ABOUT
 END

@@ -41,4 +41,22 @@ MeshCopy::MeshCopy(IUnknown* p, int count1, double step1,
 	entity->Create();
 }
 
+MeshCopy& MeshCopy::SetParam1(int count, double step) {
+	K5::ksEntityPtr entity = pEntity;
+	K5::ksMeshCopyDefinitionPtr def = entity->GetDefinition();
+	if (!def) throw Kompas3DException("Не могу получить ksMeshCopyDefinition");
+	def->count1 = count;
+	def->step1 = step;
+	return *this;
+}
+
+MeshCopy& MeshCopy::SetParam2(int count, double step) {
+	K5::ksEntityPtr entity = pEntity;
+	K5::ksMeshCopyDefinitionPtr def = entity->GetDefinition();
+	if (!def) throw Kompas3DException("Не могу получить ksMeshCopyDefinition");
+	def->count2 = count;
+	def->step2 = step;
+	return *this;
+}
+
 int MeshCopy::TYPE = KConst3D::o3d_meshCopy;

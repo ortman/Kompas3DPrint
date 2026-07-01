@@ -104,3 +104,9 @@ Panel::Property::operator double() const {
 	K7::IPropertyControlPtr prop(pProp);
 	return prop->Value;
 }
+
+double Panel::Property::operator=(double val) {
+	K7::IPropertyControlPtr prop(pProp);
+	prop->Value = val;
+	return val;
+}

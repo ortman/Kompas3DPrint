@@ -57,4 +57,24 @@ CircularCopy::CircularCopy(IUnknown* p,
 	entity->Create();
 }
 
+CircularCopy& CircularCopy::SetCircularParam(int count, double step, bool factor) {
+	K5::ksEntityPtr entity = pEntity;
+	K5::ksCircularCopyDefinitionPtr def = entity->GetDefinition();
+	if (!def) throw Kompas3DException("Не могу получить ksMeshCopyDefinition");
+	def->count2 = count;
+	def->step2 = step;
+	def->factor2 = factor;
+	return *this;
+}
+
+CircularCopy& CircularCopy::SetRadialParam(int count, double step, bool factor) {
+	K5::ksEntityPtr entity = pEntity;
+	K5::ksCircularCopyDefinitionPtr def = entity->GetDefinition();
+	if (!def) throw Kompas3DException("Не могу получить ksMeshCopyDefinition");
+	def->count1 = count;
+	def->step1 = step;
+	def->factor1 = factor;
+	return *this;
+}
+
 int CircularCopy::TYPE = KConst3D::o3d_circularCopy;

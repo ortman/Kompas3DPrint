@@ -9,7 +9,12 @@ Node::~Node() {
     if (pEntity) pEntity->Release();
 }
 
-std::string Node::GetName() {
+int Node::GetType() const {
+	K5::ksEntityPtr entity = pEntity;
+	return entity ? entity->type : 0;
+}
+
+std::string Node::GetName() const {
 	K5::ksEntityPtr entity = pEntity;
 	if (!entity) return std::string();
 	return Cp1251ToUtf8(entity->name);
@@ -18,8 +23,14 @@ std::string Node::GetName() {
 Node& Node::SetName(const std::string& name) {
 	K5::ksEntityPtr entity = pEntity;
 	if (entity) {
-		entity->name = name.c_str();
+		entity->name = Utf8ToCp1251(name).c_str();
 	}
+	return *this;
+}
+
+Node& Node::Update() {
+	K5::ksEntityPtr entity = pEntity;
+	if (entity) entity->Update();
 	return *this;
 }
 

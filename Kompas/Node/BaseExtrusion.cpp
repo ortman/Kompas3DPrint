@@ -17,4 +17,28 @@ BaseExtrusion::BaseExtrusion(IUnknown* p, std::unique_ptr<Sketch>& sketch, doubl
 	entity->Create();
 }
 
+BaseExtrusion& BaseExtrusion::SetDepth1(double depth) {
+	K5::ksEntityPtr entity = pEntity;
+	if (K5::ksBaseExtrusionDefinitionPtr def = entity->GetDefinition()) {
+		K5::ksExtrusionParamPtr param = def->ExtrusionParam();
+		param->depthNormal = depth;
+	} else if (K5::ksBossExtrusionDefinitionPtr def = entity->GetDefinition()) {
+		K5::ksExtrusionParamPtr param = def->ExtrusionParam();
+		param->depthNormal = depth;
+	}
+	return *this;
+}
+
+BaseExtrusion& BaseExtrusion::SetDepth2(double depth) {
+	K5::ksEntityPtr entity = pEntity;
+	if (K5::ksBaseExtrusionDefinitionPtr def = entity->GetDefinition()) {
+		K5::ksExtrusionParamPtr param = def->ExtrusionParam();
+		param->depthReverse = depth;
+	} else if (K5::ksBossExtrusionDefinitionPtr def = entity->GetDefinition()) {
+		K5::ksExtrusionParamPtr param = def->ExtrusionParam();
+		param->depthReverse = depth;
+	}
+	return *this;
+}
+
 int BaseExtrusion::TYPE = KConst3D::o3d_baseExtrusion;

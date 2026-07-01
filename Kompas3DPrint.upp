@@ -11,13 +11,20 @@ library(WIN32) "kernel32 user32 advapi32 shell32 winmm";
 include
 	"C:/Program Files/ASCON/KOMPAS-3D v24 Home/SDK/Include",
 	"C:/Program Files/ASCON/KOMPAS-3D v24 Home/SDK/lib",
-	C:/PROJECTS/UPP/out/MyApps/Kompas3DPrint/MSVS22x64.Debug.Debug_Full.Dll.Gui.Main;
+	C:/PROJECTS/UPP/out/gitProjects/Kompas3DPrint/MSVS22x64.Debug.Debug_Full.Dll.Gui.Main;
 
 file
+	Command/Export.hpp,
+	Kompas3DPrint.cpp,
+	Resources.h,
 	Kompas3DPrint.h,
 	Kompas3DPrint.rc charset "windows-1251" highlight cpp,
 	Layouts.lay,
-	Kompas3DPrint.cpp,
+	Command readonly separator,
+	Command/Rack.hpp,
+	Command/Gear.hpp,
+	Command/SettingsDlg.hpp,
+	Command/AboutDlg.hpp,
 	Kompas readonly separator,
 	Kompas/ComKompas.h,
 	Kompas/ComKompas.cpp,
@@ -40,8 +47,8 @@ file
 	Kompas/Node/Plane.cpp,
 	Kompas/Node/Axis.h,
 	Kompas/Node/Axis.cpp,
-	Kompas/Node/CutExtrusion.cpp,
 	Kompas/Node/CutExtrusion.h,
+	Kompas/Node/CutExtrusion.cpp,
 	Kompas/Node/BaseExtrusion.h,
 	Kompas/Node/BaseExtrusion.cpp,
 	Kompas/Node/NodeMacro.h,
@@ -52,5 +59,6 @@ file
 	Kompas/Node/CircularCopy.cpp;
 
 mainconfig
+	"" = "GUI",
 	"" = "GUI DLL";
 

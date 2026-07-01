@@ -34,6 +34,7 @@ public:
 	Property(IUnknown* pProp, const std::string& name, double val = 0.0);
 	~Property();
 	operator double() const;
+	double operator=(double);
 };
 
 class Panel::Tab {

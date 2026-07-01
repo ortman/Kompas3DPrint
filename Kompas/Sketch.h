@@ -42,10 +42,13 @@ private:
 	double lastY = 0.0;
 public:
 	static int TYPE;
-	Sketch(IUnknown* pSketch, std::unique_ptr<Plane> plane, double angle = 0.0, double locX = 0.0, double locY = 0.0);
+	Sketch(const Node& node) : Node(node.GetEntity()) {}
+	Sketch(IUnknown* pSketch, std::unique_ptr<Plane> plane, double angle = 0.0, double locX = 0.0, double locY = 0.0, const std::optional<std::string>& name = std::nullopt);
+	Sketch(IUnknown* pSketch, std::unique_ptr<Plane> plane, const std::optional<std::string>& name = std::nullopt) : Sketch(pSketch, std::move(plane), 0.0, 0.0, 0.0, name) {}
 	Sketch& BeginEdit();
 	void EndEdit();
 	bool IsEdit() { return eDef; }
+	Sketch& Clear();
 	Sketch& Line(double x1, double y1, double x2, double y2, LineStyle style = LineStyle::Main);
 	Sketch& LineTo(double x, double y, LineStyle style = LineStyle::Main);
 	Sketch& Circle(double cx, double cy, double r, LineStyle style = LineStyle::Main);

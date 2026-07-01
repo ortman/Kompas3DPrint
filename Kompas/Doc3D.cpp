@@ -50,3 +50,16 @@ std::unique_ptr<Part> Doc3D::GetTopPart() {
 	if (!top) throw Kompas3DException("Не могу получить Top Part");
 	return std::make_unique<Part>(pDoc, top.GetInterfacePtr());
 }
+
+//bool Doc3D::IsEditObject() {
+//	K5::ksDocument3DPtr doc = pDoc;
+//	return doc && doc->IsEditMode();
+//}
+
+std::unique_ptr<NodeMacro> Doc3D::GetEditMacroObject() {
+	K5::ksDocument3DPtr doc = pDoc;
+	if (!doc || !doc->IsEditMode()) return nullptr;
+	IUnknown* macro = doc->GetEditMacroObject();
+	if (!macro) return nullptr;
+	return std::make_unique<NodeMacro>(macro);
+}

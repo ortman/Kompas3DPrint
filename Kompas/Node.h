@@ -24,10 +24,16 @@ public:
 	static int TYPE;
 	Node(IUnknown* pEntity);
 	virtual ~Node();
-	IUnknown* GetEntity() { return pEntity; }
-	
-	std::string GetName();
+	IUnknown* GetEntity() const { return pEntity; }
+	int GetType() const;
+	bool IsType(int type) const { return GetType() == type; }
+	std::string GetName() const;
 	Node& SetName(const std::string& name);
+	Node& Update();
+	template <typename T>
+	std::unique_ptr<T> As() {
+		return std::make_unique<T>(*this);
+	}
 	static std::string Utf8ToCp1251(const std::string& utf8Str);
 	static std::string Cp1251ToUtf8(const char* cp1251Str);
 };

@@ -17,4 +17,20 @@ CutExtrusion::CutExtrusion(IUnknown* p, std::unique_ptr<Sketch>& sketch, double 
 	entity->Create();
 }
 
+CutExtrusion& CutExtrusion::SetDepth1(double depth) {
+	K5::ksEntityPtr entity = pEntity;
+	K5::ksCutExtrusionDefinitionPtr def = entity->GetDefinition();
+	K5::ksExtrusionParamPtr param = def->ExtrusionParam();
+	param->depthNormal = depth;
+	return *this;
+}
+
+CutExtrusion& CutExtrusion::SetDepth2(double depth) {
+	K5::ksEntityPtr entity = pEntity;
+	K5::ksCutExtrusionDefinitionPtr def = entity->GetDefinition();
+	K5::ksExtrusionParamPtr param = def->ExtrusionParam();
+	param->depthReverse = depth;
+	return *this;
+}
+
 int CutExtrusion::TYPE = KConst3D::o3d_cutExtrusion;
