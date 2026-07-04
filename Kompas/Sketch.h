@@ -1,7 +1,6 @@
 #ifndef _ComTest_Sketch_h_
 #define _ComTest_Sketch_h_
 
-#pragma once
 #include <unknwn.h>
 #include <memory>
 #include "Node/Plane.h"

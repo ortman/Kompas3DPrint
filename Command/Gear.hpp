@@ -134,7 +134,7 @@ private:
 		sketchToth->EndEdit();
 		toth->SetDepth2(think);
 		tothArray->SetCircularParam(count, 360, true);
-		edit->Show().Update();
+		edit->Hide().Update();
 	}
 
 	void DrawTothSketch(Sketch& sketch, double m, int count) {

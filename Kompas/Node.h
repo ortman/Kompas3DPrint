@@ -1,7 +1,6 @@
 #ifndef _ComTest_Node_h_
 #define _ComTest_Node_h_
 
-#pragma once
 #include <unknwn.h>
 #include <string>
 #include <exception>

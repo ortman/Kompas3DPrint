@@ -10,8 +10,6 @@
 #include "Node/CircularCopy.h"
 #include "Panel.h"
 
-#pragma once
-
 class Kompas3D {
 public:
 	static KompasEvent<bool(Doc3D& doc, int docType)>  WhenCreateDocument;

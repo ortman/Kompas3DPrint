@@ -33,7 +33,7 @@ private:
         KompasEvent previous;
         F current;
 
-        ChainWrapper(const KompasEvent& prev, F&& curr) 
+        ChainWrapper(const KompasEvent& prev, F&& curr)
             : previous(prev), current(std::forward<F>(curr)) {}
 
         Ret Execute(Args... args) override {

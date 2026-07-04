@@ -141,7 +141,7 @@ private:
 		toth->SetDepth2(think);
 		double step = M_PI * m;
 		tothArray->SetParam1((int)(length / step) + 1, step);
-		edit->Show().Update();
+		edit->Hide().Update();
 	}
 	
 	void DrawTothSketch(Sketch& sketch, double m) {

@@ -1,7 +1,6 @@
 #ifndef _ComTest_Part_h_
 #define _ComTest_Part_h_
 
-#pragma once
 #include "Node.h"
 #include "Node/Plane.h"
 #include "Node/Axis.h"
