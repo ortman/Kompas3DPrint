@@ -16,7 +16,7 @@ public:
 	static KompasEvent<bool(Doc3D& doc, int docType)>  WhenOpenDocument;
 	
 	Kompas3D() = delete;
-	static bool Connect(bool open = true, bool visible = true);
+	static bool Connect(bool open = false, bool visible = true);
 	static void Disconnect();
 	static std::unique_ptr<Doc3D> GetActiveDocument3D();
 	template <typename T>
@@ -24,6 +24,8 @@ public:
 	static Panel CreatePanel(const std::string& name);
 	static void Message(const std::string& txt);
 	static void Error(const std::string& txt);
+	static std::string SystemPath(long type);
+	static std::string ConfigPath();
 };
 
 #endif

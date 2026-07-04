@@ -14,10 +14,10 @@ std::unique_ptr<Rack>        rack;
 std::unique_ptr<Gear>        gear;
 std::unique_ptr<Export>      exprt;
 
-
 void MainStart() {
 	aboutDlg = std::make_unique<AboutDlg>();
 	settings = std::make_unique<Settings>();
+	settings->Load();
 	rack = std::make_unique<Rack>();
 	gear = std::make_unique<Gear>();
 	exprt = std::make_unique<Export>();
@@ -37,7 +37,7 @@ void LIBRARYENTRY(unsigned int comm) {
 			exprt->SaveAs(settings->GetExportParams(Doc3D::Format::IGES));
 			break;
 		case MENU_EXPORT_X_T:
-			exprt->SaveAs(settings->GetExportParams(Doc3D::Format::XT));
+			exprt->SaveAs(settings->GetExportParams(Doc3D::Format::PARASOLID));
 			break;
 		case MENU_EXPORT_ACIS:
 			exprt->SaveAs(settings->GetExportParams(Doc3D::Format::ACIS));
@@ -69,7 +69,7 @@ class App : public WithAppLay<TopWindow> {
 public:
 	App() {
 		CtrlLayout(*this, LIB_NAME);
-		if (!Kompas3D::Connect(false)) {
+		if (!Kompas3D::Connect()) {
 			DisableCtrls({
 				&bSettings, &bAbout, &bOpenSlicer, &bGear, &bRack,
 				&bExportSTL, &bExportSTEP, &bExportIGS, &bExportX_T, &bExportACIS, &bExportVRLM
@@ -92,6 +92,6 @@ public:
 };
 
 GUI_APP_MAIN {
-	if (Kompas3D::Connect(false)) MainStart();
+	if (Kompas3D::Connect()) MainStart();
 	App().Run();
 }

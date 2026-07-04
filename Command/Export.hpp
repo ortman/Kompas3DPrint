@@ -17,10 +17,11 @@ public:
 			Doc3D::Format::STEP,
 			Doc3D::Format::VRLM,
 			Doc3D::Format::IGES,
+			Doc3D::Format::STEP_AP203,
 			Doc3D::Format::STEP_AP214,
 			Doc3D::Format::STEP_AP242,
 			Doc3D::Format::ACIS,
-			Doc3D::Format::XT,
+			Doc3D::Format::PARASOLID,
 			Doc3D::Format::JT
 		};
 		for (const Doc3D::Format& type : types) {

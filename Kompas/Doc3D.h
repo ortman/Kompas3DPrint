@@ -18,17 +18,20 @@ public:
 	struct Format {
 		enum Value {
 			ACIS = 1,
-			XT   = 2,
+			PARASOLID = 2,
 			STEP = 3,
 			IGES = 4,
 			VRLM = 5,
 			STL  = 6,
 			JT   = 8,
+			STEP_AP203 = 203,
 			STEP_AP214 = 214,
 			STEP_AP242 = 242
 		};
 		
 		Value value;
+		
+		Format() : value(STL) {}
 		
 		constexpr Format(Value v) : value(v) {}
 		
@@ -43,18 +46,31 @@ public:
 		constexpr const char* Ext() const {
 			switch (value) {
 				case STL : return ".stl";
+				case STEP_AP203:
 				case STEP_AP214:
 				case STEP_AP242:
 				case STEP: return ".step";
 				case VRLM: return ".vrlm";
 				case IGES: return ".igs";
 				case ACIS: return ".sat";
-				case XT  : return ".x_t";
+				case PARASOLID: return ".x_t";
 				case JT  : return ".jt";
 				default  : return "";
 			}
 		}
-	    
+
+		Format(const std::string& v) : value(STL) {
+			if (v == "STEP") value = STEP;
+			else if (v == "VRLM") value = VRLM;
+			else if (v == "IGES") value = IGES;
+			else if (v == "ACIS") value = ACIS;
+			else if (v == "JT")   value = JT;
+			else if (v == "PARASOLID")  value = PARASOLID;
+			else if (v == "STEP_AP203") value = STEP_AP203;
+			else if (v == "STEP_AP214") value = STEP_AP214;
+			else if (v == "STEP_AP242") value = STEP_AP242;
+		}
+
 		constexpr const char* Name() const {
 			switch (value) {
 				case STL : return "STL";
@@ -62,11 +78,11 @@ public:
 				case VRLM: return "VRLM";
 				case IGES: return "IGES";
 				case ACIS: return "ACIS";
-				case XT  : return "XT";
 				case JT  : return "JT";
 				default  : return "";
-				case STEP_AP214: return "STEP AP214";
-				case STEP_AP242: return "STEP AP242";
+				case PARASOLID : return "PARASOLID";
+				case STEP_AP214: return "STEP_AP214";
+				case STEP_AP242: return "STEP_AP242";
 			}
 		}
 	};

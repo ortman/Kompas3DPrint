@@ -126,8 +126,16 @@ void Kompas3D::Error(const std::string& txt) {
 	}
 }
 
-KompasEvent<bool(Doc3D&, int)> Kompas3D::WhenCreateDocument; //long pDoc, int docType
-KompasEvent<bool(Doc3D&, int)> Kompas3D::WhenOpenDocument;  // long pDoc, int docType
+std::string Kompas3D::SystemPath(long type) {
+	if (!Connect()) return std::string();
+	K5::KompasObjectPtr kompas(pKompas);
+	return Node::Cp1251ToUtf8(kompas->ksSystemPath(type));
+}
+
+std::string Kompas3D::ConfigPath() { return SystemPath(KConst::ksConfigurations); }
+
+KompasEvent<bool(Doc3D&, int)> Kompas3D::WhenCreateDocument;
+KompasEvent<bool(Doc3D&, int)> Kompas3D::WhenOpenDocument;
 
 #define KOMPAS_PARAM(p) template K5::p##Ptr Kompas3D::GetParamStruct<K5::p##Ptr>(int);
 
