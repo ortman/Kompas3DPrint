@@ -16,6 +16,5 @@ LAYOUT(AboutLay, 220, 156)
 END_LAYOUT
 
 LAYOUT(SettingsLay, 436, 336)
-	ITEM(Upp::Button, dv___0, SetLabel(t_("Button")).LeftPosZ(64, 56).TopPosZ(80, 15))
 END_LAYOUT
 

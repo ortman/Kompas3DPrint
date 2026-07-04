@@ -3,9 +3,6 @@ charset "UTF-8";
 uses
 	CtrlLib;
 
-target
-	Kompas3DPrint.rtw;
-
 library(WIN32) "kernel32 user32 advapi32 shell32 winmm";
 
 include
@@ -22,7 +19,7 @@ file
 	Command readonly separator,
 	Command/Rack.hpp,
 	Command/Gear.hpp,
-	Command/SettingsDlg.hpp,
+	Command/Settings.hpp,
 	Command/AboutDlg.hpp,
 	Command/Export.hpp,
 	Kompas readonly separator,
@@ -40,8 +37,8 @@ file
 	Kompas/Node.cpp,
 	Kompas/Panel.h,
 	Kompas/Panel.cpp,
-	Kompas/KompasEvent.cpp,
 	Kompas/KompasEvent.h,
+	Kompas/KompasEvent.cpp,
 	Nodes readonly separator,
 	Kompas/Node/Plane.h,
 	Kompas/Node/Plane.cpp,
@@ -59,6 +56,6 @@ file
 	Kompas/Node/CircularCopy.cpp;
 
 mainconfig
-	"" = "GUI",
-	"" = "GUI DLL";
+	"App" = "GUI",
+	"Kompas3DPrint.rtw" = "GUI DLL";
 

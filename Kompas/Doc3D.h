@@ -1,25 +1,98 @@
 #ifndef _ComTest_Document3D_h_
 #define _ComTest_Document3D_h_
 
-#pragma once
 #include "Part.h"
 #include "KompasEvent.h"
 #include "Node/NodeMacro.h"
 
+#define SETTINGS_LINEAR_MAX 1.0
+#define SETTINGS_LINEAR_MIN 0.001
+#define SETTINGS_ANGLE_MAX 90.0
+#define SETTINGS_ANGLE_MIN 0.1
+#define SETTINGS_RIDGE_MIN 0.01
+#define SETTINGS_RIDGE_MAX 100
+
 class DocumentFileNotifyLoc;
 class Doc3D {
 public:
-	enum Format {
-		SAT  = 1,
-		XT   = 2,
-		STEP = 3,
-		IGES = 4,
-		VRLM = 5,
-		STL  = 6,
-		JT   = 8,
-		STEP_AP214 = 214,
-		STEP_AP242 = 242
+	struct Format {
+		enum Value {
+			ACIS = 1,
+			XT   = 2,
+			STEP = 3,
+			IGES = 4,
+			VRLM = 5,
+			STL  = 6,
+			JT   = 8,
+			STEP_AP214 = 214,
+			STEP_AP242 = 242
+		};
+		
+		Value value;
+		
+		constexpr Format(Value v) : value(v) {}
+		
+		//constexpr operator Format() const { return value; }
+		
+		constexpr operator int() const { return value; }
+		
+		constexpr friend bool operator==(Format lhs, Format rhs) noexcept {
+	        return lhs.value == rhs.value;
+	    }
+	    
+		constexpr const char* Ext() const {
+			switch (value) {
+				case STL : return ".stl";
+				case STEP_AP214:
+				case STEP_AP242:
+				case STEP: return ".step";
+				case VRLM: return ".vrlm";
+				case IGES: return ".igs";
+				case ACIS: return ".sat";
+				case XT  : return ".x_t";
+				case JT  : return ".jt";
+				default  : return "";
+			}
+		}
+	    
+		constexpr const char* Name() const {
+			switch (value) {
+				case STL : return "STL";
+				case STEP: return "STEP";
+				case VRLM: return "VRLM";
+				case IGES: return "IGES";
+				case ACIS: return "ACIS";
+				case XT  : return "XT";
+				case JT  : return "JT";
+				default  : return "";
+				case STEP_AP214: return "STEP AP214";
+				case STEP_AP242: return "STEP AP242";
+			}
+		}
 	};
+	
+	enum Unit {
+		SM = 0,
+		MM = 1,
+		DM = 2,
+		M = 3,
+		Document = 4
+	};
+	
+	struct ExportParams {
+		Format format;
+		bool objBody;
+		bool objSurface;
+		Unit units;
+		bool formatBIN;
+		bool isLinear;
+		double linearVal;
+		bool isAngle;
+		double angleVal;
+		bool isRidge;
+		double ridgeVal;
+	};
+	
 private:
 	IUnknown* pDoc;
 	DocumentFileNotifyLoc *comEvent = nullptr;
@@ -33,10 +106,9 @@ public:
 	std::string GetPath();
 	std::unique_ptr<Part> GetTopPart();
 	std::unique_ptr<NodeMacro> GetEditMacroObject();
-	bool SaveAs(Format format, const std::string& path) {
-		return false;
-	}
-	static std::string_view GetExt(Format format);
+	bool SaveAs(const ExportParams& params, const std::string& path);
+	Doc3D& Reopen();
+	void Close();
 };
 
 #endif

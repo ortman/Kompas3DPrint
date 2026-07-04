@@ -1,25 +1,35 @@
 #ifndef _Kompas3DPrint_Export_hpp_
 #define _Kompas3DPrint_Export_hpp_
+
+#include <CtrlLib/CtrlLib.h>
 #include "../Kompas/Kompas3D.h"
+#include <filesystem>
 
 class Export {
 private:
 	FileSel saveDlg;
+	std::vector<Doc3D::Format> types;
 
 public:
 	Export() {
-		//saveDlg.Types("");
+		types = {
+			Doc3D::Format::STL,
+			Doc3D::Format::STEP,
+			Doc3D::Format::VRLM,
+			Doc3D::Format::IGES,
+			Doc3D::Format::STEP_AP214,
+			Doc3D::Format::STEP_AP242,
+			Doc3D::Format::ACIS,
+			Doc3D::Format::XT,
+			Doc3D::Format::JT
+		};
+		for (const Doc3D::Format& type : types) {
+			saveDlg.Type(type.Name(), String("*") + type.Ext());
+		}
 	}
 	void Slicer() {}
-	void STL()  { SaveAs(Doc3D::STL);  }
-	void STEP() { SaveAs(Doc3D::STEP); }
-	void IGES() { SaveAs(Doc3D::IGES); }
-	void XT()   { SaveAs(Doc3D::XT);   }
-	void SAT()  { SaveAs(Doc3D::SAT);  }
-	void VRLM() { SaveAs(Doc3D::VRLM); }
 	
-private:
-	void SaveAs(Doc3D::Format format) {
+	void SaveAs(Doc3D::ExportParams& params) {
 		std::unique_ptr<Doc3D> doc = Kompas3D::GetActiveDocument3D();
 		if (!doc) {
 			Kompas3D::Error("Не обноружен активный 3D документ");
@@ -27,10 +37,25 @@ private:
 		}
 		std::string path = doc->GetPath();
 		if (path.empty()) path = "Деталь.m3d";
+		std::filesystem::path fp(path);
+		fp.replace_extension(params.format.Ext());
+		saveDlg.ActiveDir(fp.parent_path().string());
+		saveDlg.DefaultName(fp.filename().string());
+		saveDlg.ActiveType(FormatIndex(params.format));
 		if (saveDlg.ExecuteSaveAs()) {
-			//..
-			//doc->SaveAs(format, "file_path");
+			int typeIdx = saveDlg.GetActiveType();
+			params.format = types[typeIdx];
+			doc->SaveAs(params, saveDlg.Get().ToStd());
 		}
+	}
+	
+private:
+	const int FormatIndex(Doc3D::Format format) {
+		auto it = std::find(types.begin(), types.end(), format);
+		if (it != types.end()) {
+			return (int)std::distance(types.begin(), it);
+		}
+		return -1;
 	}
 };
 
