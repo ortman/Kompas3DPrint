@@ -14,10 +14,8 @@ public:
 		CtrlLayout(*this, t_("Settings"));
 	}
 	
-	Doc3D::ExportParams GetExportParams(Doc3D::Format format) {
-		Doc3D::ExportParams p = params;
-		p.format = format;
-		return p;
+	const Doc3D::ExportParams& GetExportParams() {
+		return params;
 	}
 	
 	bool Load() {

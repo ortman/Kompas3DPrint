@@ -3,7 +3,6 @@
 #include "Doc3D.h"
 #include "Kompas3D.h"
 #include <filesystem>
-#include <cmath>
 
 class DocumentFileNotifyLoc : public ComEvent {
 private:

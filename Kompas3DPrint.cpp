@@ -2,6 +2,7 @@
 #include "Kompas3DPrint.h"
 
 using namespace Upp;
+
 #include "Command/AboutDlg.hpp"
 #include "Command/Settings.hpp"
 #include "Command/Rack.hpp"
@@ -23,28 +24,22 @@ void MainStart() {
 	exprt = std::make_unique<Export>();
 }
 
+void Export(Doc3D::Format format) {
+		Doc3D::ExportParams params = settings->GetExportParams();
+		params.format = format;
+		exprt->SaveAs(params);
+}
+
 void LIBRARYENTRY(unsigned int comm) {
 	switch (comm) {
 		case MENU_SETTINGS:    settings->Open(); break;
 		case MENU_OPEN_SLICER: exprt->Slicer(); break;
-		case MENU_EXPORT_STL:
-			exprt->SaveAs(settings->GetExportParams(Doc3D::Format::STL));
-			break;
-		case MENU_EXPORT_STEP:
-			exprt->SaveAs(settings->GetExportParams(Doc3D::Format::STEP));
-			break;
-		case MENU_EXPORT_IGS:
-			exprt->SaveAs(settings->GetExportParams(Doc3D::Format::IGES));
-			break;
-		case MENU_EXPORT_X_T:
-			exprt->SaveAs(settings->GetExportParams(Doc3D::Format::PARASOLID));
-			break;
-		case MENU_EXPORT_ACIS:
-			exprt->SaveAs(settings->GetExportParams(Doc3D::Format::ACIS));
-			break;
-		case MENU_EXPORT_VRLM:
-			exprt->SaveAs(settings->GetExportParams(Doc3D::Format::VRLM));
-			break;
+		case MENU_EXPORT_STL:  Export(Doc3D::Format::STL); break;
+		case MENU_EXPORT_STEP: Export(Doc3D::Format::STEP); break;
+		case MENU_EXPORT_IGS:  Export(Doc3D::Format::IGES); break;
+		case MENU_EXPORT_X_T:  Export(Doc3D::Format::PARASOLID); break;
+		case MENU_EXPORT_ACIS: Export(Doc3D::Format::ACIS); break;
+		case MENU_EXPORT_VRLM: Export(Doc3D::Format::VRLM); break;
 		case MENU_ABOUT:       aboutDlg->Open(); break;
 		case MENU_RACK:        rack->Start(); break;
 		case MENU_GEAR:        gear->Start(); break;
