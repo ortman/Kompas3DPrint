@@ -50,6 +50,10 @@ public:
 		}
 	}
 	
+	const std::vector<Doc3D::Format>& GetTypes() {
+		return types;
+	}
+	
 private:
 	const int FormatIndex(Doc3D::Format format) {
 		auto it = std::find(types.begin(), types.end(), format);

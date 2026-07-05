@@ -7,10 +7,10 @@
 
 #define SETTINGS_LINEAR_MAX 1.0
 #define SETTINGS_LINEAR_MIN 0.001
-#define SETTINGS_ANGLE_MAX 90.0
-#define SETTINGS_ANGLE_MIN 0.1
-#define SETTINGS_RIDGE_MIN 0.01
-#define SETTINGS_RIDGE_MAX 100
+#define SETTINGS_ANGLE_MAX  90.0
+#define SETTINGS_ANGLE_MIN  0.1
+#define SETTINGS_RIDGE_MIN  0.01
+#define SETTINGS_RIDGE_MAX  100.0
 
 class DocumentFileNotifyLoc;
 class Doc3D {
@@ -79,10 +79,11 @@ public:
 				case IGES: return "IGES";
 				case ACIS: return "ACIS";
 				case JT  : return "JT";
-				default  : return "";
 				case PARASOLID : return "PARASOLID";
+				case STEP_AP203: return "STEP_AP203";
 				case STEP_AP214: return "STEP_AP214";
 				case STEP_AP242: return "STEP_AP242";
+				default  : return "";
 			}
 		}
 	};

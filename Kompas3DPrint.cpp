@@ -17,11 +17,11 @@ std::unique_ptr<Export>      exprt;
 
 void MainStart() {
 	aboutDlg = std::make_unique<AboutDlg>();
-	settings = std::make_unique<Settings>();
+	exprt = std::make_unique<Export>();
+	settings = std::make_unique<Settings>(exprt->GetTypes());
 	settings->Load();
 	rack = std::make_unique<Rack>();
 	gear = std::make_unique<Gear>();
-	exprt = std::make_unique<Export>();
 }
 
 void Export(Doc3D::Format format) {

@@ -16,21 +16,4 @@
 #define MENU_GEAR         30
 #define MENU_RACK         31
 
-#define SETTINGS_INI_BLOCK_MAIN                 "Autoexport"
-#define SETTINGS_INI_AUTOEXPORT_EN              "AutoexportOn"
-#define SETTINGS_INI_FORMAT                     "Format"
-#define SETTINGS_INI_AUTOEXPORT_WHEN_EXISTS     "AutoexportWhenExist"
-#define SETTINGS_INI_CREATE_FOLDER              "CreateFolder"
-#define SETTINGS_INI_OBJ_BODY                   "ExportBody"
-#define SETTINGS_INI_OBJ_SURFACE                "ExportSurface"
-#define SETTINGS_INI_UNITS                      "Units"
-#define SETTINGS_INI_FORMAT_BIN                 "Binary"
-#define SETTINGS_INI_IS_LINEAR                  "LinearUse"
-#define SETTINGS_INI_LINEAR_VAL                 "LinearVal"
-#define SETTINGS_INI_IS_ANGLE                   "AngleUse"
-#define SETTINGS_INI_ANGLE_VAL                  "AngleVal"
-#define SETTINGS_INI_IS_RIDGE                   "RidgeUse"
-#define SETTINGS_INI_RIDGE_VAL                  "RidgeVal"
-#define SETTINGS_INI_CURA_PATH                  "CuraPath"
-
 #endif

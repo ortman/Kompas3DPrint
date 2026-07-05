@@ -5,13 +5,46 @@
 #include "../Kompas/Kompas3D.h"
 #include "../Resources.h"
 
+#define SETTINGS_INI_BLOCK_MAIN             "Autoexport"
+#define SETTINGS_INI_AUTOEXPORT_EN          "AutoexportOn"
+#define SETTINGS_INI_FORMAT                 "Format"
+#define SETTINGS_INI_AUTOEXPORT_WHEN_EXISTS "AutoexportWhenExist"
+#define SETTINGS_INI_CREATE_FOLDER          "CreateFolder"
+#define SETTINGS_INI_OBJ_BODY               "ExportBody"
+#define SETTINGS_INI_OBJ_SURFACE            "ExportSurface"
+#define SETTINGS_INI_UNITS                  "Units"
+#define SETTINGS_INI_FORMAT_BIN             "Binary"
+#define SETTINGS_INI_IS_LINEAR              "LinearUse"
+#define SETTINGS_INI_LINEAR_VAL             "LinearVal"
+#define SETTINGS_INI_IS_ANGLE               "AngleUse"
+#define SETTINGS_INI_ANGLE_VAL              "AngleVal"
+#define SETTINGS_INI_IS_RIDGE               "RidgeUse"
+#define SETTINGS_INI_RIDGE_VAL              "RidgeVal"
+#define SETTINGS_INI_SLICER_PATH            "SlicerPath"
+#define SETTINGS_INI_SLICER_FORMAT          "SlicerFormat"
+
 class Settings : public WithSettingsLay<TopWindow> {
 private:
 	Doc3D::ExportParams params;
 	
 public:
-	Settings() {
+	Settings(const std::vector<Doc3D::Format>& exportTypes) {
 		CtrlLayout(*this, t_("Settings"));
+		for (const Doc3D::Format& type : exportTypes) {
+			dlAEFormat.Add(type.value, type.Name());
+			dlSlicerFormat.Add(type.value, type.Name());
+		}
+		dlUnits.Add(Doc3D::MM, "мм");
+		dlUnits.Add(Doc3D::SM, "см");
+		dlUnits.Add(Doc3D::DM, "дм");
+		dlUnits.Add(Doc3D::M,  "м");
+		
+		eLinear.MinMax(SETTINGS_LINEAR_MIN, SETTINGS_LINEAR_MAX);
+		sLinear.MinMax(int(SETTINGS_LINEAR_MIN * 1000.), int(SETTINGS_LINEAR_MAX * 1000.));
+		eAngle.MinMax(SETTINGS_ANGLE_MIN,   SETTINGS_ANGLE_MAX);
+		sAngle.MinMax(int(SETTINGS_ANGLE_MIN * 1000.), int(SETTINGS_ANGLE_MAX * 1000.));
+		eRidge.MinMax(SETTINGS_RIDGE_MIN,   SETTINGS_RIDGE_MAX);
+		sRidge.MinMax(int(SETTINGS_RIDGE_MIN * 1000.), int(SETTINGS_RIDGE_MAX * 1000.));
 	}
 	
 	const Doc3D::ExportParams& GetExportParams() {
@@ -23,22 +56,28 @@ public:
 		if (dir.empty()) return false;
 		VectorMap<String, String> ini = LoadIniFile((dir + "/Kompas3DPrint.ini").c_str());
 		if (ini.GetCount() == 0) return false;
-		params.format     = GetIniFmt( ini, SETTINGS_INI_FORMAT,        Doc3D::Format(Doc3D::Format::STL));
-		params.objBody    = GetIniBool(ini, SETTINGS_INI_OBJ_BODY,      true);
-		params.objSurface = GetIniBool(ini, SETTINGS_INI_OBJ_SURFACE,   false);
-		params.units      = GetIniUnit(ini, SETTINGS_INI_UNITS,         Doc3D::MM);
-		params.formatBIN  = GetIniBool(ini, SETTINGS_INI_FORMAT_BIN,    true);
-		params.isLinear   = GetIniBool(ini, SETTINGS_INI_IS_LINEAR,     true);
-		params.linearVal  = GetIniDbl( ini, SETTINGS_INI_LINEAR_VAL,    0.001);
-		params.isAngle    = GetIniBool(ini, SETTINGS_INI_IS_ANGLE,      false);
-		params.angleVal   = GetIniDbl( ini, SETTINGS_INI_ANGLE_VAL,     7.2);
-		params.isRidge    = GetIniBool(ini, SETTINGS_INI_IS_RIDGE,      false);
-		params.ridgeVal   = GetIniDbl( ini, SETTINGS_INI_RIDGE_VAL,     1);
+		oAutoExportEn   <<= GetIniBool(ini, SETTINGS_INI_AUTOEXPORT_EN, true);
+		oCreateFolder   <<= GetIniBool(ini, SETTINGS_INI_CREATE_FOLDER, false);
+		oRewriteOnly    <<= GetIniBool(ini, SETTINGS_INI_AUTOEXPORT_WHEN_EXISTS, false);
 		
-		bool autoExportEn = GetIniBool(ini, SETTINGS_INI_AUTOEXPORT_EN, true);
-		bool createFolder = GetIniBool(ini, SETTINGS_INI_CREATE_FOLDER, false);
-		bool autoExportWE = GetIniBool(ini, SETTINGS_INI_AUTOEXPORT_WHEN_EXISTS, false);
-		String slicerPath = GetIniStr( ini, SETTINGS_INI_CURA_PATH,     "");
+		params.format     = GetIniFmt( ini, SETTINGS_INI_FORMAT,        Doc3D::Format(Doc3D::Format::STL));
+		dlAEFormat      <<= params.format.value;
+		oExportBodies   <<= params.objBody    = GetIniBool(ini, SETTINGS_INI_OBJ_BODY,      true);
+		oExportSurfaces <<= params.objSurface = GetIniBool(ini, SETTINGS_INI_OBJ_SURFACE,   false);
+		dlUnits         <<= params.units      = GetIniUnit(ini, SETTINGS_INI_UNITS,         Doc3D::MM);
+		sTxtBin         <<= params.formatBIN  = GetIniBool(ini, SETTINGS_INI_FORMAT_BIN,    true);
+		oLinear         <<= params.isLinear   = GetIniBool(ini, SETTINGS_INI_IS_LINEAR,     true);
+		eLinear         <<= params.linearVal  = GetIniDbl( ini, SETTINGS_INI_LINEAR_VAL,    0.001);
+		sLinear         <<= int(params.linearVal * 1000.);
+		oAngle          <<= params.isAngle    = GetIniBool(ini, SETTINGS_INI_IS_ANGLE,      false);
+		eAngle          <<= params.angleVal   = GetIniDbl( ini, SETTINGS_INI_ANGLE_VAL,     7.2);
+		sAngle          <<= int(params.angleVal * 1000.);
+		oRidge          <<= params.isRidge    = GetIniBool(ini, SETTINGS_INI_IS_RIDGE,      false);
+		eRidge          <<= params.ridgeVal   = GetIniDbl( ini, SETTINGS_INI_RIDGE_VAL,     1);
+		sRidge          <<= int(params.ridgeVal * 1000.);
+		
+		eSlicerPath     <<= GetIniStr(ini, SETTINGS_INI_SLICER_PATH,   GetIniStr(ini, "CuraPath", ""));
+		dlSlicerFormat  <<= GetIniFmt(ini, SETTINGS_INI_SLICER_FORMAT, Doc3D::Format(Doc3D::Format::STL)).value;
 		return true;
 	}
 	
@@ -61,7 +100,8 @@ public:
 		SetIniBool(ini, SETTINGS_INI_AUTOEXPORT_EN, true);
 		SetIniBool(ini, SETTINGS_INI_CREATE_FOLDER, false);
 		SetIniBool(ini, SETTINGS_INI_AUTOEXPORT_WHEN_EXISTS, false);
-		SetIniStr( ini, SETTINGS_INI_CURA_PATH,   "");
+		SetIniStr( ini, SETTINGS_INI_SLICER_PATH, ~eSlicerPath);
+		SetIniStr( ini, SETTINGS_INI_SLICER_FORMAT, Doc3D::Format((Doc3D::Format::Value)(int)~dlSlicerFormat).Name());
 		ini.Close();
 		return false;
 	}
