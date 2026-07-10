@@ -9,6 +9,7 @@ using namespace Upp;
 #include "Command/Gear.hpp"
 #include "Command/Export.hpp"
 #include "Command/Threads.hpp"
+#include "Command/StandardParts.hpp"
 
 std::unique_ptr<AboutDlg>    aboutDlg;
 std::unique_ptr<Export>      exprt;
@@ -16,6 +17,7 @@ std::unique_ptr<Settings>    settings;
 std::unique_ptr<Rack>        rack;
 std::unique_ptr<Gear>        gear;
 std::unique_ptr<Threads>     threads;
+std::unique_ptr<StandardParts> standardParts;
 
 void MainStart() {
 	aboutDlg = std::make_unique<AboutDlg>();
@@ -25,6 +27,7 @@ void MainStart() {
 	rack     = std::make_unique<Rack>();
 	gear     = std::make_unique<Gear>();
 	threads  = std::make_unique<Threads>();
+	standardParts  = std::make_unique<StandardParts>();
 }
 
 void Export(Doc3D::Format format) {
@@ -93,6 +96,7 @@ public:
 		bGear       << [=]() { LIBRARYENTRY(MENU_GEAR); };
 		bRack       << [=]() { LIBRARYENTRY(MENU_RACK); };
 		bThreads    << [=]() { LIBRARYENTRY(MENU_THREADS); };
+		bStIndex    << [=]() { standardParts->Start(); };
 	}
 };
 

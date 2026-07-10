@@ -100,7 +100,7 @@ Doc3D Kompas3D::Open3D(std::string path, bool visible) {
 	if (!Connect()) throw Kompas3DException("Нет подключения к Компас3D");
 	K5::KompasObjectPtr kompas(pKompas);
 	K5::ksDocument3DPtr doc = kompas->Document3D();
-	if (!doc->Open(Node::Utf8ToCp1251(path).c_str(), visible)) {
+	if (!doc->Open(Node::Utf8ToCp1251(path).c_str(), !visible)) {
 		throw Kompas3DException("Не могу открыть документ: " + path);
 	}
 	return Doc3D(doc.GetInterfacePtr());

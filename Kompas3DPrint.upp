@@ -23,6 +23,7 @@ file
 	Command/AboutDlg.hpp,
 	Command/Export.hpp,
 	Command/Threads.hpp,
+	Command/StandardParts.hpp,
 	Kompas readonly separator,
 	Kompas/ComKompas.h,
 	Kompas/ComKompas.cpp,
