@@ -39,12 +39,12 @@ public:
 	}
 	
 	void SaveAs(Doc3D::ExportParams& params) {
-		std::unique_ptr<Doc3D> doc = Kompas3D::GetActiveDocument3D();
+		Doc3D doc = Kompas3D::GetActiveDocument3D();
 		if (!doc) {
 			Kompas3D::Error("Не обноружен активный 3D документ");
 			return;
 		}
-		std::string path = doc->GetPath();
+		std::string path = doc.GetPath();
 		if (path.empty()) path = "Деталь.m3d";
 		std::filesystem::path fp(path);
 		fp.replace_extension(params.format.Ext());
@@ -54,7 +54,7 @@ public:
 		if (saveDlg.ExecuteSaveAs()) {
 			int typeIdx = saveDlg.GetActiveType();
 			params.format = types[typeIdx];
-			doc->SaveAs(params, saveDlg.Get().ToStd());
+			doc.SaveAs(params, saveDlg.Get().ToStd());
 		}
 	}
 	

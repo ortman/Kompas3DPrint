@@ -6,9 +6,9 @@ class Threads {
 public:
 	void Start() {
 		
-		auto doc = Kompas3D::GetActiveDocument3D();
+		Doc3D doc = Kompas3D::GetActiveDocument3D();
 		if (!doc) return;
-		Part topPart = doc->GetTopPart();
+		Part topPart = doc.GetTopPart();
 		
 		// Удаляем макрос
 		for (Node& node : topPart.GetNodes()) {

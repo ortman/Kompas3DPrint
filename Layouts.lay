@@ -1,8 +1,8 @@
-LAYOUT(AppLay, 212, 196)
+LAYOUT(AppLay, 212, 232)
 	ITEM(Upp::Button, bGear, SetLabel(t_("Create gear")).LeftPosZ(108, 100).TopPosZ(68, 28))
 	ITEM(Upp::Button, bSettings, SetLabel(t_("Settings")).LeftPosZ(108, 100).TopPosZ(4, 28))
 	ITEM(Upp::Button, bOpenSlicer, SetLabel(t_("Open Sliser")).LeftPosZ(108, 100).TopPosZ(36, 28))
-	ITEM(Upp::Button, bExportSTL, SetLabel(t_("Export STL")).LeftPosZ(4, 100).VSizePosZ(4, 164))
+	ITEM(Upp::Button, bExportSTL, SetLabel(t_("Export STL")).LeftPosZ(4, 100).TopPosZ(4, 28))
 	ITEM(Upp::Button, bExportSTEP, SetLabel(t_("Export STEP")).LeftPosZ(4, 100).TopPosZ(36, 28))
 	ITEM(Upp::Button, bExportIGS, SetLabel(t_("Export IGS")).LeftPosZ(4, 100).TopPosZ(68, 28))
 	ITEM(Upp::Button, bExportX_T, SetLabel(t_("Export X_T")).LeftPosZ(4, 100).TopPosZ(100, 28))
@@ -11,6 +11,7 @@ LAYOUT(AppLay, 212, 196)
 	ITEM(Upp::Button, bRack, SetLabel(t_("Create rack")).LeftPosZ(108, 100).TopPosZ(100, 28))
 	ITEM(Upp::Button, bAbout, SetLabel(t_("About")).LeftPosZ(108, 100).TopPosZ(132, 28))
 	ITEM(Upp::Button, bThreads, SetLabel(t_("Create threads")).LeftPosZ(108, 100).TopPosZ(164, 28))
+	ITEM(Upp::Button, bStIndex, SetLabel(t_("Индексировать!")).LeftPosZ(108, 100).TopPosZ(196, 28))
 END_LAYOUT
 
 LAYOUT(AboutLay, 220, 156)

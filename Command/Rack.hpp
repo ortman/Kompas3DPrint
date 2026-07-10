@@ -56,12 +56,12 @@ public:
 	
 	void Start() {
 		if (!panel) throw new Kompas3DException("Панель свойств рейки отсутствует");
-		auto doc = Kompas3D::GetActiveDocument3D();
+		Doc3D doc = Kompas3D::GetActiveDocument3D();
 		if (!doc) {
 			Kompas3D::Error("Не найден активный 3D документ");
 			return;
 		}
-		edit = doc->GetEditMacroObject();
+		edit = doc.GetEditMacroObject();
 		if (edit) {
 			RackParameters rackParam;
 			if (edit.GetUserParam(&rackParam, sizeof(rackParam))) {
@@ -76,9 +76,9 @@ public:
 	
 private:
 	void CreateRack(double m, double length, double think, double depth) {
-		auto doc = Kompas3D::GetActiveDocument3D();
+		Doc3D doc = Kompas3D::GetActiveDocument3D();
 		if (!doc) return;
-		Part topPart = doc->GetTopPart();
+		Part topPart = doc.GetTopPart();
 		std::ostringstream name;
 		name << "Рейка " << m << " x " << length;
 		NodeMacro macro = topPart.Create<NodeMacro>(false, name.str());

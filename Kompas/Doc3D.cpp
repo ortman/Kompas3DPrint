@@ -121,3 +121,17 @@ bool Doc3D::SaveAs(const ExportParams& params, const std::string& path) {
 	fp.replace_extension(params.format.Ext());
 	return doc->SaveAsToAdditionFormat(Node::Utf8ToCp1251(fp.string()).c_str(), formatParam);
 }
+
+int Doc3D::GetEmbodimentsCount() {
+	K7::IEmbodimentsManagerPtr em = Kompas3D::ToApi7<K7::IEmbodimentsManagerPtr>(pDoc);
+	if (em) return em->EmbodimentCount;
+	return 0;
+}
+
+std::string Doc3D::GetEmbodimentName(int i) {
+	return std::string();
+}
+
+Part Doc3D::GetEmbodiment(int i) {
+	return Part(pDoc, nullptr);
+}

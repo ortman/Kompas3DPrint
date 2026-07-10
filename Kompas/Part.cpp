@@ -1,4 +1,5 @@
 #include "ComKompas.h"
+#include "Kompas3D.h"
 #include "Part.h"
 
 Part::Part(IUnknown* d, IUnknown* p) : pDoc(d), pPart(p) {
@@ -90,4 +91,21 @@ Axis Part::GetAxisOZ() {
 	IUnknown* entity = GetDefaultEntity(KConst3D::o3d_axisOZ);
 	if (!entity) return nullptr;
 	return Axis(entity);
+}
+
+std::vector<Part::Variable> Part::GetVariables(bool isExternal) {
+	std::vector<Part::Variable> variables;
+	K5::ksPartPtr part = pPart;
+	K5::ksVariableCollectionPtr vs = part->VariableCollection();
+	int cnt = vs->GetCount();
+	for (int i = 0; i < cnt; ++i) {
+		K5::ksVariablePtr v = vs->GetByIndex(i);
+		variables.push_back({
+			(bool)v->external,
+			v->value,
+			Node::Cp1251ToUtf8(v->name),
+			Node::Cp1251ToUtf8(v->note)
+		});
+	}
+	return variables;
 }

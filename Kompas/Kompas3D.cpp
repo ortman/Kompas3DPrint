@@ -85,13 +85,13 @@ void Kompas3D::Disconnect() {
 	if (comInit) CoUninitialize();
 }
 
-std::unique_ptr<Doc3D> Kompas3D::GetActiveDocument3D() {
+Doc3D Kompas3D::GetActiveDocument3D() {
 	if (!Connect()) return nullptr;
 	K5::KompasObjectPtr kompas(pKompas);
 	//kompas->AddRef();
 	K5::ksDocument3DPtr doc = kompas->ActiveDocument3D();
 	if (doc) {
-		return std::make_unique<Doc3D>(doc.GetInterfacePtr());
+		return Doc3D(doc.GetInterfacePtr());
 	}
 	return nullptr;
 }
@@ -144,7 +144,7 @@ std::string Kompas3D::ConfigPath() { return SystemPath(KConst::ksConfigurations)
 KompasEvent<bool(Doc3D&, int)> Kompas3D::WhenCreateDocument;
 KompasEvent<bool(Doc3D&, int)> Kompas3D::WhenOpenDocument;
 
-#define KOMPAS_PARAM(p) template K5::p##Ptr Kompas3D::GetParamStruct<K5::p##Ptr>(int);
+#define KOMPAS_PARAM(p) template K5::p##Ptr Kompas3D::GetParamStruct(int);
 KOMPAS_PARAM(ksRectangleParam)
 KOMPAS_PARAM(ksRegularPolygonParam)
 KOMPAS_PARAM(ksEllipseParam)
@@ -152,5 +152,6 @@ KOMPAS_PARAM(ksEllipseArcParam)
 KOMPAS_PARAM(ksEllipseArcParam1)
 KOMPAS_PARAM(ksUserParam)
 
-#define KOMPAS_API7(p) template K7::p##Ptr Kompas3D::ToApi7<K7::p##Ptr>(IUnknown*);
+#define KOMPAS_API7(p) template K7::p##Ptr Kompas3D::ToApi7(IUnknown*);
+KOMPAS_API7(IEmbodimentsManager)
 KOMPAS_API7(IThread)

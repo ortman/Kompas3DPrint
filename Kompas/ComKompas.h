@@ -85,3 +85,7 @@ public:
 	    return hr;
 	}
 };
+
+#include <string>
+
+std::string GetClassName(IUnknown* pUnk);

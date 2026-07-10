@@ -127,6 +127,10 @@ public:
 	bool SaveAs(const ExportParams& params, const std::string& path);
 	Doc3D& Reopen();
 	void Close();
+	int GetEmbodimentsCount();
+	std::string GetEmbodimentName(int i);
+	Part GetEmbodiment(int i);
+	operator bool() const { return pDoc; }
 };
 
 #endif

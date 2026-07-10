@@ -52,12 +52,12 @@ public:
 	
 	void Start() {
 		if (!panel) throw new Kompas3DException("Панель свойств шестерни отсутствует");
-		auto doc = Kompas3D::GetActiveDocument3D();
+		Doc3D doc = Kompas3D::GetActiveDocument3D();
 		if (!doc) {
 			Kompas3D::Error("Не найден активный 3D документ");
 			return;
 		}
-		edit = doc->GetEditMacroObject();
+		edit = doc.GetEditMacroObject();
 		if (edit) {
 			GearParameters gearParam;
 			if (edit.GetUserParam(&gearParam, sizeof(gearParam))) {
@@ -71,9 +71,9 @@ public:
 
 private:
 	void CreateGear(double m, int count, double think) {
-		auto doc = Kompas3D::GetActiveDocument3D();
+		Doc3D doc = Kompas3D::GetActiveDocument3D();
 		if (!doc) return;
-		auto topPart = doc->GetTopPart();
+		Part topPart = doc.GetTopPart();
 		std::ostringstream name;
 		name << "Шестерня " << m << " x " << count;
 		NodeMacro macro = topPart.Create<NodeMacro>(false, name.str());

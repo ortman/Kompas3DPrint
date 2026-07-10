@@ -8,6 +8,14 @@
 #include <utility>
 
 class Part {
+public:
+	struct Variable {
+		bool isExternal;
+		double value;
+		std::string name;
+		std::string comment;
+	};
+
 private:
 	IUnknown* pDoc;
 	IUnknown* pPart;
@@ -32,6 +40,7 @@ public:
 	Axis GetAxisOX();
 	Axis GetAxisOY();
 	Axis GetAxisOZ();
+	std::vector<Variable> GetVariables(bool isExternal = false);
 };
 
 #endif
