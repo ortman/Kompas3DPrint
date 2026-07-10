@@ -50,15 +50,15 @@ Doc3D::~Doc3D() {
 
 std::string Doc3D::GetPath() {
 	K5::ksDocument3DPtr doc = pDoc;
-	if (!doc) throw new Kompas3DException("Потерян указатель на документ");
+	if (!doc) throw Kompas3DException("Потерян указатель на документ");
 	return Node::Cp1251ToUtf8(doc->fileName);
 }
 
 Part Doc3D::GetTopPart() {
 	K5::ksDocument3DPtr doc = pDoc;
-	if (!doc) throw new Kompas3DException("Потерян указатель на документ");
+	if (!doc) throw Kompas3DException("Потерян указатель на документ");
 	K5::ksPartPtr top = doc->GetPart(KConst3D::pTop_Part);
-	if (!top) throw new Kompas3DException("Не могу получить Top Part");
+	if (!top) throw Kompas3DException("Не могу получить Top Part");
 	return Part(pDoc, top.GetInterfacePtr());
 }
 
@@ -71,7 +71,7 @@ NodeMacro Doc3D::GetEditMacroObject() {
 
 Doc3D& Doc3D::Reopen() {
 	K5::ksDocument3DPtr doc = pDoc;
-	if (!doc) throw new Kompas3DException("Потерян указатель на документ");
+	if (!doc) throw Kompas3DException("Потерян указатель на документ");
 	std::string path = GetPath();
 	if (!path.empty()) {
 		Close();
@@ -87,7 +87,7 @@ void Doc3D::Close() {
 bool Doc3D::SaveAs(const ExportParams& params, const std::string& path) {
 	Kompas3D::Error(path);
 	K5::ksDocument3DPtr doc = pDoc;
-	if (!doc) throw new Kompas3DException("Потерян указатель на документ");
+	if (!doc) throw Kompas3DException("Потерян указатель на документ");
 	K5::ksAdditionFormatParamPtr formatParam = doc->AdditionFormatParam();
 	formatParam->Init();
 	formatParam->SetObjectsOptions(KConst3D::ksD3COBodyes, params.objBody);

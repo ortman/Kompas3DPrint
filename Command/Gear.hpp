@@ -51,7 +51,7 @@ public:
 	}
 	
 	void Start() {
-		if (!panel) throw new Kompas3DException("Панель свойств шестерни отсутствует");
+		if (!panel) throw Kompas3DException("Панель свойств шестерни отсутствует");
 		Doc3D doc = Kompas3D::GetActiveDocument3D();
 		if (!doc) {
 			Kompas3D::Error("Не найден активный 3D документ");

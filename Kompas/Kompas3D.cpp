@@ -111,11 +111,11 @@ T Kompas3D::ToApi7(IUnknown* k5) {
 }
 
 Panel Kompas3D::CreatePanel(const std::string& name) {
-	if (!Connect()) throw new Kompas3DException("Kompas not connected");
+	if (!Connect()) throw Kompas3DException("Kompas not connected");
 	K7::IApplicationPtr kompas7(pKompas7);
-	if (!pKompas7) throw new Kompas3DException("Kompas not connected");
+	if (!pKompas7) throw Kompas3DException("Kompas not connected");
 	K7::IPropertyManagerPtr manager = kompas7->CreatePropertyManager(true);
-	if (!manager) throw new Kompas3DException("Can not create PropertyManager");
+	if (!manager) throw Kompas3DException("Can not create PropertyManager");
 	return Panel(manager.GetInterfacePtr(), name);
 }
 
