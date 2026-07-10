@@ -41,6 +41,7 @@ public:
 	Axis GetAxisOY();
 	Axis GetAxisOZ();
 	std::vector<Variable> GetVariables(bool isExternal = false);
+	operator bool() const { return pPart; }
 };
 
 #endif
