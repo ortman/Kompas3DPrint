@@ -22,6 +22,7 @@ public:
 	static bool Connect(bool open = false, bool visible = true);
 	static void Disconnect();
 	static Doc3D GetActiveDocument3D();
+	static Doc3D Open3D(std::string path, bool visible = true);
 	template <typename T>
 	static T GetParamStruct(int type);
 	template <typename T>
