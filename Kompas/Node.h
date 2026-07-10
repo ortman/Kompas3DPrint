@@ -5,7 +5,6 @@
 #include <string>
 #include <exception>
 #include <optional>
-//#include <memory>
 
 class Kompas3DException : public std::exception {
 private:
@@ -23,7 +22,7 @@ public:
 	static int TYPE;
 	Node(IUnknown* pEntity);
 	virtual ~Node();
-	IUnknown* GetEntity() const { return pEntity; }
+	IUnknown* GetEntity() const { pEntity->AddRef(); return pEntity; }
 	int GetType() const;
 	bool IsType(int type) const { return GetType() == type; }
 	std::string GetName() const;
