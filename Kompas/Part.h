@@ -33,6 +33,7 @@ public:
 		if (!entity) throw Kompas3DException(std::string("Не могу создать объект ") + typeid(T).name());
 		return T(entity, std::forward<Args>(args)...);
 	}
+	std::string Name();
 	Part& Remove(Node node);
 	Plane GetPlaneXOY();
 	Plane GetPlaneXOZ();

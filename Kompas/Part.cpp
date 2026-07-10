@@ -8,8 +8,14 @@ Part::Part(IUnknown* d, IUnknown* p) : pDoc(d), pPart(p) {
 }
 
 Part::~Part() {
-    if (pDoc) pDoc->Release();
-    if (pPart) pPart->Release();
+	if (pDoc) pDoc->Release();
+	if (pPart) pPart->Release();
+}
+
+std::string Part::Name() {
+	K5::ksPartPtr part = pPart;
+	if (!part) throw Kompas3DException("Не могу получить объект Part");
+	return Node::Cp1251ToUtf8(part->name);
 }
 
 std::vector<Node> Part::GetNodes() {

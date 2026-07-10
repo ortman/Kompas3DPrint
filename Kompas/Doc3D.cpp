@@ -131,7 +131,11 @@ std::string Doc3D::GetEmbodimentName(int i) {
 	if (K7::IEmbodimentsManagerPtr em = Kompas3D::ToApi7<K7::IEmbodimentsManagerPtr>(pDoc)) {
 		if (i < em->EmbodimentCount) {
 			if (K7::IEmbodimentPtr e = em->Embodiment[i]) {
-				return Node::Cp1251ToUtf8(e->Name);
+				std::string name = Node::Cp1251ToUtf8(e->GetMarking(KConst::ksVMEmbodimentNumber, false));
+				size_t eName = name.find_last_not_of(" \t\n\r");
+				if (eName != std::string::npos) name = name.substr(0, eName + 1);
+				size_t sName = name.find_first_not_of(" \t\n\r-");
+				if (sName != std::string::npos) return name.substr(sName);
 			}
 		}
 	}
