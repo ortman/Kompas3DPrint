@@ -124,14 +124,28 @@ bool Doc3D::SaveAs(const ExportParams& params, const std::string& path) {
 
 int Doc3D::GetEmbodimentsCount() {
 	K7::IEmbodimentsManagerPtr em = Kompas3D::ToApi7<K7::IEmbodimentsManagerPtr>(pDoc);
-	if (em) return em->EmbodimentCount;
-	return 0;
+	return em ? em->EmbodimentCount : 0;
 }
 
 std::string Doc3D::GetEmbodimentName(int i) {
+	if (K7::IEmbodimentsManagerPtr em = Kompas3D::ToApi7<K7::IEmbodimentsManagerPtr>(pDoc)) {
+		if (i < em->EmbodimentCount) {
+			if (K7::IEmbodimentPtr e = em->Embodiment[i]) {
+				return Node::Cp1251ToUtf8(e->Name);
+			}
+		}
+	}
 	return std::string();
 }
 
 Part Doc3D::GetEmbodiment(int i) {
+	if (K7::IEmbodimentsManagerPtr em = Kompas3D::ToApi7<K7::IEmbodimentsManagerPtr>(pDoc)) {
+		if (i < em->EmbodimentCount) {
+			if (K7::IEmbodimentPtr e = em->Embodiment[i]) {
+				K5::ksPartPtr part = Kompas3D::ToApi5<K5::ksPartPtr>(e->Part);
+				return Part(pDoc, part.GetInterfacePtr());
+			}
+		}
+	}
 	return Part(pDoc, nullptr);
 }

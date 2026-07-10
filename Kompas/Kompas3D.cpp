@@ -110,6 +110,13 @@ T Kompas3D::ToApi7(IUnknown* k5) {
 	return kompas->TransferInterface(k5, KConst::ksAPI7Dual, 0);
 }
 
+template <typename T>
+T Kompas3D::ToApi5(IUnknown* k7) {
+	if (!Connect()) return nullptr;
+	K5::KompasObjectPtr kompas(pKompas);
+	return kompas->TransferInterface(k7, KConst::ksAPI5Auto, 0);
+}
+
 Panel Kompas3D::CreatePanel(const std::string& name) {
 	if (!Connect()) throw Kompas3DException("Kompas not connected");
 	K7::IApplicationPtr kompas7(pKompas7);
@@ -155,3 +162,6 @@ KOMPAS_PARAM(ksUserParam)
 #define KOMPAS_API7(p) template K7::p##Ptr Kompas3D::ToApi7(IUnknown*);
 KOMPAS_API7(IEmbodimentsManager)
 KOMPAS_API7(IThread)
+
+#define KOMPAS_API5(p) template K5::p##Ptr Kompas3D::ToApi5(IUnknown*);
+KOMPAS_API5(ksPart)
