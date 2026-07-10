@@ -5,7 +5,7 @@
 #include <string>
 #include <exception>
 #include <optional>
-#include <memory>
+//#include <memory>
 
 class Kompas3DException : public std::exception {
 private:
@@ -29,11 +29,8 @@ public:
 	std::string GetName() const;
 	Node& SetName(const std::string& name);
 	Node& Update();
-	template <typename T>
-	std::unique_ptr<T> As() {
-		return std::make_unique<T>(*this);
-	}
 	static std::string Utf8ToCp1251(const std::string& utf8Str);
 	static std::string Cp1251ToUtf8(const char* cp1251Str);
+	operator bool() const { return pEntity; }
 };
 #endif

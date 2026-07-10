@@ -10,6 +10,7 @@ LAYOUT(AppLay, 212, 196)
 	ITEM(Upp::Button, bExportVRLM, SetLabel(t_("Export VRLM")).LeftPosZ(4, 100).TopPosZ(164, 28))
 	ITEM(Upp::Button, bRack, SetLabel(t_("Create rack")).LeftPosZ(108, 100).TopPosZ(100, 28))
 	ITEM(Upp::Button, bAbout, SetLabel(t_("About")).LeftPosZ(108, 100).TopPosZ(132, 28))
+	ITEM(Upp::Button, bThreads, SetLabel(t_("Create threads")).LeftPosZ(108, 100).TopPosZ(164, 28))
 END_LAYOUT
 
 LAYOUT(AboutLay, 220, 156)

@@ -3,7 +3,7 @@
 
 MeshCopy::MeshCopy(IUnknown* p, int count1, double step1,
 		int count2, double step2,
-		const std::vector<std::unique_ptr<Node>>& nodes,
+		const std::vector<Node>& nodes,
 		const std::optional<std::string>& name) : Node(p) {
 	K5::ksEntityPtr entity = pEntity;
 	if (name.has_value()) entity->name = Utf8ToCp1251(name.value()).c_str();
@@ -15,8 +15,8 @@ MeshCopy::MeshCopy(IUnknown* p, int count1, double step1,
 	def->step2 = step2;
 	K5::ksEntityCollectionPtr operations = def->OperationArray();
 	if (!def) throw Kompas3DException("Не могу получить OperationArray в MeshCopy");
-	for (const std::unique_ptr<Node>& node : nodes) {
-		K5::ksEntityPtr nodeEntity = node->GetEntity();
+	for (const Node& node : nodes) {
+		K5::ksEntityPtr nodeEntity = node.GetEntity();
 		if (nodeEntity) operations->Add(nodeEntity);
 	}
 	entity->Create();
@@ -24,7 +24,7 @@ MeshCopy::MeshCopy(IUnknown* p, int count1, double step1,
 
 MeshCopy::MeshCopy(IUnknown* p, int count1, double step1,
 		int count2, double step2,
-		const std::unique_ptr<Node> node,
+		const Node node,
 		const std::optional<std::string>& name) : Node(p) {
 	K5::ksEntityPtr entity = pEntity;
 	if (name.has_value()) entity->name = Utf8ToCp1251(name.value()).c_str();
@@ -36,7 +36,7 @@ MeshCopy::MeshCopy(IUnknown* p, int count1, double step1,
 	def->step2 = step2;
 	K5::ksEntityCollectionPtr operations = def->OperationArray();
 	if (!def) throw Kompas3DException("Не могу получить OperationArray в MeshCopy");
-	K5::ksEntityPtr nodeEntity = node->GetEntity();
+	K5::ksEntityPtr nodeEntity = node.GetEntity();
 	if (nodeEntity) operations->Add(nodeEntity);
 	entity->Create();
 }

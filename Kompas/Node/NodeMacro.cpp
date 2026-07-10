@@ -3,6 +3,7 @@
 #include "../Kompas3D.h"
 
 NodeMacro::NodeMacro(IUnknown* p, bool show, const std::optional<std::string>& name) : Node(p) {
+	if (!pEntity) return;
 	K5::ksEntityPtr entity = pEntity;
 	if (name.has_value()) entity->name = Utf8ToCp1251(name.value()).c_str();
 	K5::ksMacro3DDefinitionPtr def = entity->GetDefinition();
@@ -11,7 +12,7 @@ NodeMacro::NodeMacro(IUnknown* p, bool show, const std::optional<std::string>& n
 	entity->Create();
 }
 
-NodeMacro& NodeMacro::Add(Node& node) {
+NodeMacro& NodeMacro::Add(Node node) {
 	K5::ksEntityPtr entity = pEntity;
 	K5::ksMacro3DDefinitionPtr def = entity->GetDefinition();
 	K5::ksEntityPtr e = node.GetEntity();
@@ -19,8 +20,8 @@ NodeMacro& NodeMacro::Add(Node& node) {
 	return *this;
 }
 
-std::vector<std::unique_ptr<Node>> NodeMacro::GetNodes() {
-	std::vector<std::unique_ptr<Node>> nodes;
+std::vector<Node> NodeMacro::GetNodes() {
+	std::vector<Node> nodes;
 	K5::ksEntityPtr entity = pEntity;
 	if (!entity) return nodes;
 	K5::ksMacro3DDefinitionPtr def = entity->GetDefinition();
@@ -31,7 +32,7 @@ std::vector<std::unique_ptr<Node>> NodeMacro::GetNodes() {
 	for (int i = 0; i < count; ++i) {
 		K5::ksFeaturePtr feature = subFeatures->GetByIndex(i);
 		if (K5::ksEntityPtr e = feature->GetObject()) {
-			nodes.push_back(std::make_unique<Node>(e));
+			nodes.push_back(Node(e));
 		}
 	}
 	return nodes;

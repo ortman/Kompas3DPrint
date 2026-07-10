@@ -11,8 +11,8 @@ Part::~Part() {
     if (pPart) pPart->Release();
 }
 
-std::vector<std::unique_ptr<Node>> Part::GetNodes() {
-	std::vector<std::unique_ptr<Node>> nodes;
+std::vector<Node> Part::GetNodes() {
+	std::vector<Node> nodes;
 	K5::ksPartPtr part = pPart;
 	if (!part) return nodes;
 	K5::ksFeaturePtr topFeature = part->GetFeature();
@@ -24,7 +24,7 @@ std::vector<std::unique_ptr<Node>> Part::GetNodes() {
 		K5::ksFeaturePtr feature = subFeatures->GetByIndex(i);
 		K5::ksEntityPtr entity = feature->GetObject();
 		if (entity) {
-			nodes.push_back(std::make_unique<Node>(entity));
+			nodes.push_back(Node(entity));
 		}
 	}
 	return nodes;
@@ -39,10 +39,10 @@ IUnknown* Part::CreateEntity(int type) {
 	return entity;
 }
 
-Part& Part::Remove(std::unique_ptr<Node>& node) {
+Part& Part::Remove(Node node) {
 	K5::ksDocument3DPtr doc = pDoc;
 	if (doc) {
-		K5::ksEntityPtr entity = node->GetEntity();
+		K5::ksEntityPtr entity = node.GetEntity();
 		doc->DeleteObject(entity);
 	}
 	return *this;
@@ -56,38 +56,38 @@ IUnknown* Part::GetDefaultEntity(int type) {
 	return entity;
 }
 
-std::unique_ptr<Plane> Part::GetPlaneXOY() {
+Plane Part::GetPlaneXOY() {
 	IUnknown* entity = GetDefaultEntity(KConst3D::o3d_planeXOY);
 	if (!entity) return nullptr;
-	return std::make_unique<Plane>(entity);
+	return Plane(entity);
 }
 
-std::unique_ptr<Plane> Part::GetPlaneXOZ() {
+Plane Part::GetPlaneXOZ() {
 	IUnknown* entity = GetDefaultEntity(KConst3D::o3d_planeXOZ);
 	if (!entity) return nullptr;
-	return std::make_unique<Plane>(entity);
+	return Plane(entity);
 }
 
-std::unique_ptr<Plane> Part::GetPlaneYOZ() {
+Plane Part::GetPlaneYOZ() {
 	IUnknown* entity = GetDefaultEntity(KConst3D::o3d_planeYOZ);
 	if (!entity) return nullptr;
-	return std::make_unique<Plane>(entity);
+	return Plane(entity);
 }
 
-std::unique_ptr<Axis> Part::GetAxisOX() {
+Axis Part::GetAxisOX() {
 	IUnknown* entity = GetDefaultEntity(KConst3D::o3d_axisOX);
 	if (!entity) return nullptr;
-	return std::make_unique<Axis>(entity);
+	return Axis(entity);
 }
 
-std::unique_ptr<Axis> Part::GetAxisOY() {
+Axis Part::GetAxisOY() {
 	IUnknown* entity = GetDefaultEntity(KConst3D::o3d_axisOY);
 	if (!entity) return nullptr;
-	return std::make_unique<Axis>(entity);
+	return Axis(entity);
 }
 
-std::unique_ptr<Axis> Part::GetAxisOZ() {
+Axis Part::GetAxisOZ() {
 	IUnknown* entity = GetDefaultEntity(KConst3D::o3d_axisOZ);
 	if (!entity) return nullptr;
-	return std::make_unique<Axis>(entity);
+	return Axis(entity);
 }

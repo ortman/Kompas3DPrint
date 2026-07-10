@@ -35,8 +35,6 @@ public:
 		
 		constexpr Format(Value v) : value(v) {}
 		
-		//constexpr operator Format() const { return value; }
-		
 		constexpr operator int() const { return value; }
 		
 		constexpr friend bool operator==(Format lhs, Format rhs) noexcept {
@@ -115,14 +113,17 @@ private:
 	DocumentFileNotifyLoc *comEvent = nullptr;
 
 public:
-	KompasEvent<void()>  WhenCloseDocument;
-	KompasEvent<void()>  WhenSaveDocument;
+	KompasEvent<void()> WhenBeginCloseDocument;
+	KompasEvent<void()> WhenCloseDocument;
+	KompasEvent<void()> WhenBeginSaveDocument;
+	KompasEvent<void()> WhenSaveDocument;
+	KompasEvent<void()> WhenActiveDocument;
 	
 	Doc3D(IUnknown* pDoc);
 	~Doc3D();
 	std::string GetPath();
-	std::unique_ptr<Part> GetTopPart();
-	std::unique_ptr<NodeMacro> GetEditMacroObject();
+	Part GetTopPart();
+	NodeMacro GetEditMacroObject();
 	bool SaveAs(const ExportParams& params, const std::string& path);
 	Doc3D& Reopen();
 	void Close();

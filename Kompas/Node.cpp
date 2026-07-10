@@ -2,11 +2,13 @@
 #include "Node.h"
 
 Node::Node(IUnknown* f) : pEntity(f) {
-	if (pEntity) pEntity->AddRef();
+	if (pEntity)
+		pEntity->AddRef();
 }
 
 Node::~Node() {
-    if (pEntity) pEntity->Release();
+	if (pEntity)
+		pEntity->Release();
 }
 
 int Node::GetType() const {

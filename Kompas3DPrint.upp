@@ -22,6 +22,7 @@ file
 	Command/Settings.hpp,
 	Command/AboutDlg.hpp,
 	Command/Export.hpp,
+	Command/Threads.hpp,
 	Kompas readonly separator,
 	Kompas/ComKompas.h,
 	Kompas/ComKompas.cpp,
@@ -40,8 +41,12 @@ file
 	Kompas/KompasEvent.h,
 	Kompas/KompasEvent.cpp,
 	Nodes readonly separator,
+	Kompas/Node/Face.h,
+	Kompas/Node/Face.cpp,
 	Kompas/Node/Plane.h,
 	Kompas/Node/Plane.cpp,
+	Kompas/Node/Edge.h,
+	Kompas/Node/Edge.cpp,
 	Kompas/Node/Axis.h,
 	Kompas/Node/Axis.cpp,
 	Kompas/Node/CutExtrusion.h,
@@ -53,7 +58,9 @@ file
 	Kompas/Node/MeshCopy.h,
 	Kompas/Node/MeshCopy.cpp,
 	Kompas/Node/CircularCopy.h,
-	Kompas/Node/CircularCopy.cpp;
+	Kompas/Node/CircularCopy.cpp,
+	Kompas/Node/ThreadDesignation.h,
+	Kompas/Node/ThreadDesignation.cpp;
 
 mainconfig
 	"App" = "GUI",

@@ -16,7 +16,7 @@ private:
 	Panel::Property* propLength;
 	Panel::Property* propThink;
 	Panel::Property* propDepth;
-	std::unique_ptr<NodeMacro> edit;
+	NodeMacro edit = NodeMacro(nullptr);
 	
 public:
 	Rack() {
@@ -43,7 +43,7 @@ public:
 							CreateRack(moduleProp, lengthProp, thinkProp, depthProp);
 						}
 					}
-					edit = nullptr;
+					edit = NodeMacro(nullptr);
 					rackPanel.Hide();
 				} catch (const Kompas3DException& e) {
 					Kompas3D::Error(e.what());
@@ -61,11 +61,10 @@ public:
 			Kompas3D::Error("Не найден активный 3D документ");
 			return;
 		}
-		auto m = doc->GetEditMacroObject();
-		if (m) {
-			edit = std::move(m);
+		edit = doc->GetEditMacroObject();
+		if (edit) {
 			RackParameters rackParam;
-			if (edit->GetUserParam(&rackParam, sizeof(rackParam))) {
+			if (edit.GetUserParam(&rackParam, sizeof(rackParam))) {
 				*propModule = rackParam.m;
 				*propLength = rackParam.length;
 				*propThink = rackParam.think;
@@ -79,69 +78,68 @@ private:
 	void CreateRack(double m, double length, double think, double depth) {
 		auto doc = Kompas3D::GetActiveDocument3D();
 		if (!doc) return;
-		auto topPart = doc->GetTopPart();
+		Part topPart = doc->GetTopPart();
 		std::ostringstream name;
 		name << "Рейка " << m << " x " << length;
-		auto macro = topPart->Create<NodeMacro>(false, name.str());
+		NodeMacro macro = topPart.Create<NodeMacro>(false, name.str());
 		RackParameters rackParam = {m, length, think, depth};
-		macro->SetUserParam(&rackParam, sizeof(rackParam), MENU_RACK);
+		macro.SetUserParam(&rackParam, sizeof(rackParam), MENU_RACK);
 		
-		auto sketchBlank = topPart->Create<Sketch>(topPart->GetPlaneXOY(), "BlankSketch");
-		sketchBlank->Rect(0, 0, length, depth);
-		auto blank = topPart->Create<BaseExtrusion>(sketchBlank, think, 0, "Blank");
+		Sketch sketchBlank = topPart.Create<Sketch>(topPart.GetPlaneXOY(), "BlankSketch");
+		sketchBlank.Rect(0, 0, length, depth);
+		BaseExtrusion blank = topPart.Create<BaseExtrusion>(sketchBlank, think, 0, "Blank");
 		
-		auto sketchToth = topPart->Create<Sketch>(topPart->GetPlaneXOY(), "TothSketch");
-		DrawTothSketch(*sketchToth, m);
-		auto toth = topPart->Create<CutExtrusion>(sketchToth, 0, think, "TothCut");
-		
-		macro->Add(sketchBlank)
-			.Add(blank)
-			.Add(sketchToth)
-			.Add(toth);
+		Sketch sketchToth = topPart.Create<Sketch>(topPart.GetPlaneXOY(), "TothSketch");
+		DrawTothSketch(sketchToth, m);
+		CutExtrusion toth = topPart.Create<CutExtrusion>(sketchToth, 0, think, "TothCut");
 		
 		double step = M_PI * m;
-		auto tothArray = topPart->Create<MeshCopy>((int)(length / step) + 1, step, 1, 0, std::move(toth), "TothCutArray");
+		MeshCopy tothArray = topPart.Create<MeshCopy>((int)(length / step) + 1, step, 1, 0, std::move(toth), "TothCutArray");
 		
-		macro->Add(tothArray)
+		macro.Add(sketchBlank)
+			.Add(blank)
+			.Add(sketchToth)
+			.Add(toth)
+			.Add(tothArray)
 			.Update();
 	}
 	
 	void ReplaceRack(double m, double length, double think, double depth) {
 		if (!edit) return;
-		std::unique_ptr<Sketch> sketchBlank = nullptr;
-		std::unique_ptr<BaseExtrusion> blank = nullptr;
-		std::unique_ptr<Sketch> sketchToth = nullptr;
-		std::unique_ptr<CutExtrusion> toth = nullptr;
-		std::unique_ptr<MeshCopy> tothArray = nullptr;
-		for (auto& node : edit->GetNodes()) {
-			if (node->IsType(Sketch::TYPE) && node->GetName() == "BlankSketch") {
-				sketchBlank = node->As<Sketch>();
-			} else if ((node->IsType(BaseExtrusion::TYPE)
-				|| node->IsType(25))
-				&& node->GetName() == "Blank") {
-				blank = node->As<BaseExtrusion>();
-			} else if (node->IsType(Sketch::TYPE) && node->GetName() == "TothSketch") {
-				sketchToth = node->As<Sketch>();
-			} else if (node->IsType(CutExtrusion::TYPE) && node->GetName() == "TothCut") {
-				toth = node->As<CutExtrusion>();
-			} else if (node->IsType(MeshCopy::TYPE) && node->GetName() == "TothCutArray") {
-				tothArray = node->As<MeshCopy>();
+		Sketch sketchBlank(nullptr);
+		BaseExtrusion blank(nullptr);
+		Sketch sketchToth(nullptr);
+		CutExtrusion toth(nullptr);
+		MeshCopy tothArray(nullptr);
+		for (auto& node : edit.GetNodes()) {
+			if (node.IsType(Sketch::TYPE) && node.GetName() == "BlankSketch") {
+				sketchBlank = Sketch(node);
+			} else if ((node.IsType(BaseExtrusion::TYPE)
+				|| node.IsType(25))
+				&& node.GetName() == "Blank") {
+				blank = BaseExtrusion(node);
+			} else if (node.IsType(Sketch::TYPE) && node.GetName() == "TothSketch") {
+				sketchToth = Sketch(node);
+			} else if (node.IsType(CutExtrusion::TYPE) && node.GetName() == "TothCut") {
+				toth = CutExtrusion(node);
+			} else if (node.IsType(MeshCopy::TYPE) && node.GetName() == "TothCutArray") {
+				tothArray = MeshCopy(node);
 			}
 		}
 		if (!sketchBlank || !blank || !sketchToth || !toth || !tothArray) return;
 		RackParameters rackParam = {m, length, think, depth};
-		edit->SetUserParam(&rackParam, sizeof(rackParam), MENU_RACK);
+		edit.SetUserParam(&rackParam, sizeof(rackParam), MENU_RACK);
 		std::ostringstream name;
 		name << "Рейка " << m << " x " << length;
-		edit->SetName(name.str());
-		sketchBlank->Clear().Rect(0, 0, length, depth).EndEdit();
-		blank->SetDepth1(think);
-		DrawTothSketch(sketchToth->Clear(), m);
-		sketchToth->EndEdit();
-		toth->SetDepth2(think);
+		edit.SetName(name.str());
+		sketchBlank.Clear().Rect(0, 0, length, depth).EndEdit();
+		blank.SetDepth1(think);
+		DrawTothSketch(sketchToth.Clear(), m);
+		sketchToth.EndEdit();
+		toth.SetDepth2(think);
 		double step = M_PI * m;
-		tothArray->SetParam1((int)(length / step) + 1, step);
-		edit->Hide().Update();
+		tothArray.SetParam1((int)(length / step) + 1, step);
+		edit.Hide().Update();
 	}
 	
 	void DrawTothSketch(Sketch& sketch, double m) {

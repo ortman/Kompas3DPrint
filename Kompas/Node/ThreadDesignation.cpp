@@ -1,0 +1,53 @@
+#include "../ComKompas.h"
+#include "../Kompas3D.h"
+#include "ThreadDesignation.h"
+
+double ThreadDesignation::GetLength() const {
+	K5::ksEntityPtr entity = pEntity;
+	K5::ksThreadDefinitionPtr def = entity->GetDefinition();
+	if (!def) throw Kompas3DException("Не могу получить ksMeshCopyDefinition");
+	return def->length;
+}
+
+double ThreadDesignation::GetPitch() const {
+	K5::ksEntityPtr entity = pEntity;
+	K5::ksThreadDefinitionPtr def = entity->GetDefinition();
+	if (!def) throw Kompas3DException("Не могу получить ksMeshCopyDefinition");
+	return def->p;
+}
+
+double ThreadDesignation::GetDiameter() const {
+	K5::ksEntityPtr entity = pEntity;
+	K5::ksThreadDefinitionPtr def = entity->GetDefinition();
+	if (!def) throw Kompas3DException("Не могу получить ksMeshCopyDefinition");
+	return def->dr;
+}
+
+bool ThreadDesignation::IsForwardDir() const {
+	K5::ksEntityPtr entity = pEntity;
+	K5::ksThreadDefinitionPtr def = entity->GetDefinition();
+	if (!def) throw Kompas3DException("Не могу получить ksMeshCopyDefinition");
+	K7::IThreadPtr iThread = Kompas3D::ToApi7<K7::IThreadPtr>(pEntity);
+	return iThread ? iThread->LeftThread : true;
+}
+
+bool ThreadDesignation::IsOutside() const {
+	K5::ksEntityPtr entity = pEntity;
+	K5::ksThreadDefinitionPtr def = entity->GetDefinition();
+	if (!def) throw Kompas3DException("Не могу получить ksMeshCopyDefinition");
+	return def->outside;
+}
+
+Edge ThreadDesignation::GetBeginEdge() const {
+	K5::ksEntityPtr entity = pEntity;
+	K5::ksThreadDefinitionPtr def = entity->GetDefinition();
+	return Edge(def->GetFaceBegin());
+}
+
+Edge ThreadDesignation::GetEndEdge() const {
+	K5::ksEntityPtr entity = pEntity;
+	K5::ksThreadDefinitionPtr def = entity->GetDefinition();
+	return Edge(def->GetFaceEnd());
+}
+
+int ThreadDesignation::TYPE = KConst3D::o3d_thread;

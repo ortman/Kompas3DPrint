@@ -15,5 +15,6 @@
 #define MENU_ABOUT        20
 #define MENU_GEAR         30
 #define MENU_RACK         31
+#define MENU_THREADS      32
 
 #endif

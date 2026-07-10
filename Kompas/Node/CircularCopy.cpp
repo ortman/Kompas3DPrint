@@ -5,8 +5,8 @@
 CircularCopy::CircularCopy(IUnknown* p,
 		int CCount, double CStep, bool CFactor,
 		int RCount, double RStep, bool RFactor,
-		std::unique_ptr<Axis> axis,
-		const std::vector<std::unique_ptr<Node>>& nodes,
+		Axis axis,
+		const std::vector<Node>& nodes,
 		const std::optional<std::string>& name) : Node(p) {
 	K5::ksEntityPtr entity = pEntity;
 	if (name.has_value()) entity->name = Utf8ToCp1251(name.value()).c_str();
@@ -18,13 +18,13 @@ CircularCopy::CircularCopy(IUnknown* p,
 	def->count2 = CCount;
 	def->step2 = CStep;
 	def->factor2 = CFactor;
-	K5::ksEntityPtr axisEntity = axis->GetEntity();
+	K5::ksEntityPtr axisEntity = axis.GetEntity();
 	if (!axisEntity) throw Kompas3DException("Не могу получить Ось для Эскиза");
 	def->SetAxis(axisEntity);
 	K5::ksEntityCollectionPtr operations = def->GetOperationArray();
 	if (!def) throw Kompas3DException("Не могу получить OperationArray в CircularCopy");
-	for (const std::unique_ptr<Node>& node : nodes) {
-		K5::ksEntityPtr nodeEntity = node->GetEntity();
+	for (const Node& node : nodes) {
+		K5::ksEntityPtr nodeEntity = node.GetEntity();
 		if (nodeEntity) operations->Add(nodeEntity);
 	}
 
@@ -34,8 +34,8 @@ CircularCopy::CircularCopy(IUnknown* p,
 CircularCopy::CircularCopy(IUnknown* p,
 		int CCount, double CStep, bool CFactor,
 		int RCount, double RStep, bool RFactor,
-		std::unique_ptr<Axis> axis,
-		const std::unique_ptr<Node> node,
+		Axis axis,
+		const Node node,
 		const std::optional<std::string>& name) : Node(p) {
 	K5::ksEntityPtr entity = pEntity;
 	if (name.has_value()) entity->name = Utf8ToCp1251(name.value()).c_str();
@@ -47,12 +47,12 @@ CircularCopy::CircularCopy(IUnknown* p,
 	def->count2 = CCount;
 	def->step2 = CStep;
 	def->factor2 = CFactor;
-	K5::ksEntityPtr axisEntity = axis->GetEntity();
+	K5::ksEntityPtr axisEntity = axis.GetEntity();
 	if (!axisEntity) throw Kompas3DException("Не могу получить Ось для Эскиза");
 	def->SetAxis(axisEntity);
 	K5::ksEntityCollectionPtr operations = def->GetOperationArray();
 	if (!def) throw Kompas3DException("Не могу получить OperationArray в CircularCopy");
-	K5::ksEntityPtr nodeEntity = node->GetEntity();
+	K5::ksEntityPtr nodeEntity = node.GetEntity();
 	if (nodeEntity) operations->Add(nodeEntity);
 	entity->Create();
 }

@@ -15,7 +15,7 @@ private:
 	Panel::Property* propModule;
 	Panel::Property* propCount;
 	Panel::Property* propThink;
-	std::unique_ptr<NodeMacro> edit;
+	NodeMacro edit = NodeMacro(nullptr);
 
 public:
 	Gear() {
@@ -40,7 +40,7 @@ public:
 							CreateGear(moduleProp, (int)countProp, thinkProp);
 						}
 					}
-					edit = nullptr;
+					edit = NodeMacro(nullptr);
 					gearPanel.Hide();
 				} catch (const Kompas3DException&) {
 				}
@@ -57,11 +57,10 @@ public:
 			Kompas3D::Error("Не найден активный 3D документ");
 			return;
 		}
-		auto m = doc->GetEditMacroObject();
-		if (m) {
-			edit = std::move(m);
+		edit = doc->GetEditMacroObject();
+		if (edit) {
 			GearParameters gearParam;
-			if (edit->GetUserParam(&gearParam, sizeof(gearParam))) {
+			if (edit.GetUserParam(&gearParam, sizeof(gearParam))) {
 				*propModule = gearParam.m;
 				*propCount = gearParam.count;
 				*propThink = gearParam.think;
@@ -77,64 +76,63 @@ private:
 		auto topPart = doc->GetTopPart();
 		std::ostringstream name;
 		name << "Шестерня " << m << " x " << count;
-		auto macro = topPart->Create<NodeMacro>(false, name.str());
+		NodeMacro macro = topPart.Create<NodeMacro>(false, name.str());
 		GearParameters gearParam = {m, count, think};
-		macro->SetUserParam(&gearParam, sizeof(gearParam), MENU_GEAR);
+		macro.SetUserParam(&gearParam, sizeof(gearParam), MENU_GEAR);
 		
-		auto sketchBlank = topPart->Create<Sketch>(topPart->GetPlaneXOY(), "BlankSketch");
-		sketchBlank->Circle(0, 0, (m * (count + 2.0)) / 2.0);
-		auto blank = topPart->Create<BaseExtrusion>(sketchBlank, think, 0, "Blank");
+		Sketch sketchBlank = topPart.Create<Sketch>(topPart.GetPlaneXOY(), "BlankSketch");
+		sketchBlank.Circle(0, 0, (m * (count + 2.0)) / 2.0);
+		BaseExtrusion blank = topPart.Create<BaseExtrusion>(sketchBlank, think, 0, "Blank");
 		
-		auto sketchToth = topPart->Create<Sketch>(topPart->GetPlaneXOY(), "TothSketch");
-		DrawTothSketch(*sketchToth, m, count);
-		auto toth = topPart->Create<CutExtrusion>(sketchToth, 0, think, "TothCut");
+		Sketch sketchToth = topPart.Create<Sketch>(topPart.GetPlaneXOY(), "TothSketch");
+		DrawTothSketch(sketchToth, m, count);
+		CutExtrusion toth = topPart.Create<CutExtrusion>(sketchToth, 0, think, "TothCut");
+				
+		CircularCopy tothArray = topPart.Create<CircularCopy>(count, 360, true, 1, 0, false, topPart.GetAxisOZ(), std::move(toth), "TothCutArray");
 		
-		macro->Add(sketchBlank)
+		macro.Add(sketchBlank)
 			.Add(blank)
 			.Add(sketchToth)
-			.Add(toth);
-		
-		auto tothArray = topPart->Create<CircularCopy>(count, 360, true, 1, 0, false, topPart->GetAxisOZ(), std::move(toth), "TothCutArray");
-		
-		macro->Add(tothArray)
+			.Add(toth)
+			.Add(tothArray)
 			.Update();
 	}
 	
 	void ReplaceGear(double m, int count, double think) {
 		if (!edit) return;
-		std::unique_ptr<Sketch> sketchBlank = nullptr;
-		std::unique_ptr<BaseExtrusion> blank = nullptr;
-		std::unique_ptr<Sketch> sketchToth = nullptr;
-		std::unique_ptr<CutExtrusion> toth = nullptr;
-		std::unique_ptr<CircularCopy> tothArray = nullptr;
-		for (auto& node : edit->GetNodes()) {
-			if (node->IsType(Sketch::TYPE) && node->GetName() == "BlankSketch") {
-				sketchBlank = node->As<Sketch>();
-			} else if ((node->IsType(BaseExtrusion::TYPE)
-				|| node->IsType(25))
-				&& node->GetName() == "Blank") {
-				blank = node->As<BaseExtrusion>();
-			} else if (node->IsType(Sketch::TYPE) && node->GetName() == "TothSketch") {
-				sketchToth = node->As<Sketch>();
-			} else if (node->IsType(CutExtrusion::TYPE) && node->GetName() == "TothCut") {
-				toth = node->As<CutExtrusion>();
-			} else if (node->IsType(CircularCopy::TYPE) && node->GetName() == "TothCutArray") {
-				tothArray = node->As<CircularCopy>();
+		Sketch sketchBlank = Sketch(nullptr);
+		BaseExtrusion blank = BaseExtrusion(nullptr);
+		Sketch sketchToth = Sketch(nullptr);
+		CutExtrusion toth = CutExtrusion(nullptr);
+		CircularCopy tothArray = CircularCopy(nullptr);
+		for (Node& node : edit.GetNodes()) {
+			if (node.IsType(Sketch::TYPE) && node.GetName() == "BlankSketch") {
+				sketchBlank = Sketch(node);
+			} else if ((node.IsType(BaseExtrusion::TYPE)
+				|| node.IsType(25))
+				&& node.GetName() == "Blank") {
+				blank = BaseExtrusion(node);
+			} else if (node.IsType(Sketch::TYPE) && node.GetName() == "TothSketch") {
+				sketchToth = Sketch(node);
+			} else if (node.IsType(CutExtrusion::TYPE) && node.GetName() == "TothCut") {
+				toth = CutExtrusion(node);
+			} else if (node.IsType(CircularCopy::TYPE) && node.GetName() == "TothCutArray") {
+				tothArray = CircularCopy(node);
 			}
 		}
 		if (!sketchBlank || !blank || !sketchToth || !toth || !tothArray) return;
 		GearParameters gearParam = {m, count, think};
-		edit->SetUserParam(&gearParam, sizeof(gearParam), MENU_GEAR);
+		edit.SetUserParam(&gearParam, sizeof(gearParam), MENU_GEAR);
 		std::ostringstream name;
 		name << "Шестерня " << m << " x " << count;
-		edit->SetName(name.str());
-		sketchBlank->Clear().Circle(0, 0, (m * (count + 2.0)) / 2.0).EndEdit();
-		blank->SetDepth1(think);
-		DrawTothSketch(sketchToth->Clear(), m, count);
-		sketchToth->EndEdit();
-		toth->SetDepth2(think);
-		tothArray->SetCircularParam(count, 360, true);
-		edit->Hide().Update();
+		edit.SetName(name.str());
+		sketchBlank.Clear().Circle(0, 0, (m * (count + 2.0)) / 2.0).EndEdit();
+		blank.SetDepth1(think);
+		DrawTothSketch(sketchToth.Clear(), m, count);
+		sketchToth.EndEdit();
+		toth.SetDepth2(think);
+		tothArray.SetCircularParam(count, 360, true);
+		edit.Hide().Update();
 	}
 
 	void DrawTothSketch(Sketch& sketch, double m, int count) {

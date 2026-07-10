@@ -45,11 +45,20 @@ public:
 		sAngle.MinMax(int(SETTINGS_ANGLE_MIN * 1000.), int(SETTINGS_ANGLE_MAX * 1000.));
 		eRidge.MinMax(SETTINGS_RIDGE_MIN,   SETTINGS_RIDGE_MAX);
 		sRidge.MinMax(int(SETTINGS_RIDGE_MIN * 1000.), int(SETTINGS_RIDGE_MAX * 1000.));
+		
+		sLinear.WhenAction = [=]() { eLinear <<= double(int(~sLinear)) / 1000.;	};
+		eLinear.WhenAction = [=]() { sLinear <<= int(double(~eLinear)  * 1000.);};
+		sAngle.WhenAction  = [=]() { eAngle  <<= double(int(~sAngle))  / 1000.; };
+		eAngle.WhenAction  = [=]() { sAngle  <<= int(double(~eAngle)   * 1000.);};
+		sRidge.WhenAction  = [=]() { eRidge  <<= double(int(~sRidge))  / 1000.; };
+		eRidge.WhenAction  = [=]() { sRidge  <<= int(double(~eRidge)   * 1000.);};
 	}
 	
-	const Doc3D::ExportParams& GetExportParams() {
-		return params;
-	}
+	const Doc3D::ExportParams& GetExportParams() { return params;	}
+	
+	String GetSlicerPath() { return ~eSlicerPath; }
+	
+	Doc3D::Format GetSlicerFormat() { return (Doc3D::Format::Value)(int)~dlSlicerFormat; }
 	
 	bool Load() {
 		std::string dir = Kompas3D::ConfigPath();

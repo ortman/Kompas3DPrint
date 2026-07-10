@@ -103,6 +103,13 @@ T Kompas3D::GetParamStruct(int type) {
 	return kompas->GetParamStruct(type);
 }
 
+template <typename T>
+T Kompas3D::ToApi7(IUnknown* k5) {
+	if (!Connect()) return nullptr;
+	K5::KompasObjectPtr kompas(pKompas);
+	return kompas->TransferInterface(k5, KConst::ksAPI7Dual, 0);
+}
+
 Panel Kompas3D::CreatePanel(const std::string& name) {
 	if (!Connect()) throw new Kompas3DException("Kompas not connected");
 	K7::IApplicationPtr kompas7(pKompas7);
@@ -138,10 +145,12 @@ KompasEvent<bool(Doc3D&, int)> Kompas3D::WhenCreateDocument;
 KompasEvent<bool(Doc3D&, int)> Kompas3D::WhenOpenDocument;
 
 #define KOMPAS_PARAM(p) template K5::p##Ptr Kompas3D::GetParamStruct<K5::p##Ptr>(int);
-
 KOMPAS_PARAM(ksRectangleParam)
 KOMPAS_PARAM(ksRegularPolygonParam)
 KOMPAS_PARAM(ksEllipseParam)
 KOMPAS_PARAM(ksEllipseArcParam)
 KOMPAS_PARAM(ksEllipseArcParam1)
 KOMPAS_PARAM(ksUserParam)
+
+#define KOMPAS_API7(p) template K7::p##Ptr Kompas3D::ToApi7<K7::p##Ptr>(IUnknown*);
+KOMPAS_API7(IThread)

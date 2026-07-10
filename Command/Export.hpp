@@ -28,7 +28,15 @@ public:
 			saveDlg.Type(type.Name(), String("*") + type.Ext());
 		}
 	}
-	void Slicer() {}
+	
+	void Slicer(Doc3D::ExportParams& params, const String& slicerPath) {
+		if (!FileExists(slicerPath)) {
+		  Kompas3D::Message(("Неправильно указан путь до слайсера :" + slicerPath).ToStd());
+		}
+		LocalProcess slicer;
+		slicer.Start(slicerPath, {"C:/Users/User/Documents/Деталь.stl"}, NULL, GetFileFolder(slicerPath));
+		slicer.Detach();
+	}
 	
 	void SaveAs(Doc3D::ExportParams& params) {
 		std::unique_ptr<Doc3D> doc = Kompas3D::GetActiveDocument3D();

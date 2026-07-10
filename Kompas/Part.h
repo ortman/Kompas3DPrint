@@ -17,21 +17,21 @@ private:
 public:
 	Part(IUnknown* pDoc, IUnknown* pPart);
 	~Part();
-	std::vector<std::unique_ptr<Node>> GetNodes();
+	std::vector<Node> GetNodes();
 	template <typename T, typename... Args>
-	std::unique_ptr<T> Create(Args&&... args) {
+	T Create(Args&&... args) {
 		static_assert(std::is_base_of<Node, T>::value, "T must be derived from Node");
 		IUnknown* entity = CreateEntity(T::TYPE);
 		if (!entity) throw Kompas3DException(std::string("Не могу создать объект ") + typeid(T).name());
-		return std::make_unique<T>(entity, std::forward<Args>(args)...);
+		return T(entity, std::forward<Args>(args)...);
 	}
-	Part& Remove(std::unique_ptr<Node>& node);
-	std::unique_ptr<Plane> GetPlaneXOY();
-	std::unique_ptr<Plane> GetPlaneXOZ();
-	std::unique_ptr<Plane> GetPlaneYOZ();
-	std::unique_ptr<Axis> GetAxisOX();
-	std::unique_ptr<Axis> GetAxisOY();
-	std::unique_ptr<Axis> GetAxisOZ();
+	Part& Remove(Node node);
+	Plane GetPlaneXOY();
+	Plane GetPlaneXOZ();
+	Plane GetPlaneYOZ();
+	Axis GetAxisOX();
+	Axis GetAxisOY();
+	Axis GetAxisOZ();
 };
 
 #endif
