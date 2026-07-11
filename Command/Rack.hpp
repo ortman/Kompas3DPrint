@@ -4,6 +4,17 @@
 
 class Rack {
 private:
+	struct RackPanel : Panel {
+		RackPanel() : Panel("Параметры рейки") {}
+		struct MainTab : Panel::Tab {
+			MainTab() : Panel::Tab("Параметры") {}
+			Panel::Property m      = {"Модуль",  0.8};
+			Panel::Property length = {"Длина",   100};
+			Panel::Property think  = {"Толщина", 5};
+			Panel::Property depth  = {"Глубина", 8};
+		} main;
+	};
+
 	struct RackParameters {
 	    double m;
 	    double length;
@@ -11,51 +22,37 @@ private:
 	    double depth;
 	};
 	
-	Panel* panel;
-	Panel::Property* propModule;
-	Panel::Property* propLength;
-	Panel::Property* propThink;
-	Panel::Property* propDepth;
+	RackPanel panel;
 	NodeMacro edit = NodeMacro(nullptr);
 	
 public:
 	Rack() {
 		try {
 			if (!Kompas3D::Connect()) return;
-			static Panel rackPanel = Kompas3D::CreatePanel("Параметры рейки");
-			panel = &rackPanel;
-			Panel::Tab& rackTab = rackPanel.CreateTab("Параметры");
-			static Panel::Property& moduleProp = rackTab.CreateProperty("Модуль", 0.8);
-			propModule = &moduleProp;
-			static Panel::Property& lengthProp = rackTab.CreateProperty("Длина", 100);
-			propLength = &lengthProp;
-			static Panel::Property& thinkProp  = rackTab.CreateProperty("Толщина", 5);
-			propThink = &thinkProp;
-			static Panel::Property& depthProp  = rackTab.CreateProperty("Глубина", 8);
-			propDepth = &depthProp;
+			panel.Create();
 			
-			rackPanel.WhenButtonClick = [=](int buttonId) {
+			panel.WhenButtonClick = [=](int buttonId) {
 				try {
 					if (buttonId == 1) {
 						if (edit) {
-							ReplaceRack(moduleProp, lengthProp, thinkProp, depthProp);
+							ReplaceRack();
 						} else {
-							CreateRack(moduleProp, lengthProp, thinkProp, depthProp);
+							CreateRack();
 						}
 					}
 					edit = NodeMacro(nullptr);
-					rackPanel.Hide();
+					panel.Hide();
 				} catch (const Kompas3DException& e) {
 					Kompas3D::Error(e.what());
 				}
 				return false;
 			};
+
 		} catch (const Kompas3DException&) {
 		}
 	}
 	
 	void Start() {
-		if (!panel) throw Kompas3DException("Панель свойств рейки отсутствует");
 		Doc3D doc = Kompas3D::GetActiveDocument3D();
 		if (!doc) {
 			Kompas3D::Error("Не найден активный 3D документ");
@@ -65,19 +62,23 @@ public:
 		if (edit) {
 			RackParameters rackParam;
 			if (edit.GetUserParam(&rackParam, sizeof(rackParam))) {
-				*propModule = rackParam.m;
-				*propLength = rackParam.length;
-				*propThink = rackParam.think;
-				*propDepth = rackParam.depth;
+				panel.main.m = rackParam.m;
+				panel.main.length = rackParam.length;
+				panel.main.think  = rackParam.think;
+				panel.main.depth  = rackParam.depth;
 			}
 		}
-		panel->Show();
+		panel.Show();
 	}
 	
 private:
-	void CreateRack(double m, double length, double think, double depth) {
+	void CreateRack() {
 		Doc3D doc = Kompas3D::GetActiveDocument3D();
 		if (!doc) return;
+		double m = panel.main.m;
+		double length = panel.main.length;
+		double think = panel.main.think;
+		double depth = panel.main.depth;
 		Part topPart = doc.GetTopPart();
 		std::ostringstream name;
 		name << "Рейка " << m << " x " << length;
@@ -104,8 +105,12 @@ private:
 			.Update();
 	}
 	
-	void ReplaceRack(double m, double length, double think, double depth) {
+	void ReplaceRack() {
 		if (!edit) return;
+		double m = panel.main.m;
+		double length = panel.main.length;
+		double think = panel.main.think;
+		double depth = panel.main.depth;
 		Sketch sketchBlank(nullptr);
 		BaseExtrusion blank(nullptr);
 		Sketch sketchToth(nullptr);

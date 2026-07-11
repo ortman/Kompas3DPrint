@@ -88,12 +88,8 @@ void Kompas3D::Disconnect() {
 Doc3D Kompas3D::GetActiveDocument3D() {
 	if (!Connect()) return nullptr;
 	K5::KompasObjectPtr kompas(pKompas);
-	//kompas->AddRef();
 	K5::ksDocument3DPtr doc = kompas->ActiveDocument3D();
-	if (doc) {
-		return Doc3D(doc.GetInterfacePtr());
-	}
-	return nullptr;
+	return Doc3D(doc ? doc.GetInterfacePtr() : nullptr);
 }
 
 Doc3D Kompas3D::Open3D(std::string path, bool visible) {
@@ -127,13 +123,14 @@ T Kompas3D::ToApi5(IUnknown* k7) {
 	return kompas->TransferInterface(k7, KConst::ksAPI5Auto, 0);
 }
 
-Panel Kompas3D::CreatePanel(const std::string& name) {
+IUnknown* Kompas3D::CreatePropertyManager() {
 	if (!Connect()) throw Kompas3DException("Kompas not connected");
 	K7::IApplicationPtr kompas7(pKompas7);
 	if (!pKompas7) throw Kompas3DException("Kompas not connected");
 	K7::IPropertyManagerPtr manager = kompas7->CreatePropertyManager(true);
 	if (!manager) throw Kompas3DException("Can not create PropertyManager");
-	return Panel(manager.GetInterfacePtr(), name);
+	manager.AddRef();
+	return manager.GetInterfacePtr();
 }
 
 void Kompas3D::Message(const std::string& txt) {

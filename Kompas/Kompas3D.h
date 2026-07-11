@@ -29,11 +29,14 @@ public:
 	static T ToApi7(IUnknown* k5);
 	template <typename T>
 	static T ToApi5(IUnknown* k7);
-	static Panel CreatePanel(const std::string& name);
 	static void Message(const std::string& txt);
 	static void Error(const std::string& txt);
 	static std::string SystemPath(long type);
 	static std::string ConfigPath();
+	
+	friend class Panel;
+private:
+	static IUnknown* CreatePropertyManager();
 };
 
 #endif

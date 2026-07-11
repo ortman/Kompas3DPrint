@@ -5,43 +5,42 @@
 
 class Gear {
 private:
-	struct GearParameters {
-	    double m;
-	    int count;
-	    double think;
+	struct GearPanel : Panel {
+		GearPanel() : Panel("Параметры шестерни") {}
+		struct MainTab : Panel::Tab {
+			MainTab() : Panel::Tab("Параметры") {}
+			Panel::Property m     = {"Модуль",     0.8};
+			Panel::Property count = {"Количество", 20};
+			Panel::Property think = {"Толщина",    5};
+		} main;
 	};
 
-	Panel* panel;
-	Panel::Property* propModule;
-	Panel::Property* propCount;
-	Panel::Property* propThink;
+	struct GearParameters {
+		double m;
+		int count;
+		double think;
+	};
+
+	GearPanel panel;
 	NodeMacro edit = NodeMacro(nullptr);
 
 public:
 	Gear() {
 		try {
 			if (!Kompas3D::Connect()) return;
-			static Panel gearPanel = Kompas3D::CreatePanel("Параметры шестерни");
-			panel = &gearPanel;
-			static Panel::Tab& gearTab = gearPanel.CreateTab("Параметры");
-			static Panel::Property& moduleProp = gearTab.CreateProperty("Модуль", 0.8);
-			propModule = &moduleProp;
-			static Panel::Property& countProp  = gearTab.CreateProperty("Количество", 20);
-			propCount = &countProp;
-			static Panel::Property& thinkProp  = gearTab.CreateProperty("Толщина", 5);
-			propThink = &thinkProp;
+			panel.Create();
 		
-			gearPanel.WhenButtonClick = [=](int buttonId) {
+			panel.WhenButtonClick = [=](int buttonId) {
 				try {
 					if (buttonId == 1) {
 						if (edit) {
-							ReplaceGear(moduleProp, (int)countProp, thinkProp);
+							ReplaceGear();
 						} else {
-							CreateGear(moduleProp, (int)countProp, thinkProp);
+							CreateGear();
 						}
 					}
 					edit = NodeMacro(nullptr);
-					gearPanel.Hide();
+					panel.Hide();
 				} catch (const Kompas3DException&) {
 				}
 				return false;
@@ -51,7 +50,6 @@ public:
 	}
 	
 	void Start() {
-		if (!panel) throw Kompas3DException("Панель свойств шестерни отсутствует");
 		Doc3D doc = Kompas3D::GetActiveDocument3D();
 		if (!doc) {
 			Kompas3D::Error("Не найден активный 3D документ");
@@ -61,18 +59,21 @@ public:
 		if (edit) {
 			GearParameters gearParam;
 			if (edit.GetUserParam(&gearParam, sizeof(gearParam))) {
-				*propModule = gearParam.m;
-				*propCount = gearParam.count;
-				*propThink = gearParam.think;
+				panel.main.m = gearParam.m;
+				panel.main.count = gearParam.count;
+				panel.main.think = gearParam.think;
 			}
 		}
-		panel->Show();
+		panel.Show();
 	}
 
 private:
-	void CreateGear(double m, int count, double think) {
+	void CreateGear() {
 		Doc3D doc = Kompas3D::GetActiveDocument3D();
 		if (!doc) return;
+		double m = panel.main.m;
+		int count = (int)panel.main.count;
+		double think = panel.main.think;
 		Part topPart = doc.GetTopPart();
 		std::ostringstream name;
 		name << "Шестерня " << m << " x " << count;
@@ -98,8 +99,11 @@ private:
 			.Update();
 	}
 	
-	void ReplaceGear(double m, int count, double think) {
+	void ReplaceGear() {
 		if (!edit) return;
+		double m = panel.main.m;
+		int count = (int)panel.main.count;
+		double think = panel.main.think;
 		Sketch sketchBlank = Sketch(nullptr);
 		BaseExtrusion blank = BaseExtrusion(nullptr);
 		Sketch sketchToth = Sketch(nullptr);

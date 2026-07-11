@@ -1,6 +1,7 @@
 #include "ComKompas.h"
 #include "Panel.h"
 #include "Node.h"
+#include "Kompas3D.h"
 
 class PropertyManagerNotifyLoc : public ComEvent {
 private:
@@ -27,33 +28,47 @@ public:
 };
 
 // Panel
-Panel::Panel(IUnknown* m, const std::string& name) : pManager(m) {
-	if (pManager) pManager->AddRef();
-	K7::IPropertyManagerPtr manager(pManager);
-	if (!manager) throw Kompas3DException("Can not get PropertyManager");
-	manager->Caption = Node::Utf8ToCp1251(name).c_str();
-	manager->SpecToolbar = KConst::pnEnterEscHelp;
-	comEvent = new PropertyManagerNotifyLoc(this);
-	comEvent->Subscribe(pManager);
-}
-
 Panel::~Panel() {
     if (comEvent) {
 		comEvent->Unsubscribe(pManager);
 		delete comEvent;
     }
 	if (pManager) pManager->Release();
+	currentPanel = nullptr;
 }
 
-Panel::Tab& Panel::CreateTab(const std::string& name) {
-	K7::IPropertyManagerPtr manager(pManager);
-	if (!manager) throw Kompas3DException("Can not get PropertyManager");
-	K7::IPropertyTabsPtr pTabs = manager->PropertyTabs;
-	if (!pTabs) throw Kompas3DException("Can not get PropertyTabs of PropertyManager");
-	K7::IPropertyTabPtr pTab = pTabs->Add(Node::Utf8ToCp1251(name).c_str());
-	if (!pTab) throw Kompas3DException("Can not create Tab in PropertyManager");
-	tabs.push_back(std::make_unique<Panel::Tab>(pTab.GetInterfacePtr(), name));
-	return *tabs.back();
+bool Panel::Create() {
+	try {
+		pManager = Kompas3D::CreatePropertyManager();
+		K7::IPropertyManagerPtr manager(pManager);
+		manager->Caption = Node::Utf8ToCp1251(name).c_str();
+		manager->SpecToolbar = KConst::pnEnterEscHelp;
+		comEvent = new PropertyManagerNotifyLoc(this);
+		comEvent->Subscribe(pManager);
+		K7::IPropertyTabsPtr pTabs = manager->PropertyTabs;
+		if (!pTabs) throw Kompas3DException("Can not get PropertyTabs of PropertyManager");
+		for (Tab* t : tabs) {
+			K7::IPropertyTabPtr pTab = pTabs->Add(Node::Utf8ToCp1251(t->name).c_str());
+			if (pTab) {
+				pTab.AddRef();
+				t->pTab = pTab.GetInterfacePtr();
+				K7::IPropertyControlsPtr ctrls = pTab->PropertyControls;
+				if (!ctrls) throw Kompas3DException("Can not get PropertyControls of Tab");
+				for (Property* p : t->props) {
+					K7::IPropertyControlPtr c = ctrls->Add(KConst::ksControlEditReal);
+					if (c) {
+						c.AddRef();
+						c->Name = Node::Utf8ToCp1251(p->name).c_str();
+						c->Value = p->defaultVal;
+						p->pProp = c.GetInterfacePtr();
+					}
+				}
+			}
+		}
+	} catch (const Kompas3DException&) {
+		return false;
+	}
+	return true;
 }
 
 Panel& Panel::Show(bool isShow) {
@@ -67,35 +82,17 @@ Panel& Panel::Show(bool isShow) {
 	return *this;
 }
 
-// Tab
-Panel::Tab::Tab(IUnknown* p, const std::string& name) : pTab(p) {
-	if (pTab) pTab->AddRef();
-}
+Panel* Panel::currentPanel = nullptr;
 
+// Tab
 Panel::Tab::~Tab() {
 	if (pTab) pTab->Release();
+	currentTab = nullptr;
 }
 
-Panel::Property& Panel::Tab::CreateProperty(const std::string& name, double val) {
-	K7::IPropertyTabPtr tab(pTab);
-	if (!tab) throw Kompas3DException("Can not get Tab");
-	K7::IPropertyControlsPtr ctrls = tab->PropertyControls;
-	if (!ctrls) throw Kompas3DException("Can not get PropertyControls of Tab");
-	K7::IPropertyControlPtr c = ctrls->Add(KConst::ksControlEditReal);
-	if (!c) throw Kompas3DException("Can not create Control of Tab");
-	props.push_back(std::make_unique<Panel::Property>(c.GetInterfacePtr(), name, val));
-	return *props.back();
-}
+Panel::Tab* Panel::Tab::currentTab = nullptr;
 
 // Property
-Panel::Property::Property(IUnknown* p, const std::string& name, double val) : pProp(p) {
-	if (pProp) pProp->AddRef();
-	K7::IPropertyControlPtr c(pProp);
-	if (!c) throw Kompas3DException("Can not get Control");
-	c->Name = Node::Utf8ToCp1251(name).c_str();
-	c->Value = val;
-}
-
 Panel::Property::~Property() {
 	if (pProp) pProp->Release();
 }
