@@ -69,7 +69,7 @@ private:
 		Doc3D doc = Kompas3D::GetActiveDocument3D();
 		if (!doc) return;
 		double m = panel.main.m;
-		int count = (int)panel.main.count;
+		int count = panel.main.count;
 		double think = panel.main.think;
 		Part topPart = doc.GetTopPart();
 		std::ostringstream name;
@@ -99,7 +99,7 @@ private:
 	void ReplaceGear() {
 		if (!edit) return;
 		double m = panel.main.m;
-		int count = (int)panel.main.count;
+		int count = panel.main.count;
 		double think = panel.main.think;
 		Sketch sketchBlank = Sketch(nullptr);
 		BaseExtrusion blank = BaseExtrusion(nullptr);

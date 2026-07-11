@@ -14,10 +14,10 @@ private:
 	} panel{"Параметры рейки"};
 
 	struct RackParameters {
-	    double m;
-	    double length;
-	    double think;
-	    double depth;
+		double m;
+		double length;
+		double think;
+		double depth;
 	};
 	
 	NodeMacro edit = NodeMacro(nullptr);

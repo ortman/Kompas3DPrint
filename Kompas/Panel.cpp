@@ -3,6 +3,17 @@
 #include "Node.h"
 #include "Kompas3D.h"
 
+_variant_t ToVariantT(const PropertyVariant& boxVar) {
+    return std::visit([](const auto& arg) -> _variant_t {
+        using T = std::decay_t<decltype(arg)>;
+        if constexpr (std::is_same_v<T, std::string>) {
+            return _variant_t(arg.c_str()); // Создаст VARIANT с типом VT_BSTR
+        } else {
+            return _variant_t(arg); // Для int (VT_I4), double (VT_R8) и т.д.
+        }
+    }, boxVar);
+}
+
 class PropertyManagerNotifyLoc : public ComEvent {
 private:
 	Panel* panel;
@@ -59,7 +70,7 @@ bool Panel::Create() {
 					if (c) {
 						c.AddRef();
 						c->Name = Node::Utf8ToCp1251(p->name).c_str();
-						c->Value = p->defaultVal;
+						c->Value = ToVariantT(p->defaultVal);
 						p->pProp = c.GetInterfacePtr();
 					}
 				}
@@ -97,13 +108,20 @@ Panel::Property::~Property() {
 	if (pProp) pProp->Release();
 }
 
-Panel::Property::operator double() const {
+template <typename T>
+Panel::Property::operator T() const {
 	K7::IPropertyControlPtr prop(pProp);
 	return prop->Value;
 }
 
-double Panel::Property::operator=(double val) {
+template <typename T>
+T Panel::Property::operator=(T val) {
 	K7::IPropertyControlPtr prop(pProp);
 	prop->Value = val;
 	return val;
 }
+
+template double Panel::Property::operator=(double val);
+template        Panel::Property::operator double();
+template int    Panel::Property::operator=(int val);
+template        Panel::Property::operator int();

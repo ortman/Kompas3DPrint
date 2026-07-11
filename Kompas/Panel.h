@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <variant>
 #include "KompasEvent.h"
 
 class PropertyManagerNotifyLoc;
@@ -51,21 +52,25 @@ public:
 	friend class Panel;
 };
 
+using PropertyVariant = std::variant<int, double, std::string>;
+
 class Panel::Property {
 private:
 	IUnknown* pProp;
 	std::string name;
-	double defaultVal = 0.0;
+	PropertyVariant defaultVal;
 
 public:
-	Property(const char* name, double val = 0.0) : name(name), defaultVal(val) {
+	Property(const char* name, PropertyVariant val) : name(name), defaultVal(val) {
 		if (Panel::Tab::currentTab) {
 			Tab::currentTab->props.push_back(this);
 		}
 	}
 	~Property();
-	operator double() const;
-	double operator=(double);
+	template <typename T>
+	operator T() const;
+	template <typename T>
+	T operator=(T);
 	friend class Panel;
 };
 
