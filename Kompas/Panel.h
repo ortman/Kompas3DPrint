@@ -23,7 +23,7 @@ public:
 	
 	KompasEvent<bool(int buttonId)> WhenButtonClick;
 	
-	Panel(const std::string& name) : name(name), pManager(nullptr) {
+	Panel(const char* name) : name(name), pManager(nullptr) {
 		currentPanel = this;
 	}
 	~Panel();
@@ -41,7 +41,7 @@ private:
 	static Tab* currentTab;
 	
 public:
-	Tab(const std::string& name) : name(name) {
+	Tab(const char* name) : name(name) {
 		if (Panel::currentPanel) {
 			Panel::currentPanel->tabs.push_back(this);
 		}
@@ -58,7 +58,7 @@ private:
 	double defaultVal = 0.0;
 
 public:
-	Property(const std::string& name, double val = 0.0) : name(name), defaultVal(val) {
+	Property(const char* name, double val = 0.0) : name(name), defaultVal(val) {
 		if (Panel::Tab::currentTab) {
 			Tab::currentTab->props.push_back(this);
 		}

@@ -2,6 +2,13 @@
 #define _Kompas3DPrint_StandardParts_hpp_
 
 class StandardParts {
+private:
+	struct : Panel {
+		struct : Panel::Tab {
+			Panel::Property m{"Модуль",     0.8};
+		} main{"Параметры"};
+	} panel{"Стандартные изделия"};
+
 public:
 	struct Embodiments {
 		struct Variables : Moveable<Variables> {
@@ -23,11 +30,11 @@ public:
 	
 		void Jsonize(JsonIO& json) {
 			json("name", name);
-			if(json.IsLoading() || !sub.IsEmpty()) {
+			if (json.IsLoading() || !sub.IsEmpty()) {
 				json("sub", sub);
 			}
-			if(json.IsLoading() || !embodiments.data.IsEmpty()) {
-					json("embodiments", embodiments);
+			if (json.IsLoading() || !embodiments.data.IsEmpty()) {
+				json("embodiments", embodiments);
 			}
 		}
 	};
@@ -35,12 +42,24 @@ public:
 	StandardParts() {
 		try {
 			if (!Kompas3D::Connect()) return;
-			
+			panel.Create();
+			panel.WhenButtonClick = [=](int buttonId) {
+				try {
+					if (buttonId == 1) {
+						//todo: paste;
+					} else {
+						panel.Hide();
+					}
+				} catch (const Kompas3DException& e) {
+					Kompas3D::Error(e.what());
+				}
+				return false;
+			};
 		} catch (const Kompas3DException&) {
 		}
 	}
 	
-	void Start() {
+	void Scan() {
 			try {
 				if (!Kompas3D::Connect()) return;
 				Item standardParts;
@@ -52,23 +71,27 @@ public:
 			}
 	}
 	
+	void Run() {
+		Load();
+		panel.Show();
+	}
+	
 private:
 	void ScanDir(Item& dir, const String& path) {
 		dir.name = GetFileName(path);
 		FindFile ff;
-		if(ff.Search(AppendFileName(path, "*"))) {
+		if (ff.Search(AppendFileName(path, "*"))) {
 			do {
-				if(ff.IsFile()) {
-					if(ToLower(GetFileExt(ff.GetName())) == ".m3d") {
+				if (ff.IsFile()) {
+					if (ToLower(GetFileExt(ff.GetName())) == ".m3d") {
 						AddModel(dir.sub.Add(), ff.GetPath());
 					}
-				}
-				else if(ff.IsFolder()) {
-					if(ff.GetName() != "." && ff.GetName() != "..") {
+				} else if (ff.IsFolder()) {
+					if (ff.GetName() != "." && ff.GetName() != "..") {
 						ScanDir(dir.sub.Add(), ff.GetPath());
 					}
 				}
-			} while(ff.Next());
+			} while (ff.Next());
 		}
 	}
 	
@@ -93,6 +116,13 @@ private:
 			Kompas3D::Error(e.what());
 		}
 		doc.Close();
+	}
+	
+	void Load() {
+		String path = AppendFileName(GetDocumentsFolder(), "Стандартные изделия");
+		Item standardParts;
+		bool isLoaded = LoadFromJsonFile(standardParts, AppendFileName(path, "index.json"));
+		Kompas3D::Error(std::string("Load index is ") + (isLoaded ? "successful" : "error"));
 	}
 };
 

@@ -27,7 +27,7 @@ void MainStart() {
 	rack     = std::make_unique<Rack>();
 	gear     = std::make_unique<Gear>();
 	threads  = std::make_unique<Threads>();
-	standardParts  = std::make_unique<StandardParts>();
+	standardParts = std::make_unique<StandardParts>();
 }
 
 void Export(Doc3D::Format format) {
@@ -96,7 +96,8 @@ public:
 		bGear       << [=]() { LIBRARYENTRY(MENU_GEAR); };
 		bRack       << [=]() { LIBRARYENTRY(MENU_RACK); };
 		bThreads    << [=]() { LIBRARYENTRY(MENU_THREADS); };
-		bStIndex    << [=]() { standardParts->Start(); };
+		bStIndex    << [=]() { standardParts->Scan(); };
+		bStRun      << [=]() { standardParts->Run(); };
 	}
 };
 

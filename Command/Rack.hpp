@@ -4,16 +4,14 @@
 
 class Rack {
 private:
-	struct RackPanel : Panel {
-		RackPanel() : Panel("Параметры рейки") {}
+	struct : Panel {
 		struct MainTab : Panel::Tab {
-			MainTab() : Panel::Tab("Параметры") {}
-			Panel::Property m      = {"Модуль",  0.8};
-			Panel::Property length = {"Длина",   100};
-			Panel::Property think  = {"Толщина", 5};
-			Panel::Property depth  = {"Глубина", 8};
-		} main;
-	};
+			Panel::Property m     {"Модуль",  0.8};
+			Panel::Property length{"Длина",   100};
+			Panel::Property think {"Толщина", 5};
+			Panel::Property depth {"Глубина", 8};
+		} main{"Параметры"};
+	} panel{"Параметры рейки"};
 
 	struct RackParameters {
 	    double m;
@@ -22,7 +20,6 @@ private:
 	    double depth;
 	};
 	
-	RackPanel panel;
 	NodeMacro edit = NodeMacro(nullptr);
 	
 public:

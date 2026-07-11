@@ -5,15 +5,13 @@
 
 class Gear {
 private:
-	struct GearPanel : Panel {
-		GearPanel() : Panel("Параметры шестерни") {}
-		struct MainTab : Panel::Tab {
-			MainTab() : Panel::Tab("Параметры") {}
-			Panel::Property m     = {"Модуль",     0.8};
-			Panel::Property count = {"Количество", 20};
-			Panel::Property think = {"Толщина",    5};
-		} main;
-	};
+	struct : Panel {
+		struct : Panel::Tab {
+			Panel::Property m    {"Модуль",     0.8};
+			Panel::Property count{"Количество", 20};
+			Panel::Property think{"Толщина",    5};
+		} main{"Параметры"};
+	} panel{"Параметры шестерни"};
 
 	struct GearParameters {
 		double m;
@@ -21,7 +19,6 @@ private:
 		double think;
 	};
 
-	GearPanel panel;
 	NodeMacro edit = NodeMacro(nullptr);
 
 public:
