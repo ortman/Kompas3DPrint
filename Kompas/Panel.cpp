@@ -4,14 +4,14 @@
 #include "Kompas3D.h"
 
 _variant_t ToVariantT(const PropertyVariant& boxVar) {
-    return std::visit([](const auto& arg) -> _variant_t {
-        using T = std::decay_t<decltype(arg)>;
-        if constexpr (std::is_same_v<T, std::string>) {
-            return _variant_t(arg.c_str()); // Создаст VARIANT с типом VT_BSTR
-        } else {
-            return _variant_t(arg); // Для int (VT_I4), double (VT_R8) и т.д.
-        }
-    }, boxVar);
+	return std::visit([](const auto& arg) -> _variant_t {
+		using T = std::decay_t<decltype(arg)>;
+		if constexpr (std::is_same_v<T, std::string>) {
+			return _variant_t(Node::Utf8ToCp1251(arg).c_str()); // Создаст VARIANT с типом VT_BSTR
+		} else {
+			return _variant_t(arg); // Для int (VT_I4), double (VT_R8) и т.д.
+		}
+	}, boxVar);
 }
 
 class PropertyManagerNotifyLoc : public ComEvent {
@@ -41,6 +41,22 @@ public:
 							if (p->GetId() == buttonId.lVal) {
 								PropertyButton* b = dynamic_cast<PropertyButton*>(p);
 								if (b) b->WhenClick();
+							}
+						}
+					}
+				}
+				break;
+			}
+			case KConst::prChangeControlValue: {
+				VARIANT& ctrl = pDispParams->rgvarg[pDispParams->cArgs - 1];
+				if (panel && ctrl.vt == VT_DISPATCH) {
+					K7::IPropertyControlPtr pCtrl = ctrl.pdispVal;
+					if (pCtrl) {
+						for (Panel::Tab* t : panel->tabs) {
+							for (Panel::Property* p : t->props) {
+								if (pCtrl->Id == p->GetId()) {
+									p->WhenChange();
+								}
 							}
 						}
 					}
@@ -108,6 +124,20 @@ Panel* Panel::currentPanel = nullptr;
 Panel::Tab::~Tab() {
 	if (pTab) pTab->Release();
 	currentTab = nullptr;
+}
+
+Panel::Tab& Panel::Tab::Clear() {
+	K7::IPropertyTabPtr tab = pTab;
+	K7::IPropertyControlsPtr ctrls = tab->PropertyControls;
+	int cnt = (int)props.size();
+	for (int i = cnt - 1; i >= 0; --i) {
+		if (props[i]->isAutoCreate) {
+			delete props[i];
+			props.erase(props.begin() + i);
+			ctrls->Delete(i);
+		}
+	}
+	return *this;
 }
 
 Panel::Tab* Panel::Tab::currentTab = nullptr;

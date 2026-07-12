@@ -10,9 +10,9 @@ class KompasObjectNotifyLoc : public ComEvent {
 public:
 	KompasObjectNotifyLoc() : ComEvent(K5::DIID_ksKompasObjectNotify) {}
 	
-    STDMETHODIMP Invoke(DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags,
-                        DISPPARAMS* pDispParams, VARIANT* pVarResult,
-                        EXCEPINFO* pExcepInfo, UINT* puArgErr) override {
+	STDMETHODIMP Invoke(DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags,
+	                    DISPPARAMS* pDispParams, VARIANT* pVarResult,
+	                    EXCEPINFO* pExcepInfo, UINT* puArgErr) override {
 		switch((int)dispIdMember) {
 			case KConst::koOpenDocument: {
 				VARIANT& varDoc = pDispParams->rgvarg[pDispParams->cArgs - 1];
@@ -37,8 +37,8 @@ public:
 				break;
 			}
 		}
-        return S_OK;
-    }
+		return S_OK;
+	}
 };
 
 KompasObjectNotifyLoc kompasNotify;

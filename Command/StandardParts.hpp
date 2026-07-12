@@ -158,6 +158,7 @@ public:
 				if (selector.Execute() == IDOK) {
 					StandardPartsSelector::Embodiments emb = selector.GetSelected();
 					if (emb.data.GetCount()) {
+						panel.params.Clear();
 						panel.main.model.SetName("Model name");
 						PropertyList& embList = panel.main.embodiment;
 						embList.Clear();
@@ -167,6 +168,9 @@ public:
 					}
 					//Kompas3D::Error(model.ToStd());
 				}
+			};
+			panel.main.embodiment.WhenChange = [=]() {
+				Kompas3D::Error("Change ");
 			};
 			panel.WhenButtonClick = [=](int buttonId) {
 				try {

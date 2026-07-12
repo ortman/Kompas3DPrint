@@ -50,6 +50,7 @@ public:
 		currentTab = this;
 	}
 	~Tab();
+	Tab& Clear();
 	friend class Panel;
 	friend PropertyManagerNotifyLoc;
 };
@@ -58,6 +59,7 @@ using PropertyVariant = std::variant<int, double, std::string>;
 
 class Panel::Property {
 protected:
+	bool isAutoCreate = false;
 	IUnknown* pProp;
 	std::string name;
 	PropertyVariant defaultVal;
@@ -72,6 +74,8 @@ protected:
 	int GetId();
 	
 public:
+	KompasEvent<void(void)> WhenChange;
+	
 	virtual ~Property();
 	void SetName(const std::string& name);
 
