@@ -7,9 +7,9 @@ class Gear {
 private:
 	struct : Panel {
 		struct : Panel::Tab {
-			Panel::Property m    {"Модуль",     0.8};
-			Panel::Property count{"Количество", 20};
-			Panel::Property think{"Толщина",    5};
+			PropertyD m    {"Модуль",     0.8};
+			PropertyI count{"Количество", 20};
+			PropertyD think{"Толщина",    5};
 		} main{"Параметры"};
 	} panel{"Параметры шестерни"};
 

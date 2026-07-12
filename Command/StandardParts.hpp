@@ -1,27 +1,30 @@
 #ifndef _Kompas3DPrint_StandardParts_hpp_
 #define _Kompas3DPrint_StandardParts_hpp_
+#include <CtrlLib/CtrlLib.h>
+#include "../Resources.h"
+#include "../Kompas/Kompas3D.h"
 
-class StandardParts {
-private:
-	struct : Panel {
-		struct : Panel::Tab {
-			Panel::Property m{"Модуль",     0.8};
-		} main{"Параметры"};
-	} panel{"Стандартные изделия"};
-
+class StandardPartsSelector : public WithStandardPartsModelsLay<TopWindow>  {
 public:
-	struct Embodiments {
+	struct Embodiments : Moveable<Embodiments> {
 		struct Variables : Moveable<Variables> {
 	    VectorMap<String, Vector<double>> data;
 	    void Jsonize(JsonIO& json) {
 				StringMap(json, data);
 	    }
+	    Variables() {}
+	    Variables(const Variables& vs) : data(clone(vs.data)) {}
 		};
+		
+		String name;
     VectorMap<String, Variables> data;
     void Jsonize(JsonIO& json) {
 			StringMap(json, data);
     }
+    Embodiments() {}
+    Embodiments(const Embodiments& embs) : data(clone(embs.data)) {}
 	};
+	
 	struct Item : Moveable<Item> {
 		String name;
 		Embodiments embodiments;
@@ -39,44 +42,54 @@ public:
 		}
 	};
 	
-	StandardParts() {
-		try {
-			if (!Kompas3D::Connect()) return;
-			panel.Create();
-			panel.WhenButtonClick = [=](int buttonId) {
-				try {
-					if (buttonId == 1) {
-						//todo: paste;
-					} else {
-						panel.Hide();
-					}
-				} catch (const Kompas3DException& e) {
-					Kompas3D::Error(e.what());
-				}
-				return false;
-			};
-		} catch (const Kompas3DException&) {
+private:
+	Item standardParts;
+
+public:
+	StandardPartsSelector() {
+		CtrlLayout(*this, t_("Select model"));
+		Zoomable().Sizeable();
+		models.WhenLeftDouble = [=]() {
+			Vector<int> sel = models.GetSel();
+			if (sel.GetCount() == 1 && sel[0] && !models.Get(sel[0]).IsNull()) {
+				AcceptBreak(IDOK);
+			}
+		};
+	}
+	
+	void Load() {
+		String path = AppendFileName(GetDocumentsFolder(), "Стандартные изделия");
+		models.Clear();
+		bool isLoaded = LoadFromJsonFile(standardParts, AppendFileName(path, "index.json"));
+		if (isLoaded) {
+			models.SetRoot(CtrlImg::Dir(), standardParts.name);
+			LoadTree(0, standardParts);
+		} else {
+			Kompas3D::Error("Load index is error");
 		}
 	}
 	
-	void Scan() {
-			try {
-				if (!Kompas3D::Connect()) return;
-				Item standardParts;
-				String path = AppendFileName(GetDocumentsFolder(), "Стандартные изделия");
-				ScanDir(standardParts, path);
-				StoreAsJsonFile(standardParts, AppendFileName(path, "index.json"), true);
-			} catch (const Kompas3DException& e) {
-				Kompas3D::Error(e.what());
+	void LoadTree(int parent, const Item& item) {
+		for (const Item& i : item.sub) {
+			if (i.sub.GetCount()) {
+				int p = models.Add(parent, CtrlImg::Dir(), Null, i.name, i.sub.GetCount() == 1);
+				LoadTree(p, i);
+			} else {
+				models.Add(parent, CtrlImg::File(), RawToValue(i.embodiments), i.name);
 			}
+		}
 	}
 	
-	void Run() {
-		Load();
-		panel.Show();
+	Embodiments GetSelected() {
+		Vector<int> sel = models.GetSel();
+		if (sel.GetCount() == 1 && sel[0]) {
+			Value e = models.Get(sel[0]);
+			if (!e.IsNull())
+				return e.To<Embodiments>();
+		}
+		return Embodiments();
 	}
 	
-private:
 	void ScanDir(Item& dir, const String& path) {
 		dir.name = GetFileName(path);
 		FindFile ff;
@@ -94,6 +107,8 @@ private:
 			} while (ff.Next());
 		}
 	}
+
+private:
 	
 	void AddModel(Item& file, String path) {
 		Doc3D	doc = Kompas3D::Open3D(path.ToStd(), false);
@@ -117,12 +132,72 @@ private:
 		}
 		doc.Close();
 	}
+};
+
+class StandardParts {
+private:
+	struct : Panel {
+		struct : Panel::Tab {
+			PropertyButton model      {"Выберите модель"};
+			PropertyList   embodiment {"Исполнение"};
+		} main{"Основные"};
+		struct : Panel::Tab {
+			PropertyList   l    {"Длина"};
+		} params{"Параметры"};
+	} panel{"Стандартные изделия"};
 	
-	void Load() {
-		String path = AppendFileName(GetDocumentsFolder(), "Стандартные изделия");
-		Item standardParts;
-		bool isLoaded = LoadFromJsonFile(standardParts, AppendFileName(path, "index.json"));
-		Kompas3D::Error(std::string("Load index is ") + (isLoaded ? "successful" : "error"));
+	StandardPartsSelector selector;
+
+public:
+	StandardParts() {
+		try {
+			if (!Kompas3D::Connect()) return;
+			panel.Create();
+			panel.main.model.WhenClick = [=]() {
+				selector.Load();
+				if (selector.Execute() == IDOK) {
+					StandardPartsSelector::Embodiments emb = selector.GetSelected();
+					if (emb.data.GetCount()) {
+						panel.main.model.SetName("Model name");
+						PropertyList& embList = panel.main.embodiment;
+						embList.Clear();
+						for (const String& key : emb.data.GetKeys()) {
+							embList.Add(key.ToStd());
+						}
+					}
+					//Kompas3D::Error(model.ToStd());
+				}
+			};
+			panel.WhenButtonClick = [=](int buttonId) {
+				try {
+					if (buttonId == 1) {
+						//todo: paste;
+					} else {
+						panel.Hide();
+					}
+				} catch (const Kompas3DException& e) {
+					Kompas3D::Error(e.what());
+				}
+				return false;
+			};
+		} catch (const Kompas3DException&) {
+		}
+	}
+	
+	void Run() {
+		panel.Show();
+	}
+	
+	void Scan() {
+			try {
+				if (!Kompas3D::Connect()) return;
+				String path = AppendFileName(GetDocumentsFolder(), "Стандартные изделия");
+				StandardPartsSelector::Item standardParts;
+				selector.ScanDir(standardParts, path);
+				StoreAsJsonFile(standardParts, AppendFileName(path, "index.json"), true);
+			} catch (const Kompas3DException& e) {
+				Kompas3D::Error(e.what());
+			}
 	}
 };
 

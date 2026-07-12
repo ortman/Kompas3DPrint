@@ -6,10 +6,10 @@ class Rack {
 private:
 	struct : Panel {
 		struct MainTab : Panel::Tab {
-			Panel::Property m     {"Модуль",  0.8};
-			Panel::Property length{"Длина",   100};
-			Panel::Property think {"Толщина", 5};
-			Panel::Property depth {"Глубина", 8};
+			PropertyD m     {"Модуль",  0.8};
+			PropertyD length{"Длина",   100};
+			PropertyD think {"Толщина", 5};
+			PropertyD depth {"Глубина", 8};
 		} main{"Параметры"};
 	} panel{"Параметры рейки"};
 

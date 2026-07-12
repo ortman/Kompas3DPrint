@@ -20,9 +20,9 @@ private:
 public:
 	PropertyManagerNotifyLoc(Panel* p) : ComEvent(K7::DIID_ksPropertyManagerNotify), panel(p) {}
 	
-    STDMETHODIMP Invoke(DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags,
-                        DISPPARAMS* pDispParams, VARIANT* pVarResult,
-                        EXCEPINFO* pExcepInfo, UINT* puArgErr) override {
+	STDMETHODIMP Invoke(DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags,
+	                    DISPPARAMS* pDispParams, VARIANT* pVarResult,
+	                    EXCEPINFO* pExcepInfo, UINT* puArgErr) override {
 		switch((int)dispIdMember) {
 			case KConst::prButtonClick: {
 				VARIANT& buttonId = pDispParams->rgvarg[pDispParams->cArgs - 1];
@@ -33,17 +33,31 @@ public:
 				}
 				break;
 			}
+			case KConst::prControlCommand: {
+				VARIANT& buttonId = pDispParams->rgvarg[pDispParams->cArgs - 2];
+				if (panel && buttonId.vt == VT_I4) {
+					for (Panel::Tab* t : panel->tabs) {
+						for (Panel::Property* p : t->props) {
+							if (p->GetId() == buttonId.lVal) {
+								PropertyButton* b = dynamic_cast<PropertyButton*>(p);
+								if (b) b->WhenClick();
+							}
+						}
+					}
+				}
+				break;
+			}
 		}
-        return S_OK;
-    }
+		return S_OK;
+	}
 };
 
 // Panel
 Panel::~Panel() {
-    if (comEvent) {
+	if (comEvent) {
 		comEvent->Unsubscribe(pManager);
 		delete comEvent;
-    }
+	}
 	if (pManager) pManager->Release();
 	currentPanel = nullptr;
 }
@@ -66,13 +80,8 @@ bool Panel::Create() {
 				K7::IPropertyControlsPtr ctrls = pTab->PropertyControls;
 				if (!ctrls) throw Kompas3DException("Can not get PropertyControls of Tab");
 				for (Property* p : t->props) {
-					K7::IPropertyControlPtr c = ctrls->Add(KConst::ksControlEditReal);
-					if (c) {
-						c.AddRef();
-						c->Name = Node::Utf8ToCp1251(p->name).c_str();
-						c->Value = ToVariantT(p->defaultVal);
-						p->pProp = c.GetInterfacePtr();
-					}
+					K7::IPropertyControlPtr c = ctrls->Add((KConst::ControlTypeEnum)p->type);
+					if (c) p->Create(c.GetInterfacePtr());
 				}
 			}
 		}
@@ -108,20 +117,65 @@ Panel::Property::~Property() {
 	if (pProp) pProp->Release();
 }
 
-template <typename T>
-Panel::Property::operator T() const {
-	K7::IPropertyControlPtr prop(pProp);
-	return prop->Value;
+void Panel::Property::Create(IUnknown* pControls) {
+	pProp = pControls;
+	pProp->AddRef();
+	K7::IPropertyControlPtr c = pProp;
+	c->Name = Node::Utf8ToCp1251(name).c_str();
+	c->Value = ToVariantT(defaultVal);
+	c->Id = ++nextId;
 }
 
-template <typename T>
-T Panel::Property::operator=(T val) {
+int Panel::Property::GetId() {
+	K7::IPropertyControlPtr c = pProp;
+	return c->Id;
+}
+
+void Panel::Property::SetName(const std::string& name) {
+	K7::IPropertyControlPtr c = pProp;
+	c->Name = Node::Utf8ToCp1251(name).c_str();
+}
+
+int Panel::Property::nextId = 1;
+
+PropertyList& PropertyList::Add(PropertyVariant val) {
+	K7::IPropertyListPtr prop(pProp);
+	prop->Add(ToVariantT(val));
+	return *this;
+}
+
+PropertyList& PropertyList::Clear() {
+	K7::IPropertyListPtr prop(pProp);
+	prop->ClearList();
+	return *this;
+}
+
+double PropertyD::operator=(double val) {
 	K7::IPropertyControlPtr prop(pProp);
 	prop->Value = val;
 	return val;
 }
 
-template double Panel::Property::operator=(double val);
-template        Panel::Property::operator double();
-template int    Panel::Property::operator=(int val);
-template        Panel::Property::operator int();
+PropertyD::operator double() const {
+	K7::IPropertyControlPtr prop(pProp);
+	return prop->Value;
+}
+
+int PropertyI::operator=(int val) {
+	K7::IPropertyControlPtr prop(pProp);
+	prop->Value = val;
+	return val;
+}
+
+PropertyI::operator int() const {
+	K7::IPropertyControlPtr prop(pProp);
+	return prop->Value;
+}
+
+void PropertyButton::Create(IUnknown* pControls) {
+	pProp = pControls;
+	pProp->AddRef();
+	K7::IPropertyControlPtr c = pProp;
+	c->Name = Node::Utf8ToCp1251(name).c_str();
+	c->Id = ++nextId;
+}

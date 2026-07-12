@@ -31,7 +31,7 @@ std::vector<Node> Part::GetNodes() {
 		K5::ksFeaturePtr feature = subFeatures->GetByIndex(i);
 		K5::ksEntityPtr entity = feature->GetObject();
 		if (entity) {
-			nodes.push_back(Node(entity));
+			nodes.push_back(Node(entity.GetInterfacePtr()));
 		}
 	}
 	return nodes;

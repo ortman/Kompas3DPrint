@@ -50,3 +50,7 @@ LAYOUT(SettingsLay, 400, 280)
 	ITEM(Upp::Button, bSave, SetLabel(t_("Сохранить")).RightPosZ(96, 84).BottomPosZ(5, 27))
 END_LAYOUT
 
+LAYOUT(StandardPartsModelsLay, 248, 356)
+	ITEM(Upp::TreeCtrl, models, HSizePosZ(0, 0).VSizePosZ(0, 0))
+END_LAYOUT
+
