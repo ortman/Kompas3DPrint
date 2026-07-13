@@ -17,28 +17,46 @@ public:
 		};
 		
 		String name;
+		String path;
     VectorMap<String, Variables> data;
     void Jsonize(JsonIO& json) {
 			StringMap(json, data);
     }
     Embodiments() {}
-    Embodiments(const Embodiments& embs) : data(clone(embs.data)) {}
+    Embodiments(const Embodiments& e) : data(clone(e.data)), name(e.name), path(e.path) {}
+		operator bool() const {
+			return data.GetCount();
+		}
+		Embodiments& operator=(const Embodiments& e) {
+			name = e.name;
+			path = e.path;
+			data = clone(e.data);
+			return *this;
+		}
 	};
 	
 	struct Item : Moveable<Item> {
-		String name;
 		Embodiments embodiments;
-		
 		Vector<Item> sub;
 	
 		void Jsonize(JsonIO& json) {
-			json("name", name);
-			if (json.IsLoading() || !sub.IsEmpty()) {
-				json("sub", sub);
-			}
+			static String relPath;
+			String lastPath = relPath;
+			json("name", embodiments.name);
 			if (json.IsLoading() || !embodiments.data.IsEmpty()) {
 				json("embodiments", embodiments);
 			}
+			if (json.IsLoading()) {
+				relPath += "/" + embodiments.name;
+				embodiments.path = relPath;
+				if (json.Get("sub").IsNull()) {
+					embodiments.name.Trim(embodiments.name.GetCount() - 4);
+				}
+			}
+			if (json.IsLoading() || !sub.IsEmpty()) {
+				json("sub", sub);
+			}
+			relPath = lastPath;
 		}
 	};
 	
@@ -62,7 +80,8 @@ public:
 		models.Clear();
 		bool isLoaded = LoadFromJsonFile(standardParts, AppendFileName(path, "index.json"));
 		if (isLoaded) {
-			models.SetRoot(CtrlImg::Dir(), standardParts.name);
+			//models.SetRoot(CtrlImg::Dir(), standardParts.embodiments.name);
+			models.NoRoot();
 			LoadTree(0, standardParts);
 		} else {
 			Kompas3D::Error("Load index is error");
@@ -72,10 +91,10 @@ public:
 	void LoadTree(int parent, const Item& item) {
 		for (const Item& i : item.sub) {
 			if (i.sub.GetCount()) {
-				int p = models.Add(parent, CtrlImg::Dir(), Null, i.name, i.sub.GetCount() == 1);
+				int p = models.Add(parent, CtrlImg::Dir(), Null, i.embodiments.name, i.sub.GetCount() == 1);
 				LoadTree(p, i);
 			} else {
-				models.Add(parent, CtrlImg::File(), RawToValue(i.embodiments), i.name);
+				models.Add(parent, CtrlImg::File(), RawToValue(i.embodiments), i.embodiments.name);
 			}
 		}
 	}
@@ -91,7 +110,7 @@ public:
 	}
 	
 	void ScanDir(Item& dir, const String& path) {
-		dir.name = GetFileName(path);
+		dir.embodiments.name = GetFileName(path);
 		FindFile ff;
 		if (ff.Search(AppendFileName(path, "*"))) {
 			do {
@@ -113,7 +132,7 @@ private:
 	void AddModel(Item& file, String path) {
 		Doc3D	doc = Kompas3D::Open3D(path.ToStd(), false);
 		try {
-			file.name = GetFileName(path);
+			file.embodiments.name = GetFileName(path);
 			int eCnt = doc.GetEmbodimentsCount();
 			if (!eCnt) Kompas3D::Error("Нет исполнений");
 			for (int i = 0; i < eCnt; ++i) {
@@ -122,9 +141,17 @@ private:
 				Embodiments::Variables& variables = file.embodiments.data.Add(doc.GetEmbodimentName(i));
 				auto vv = e.GetVariables();
 				for (auto& v : vv) {
-					Vector<String> sub = Split(v.comment.c_str(), ',');
-					Vector<double>& d = variables.data.Add(v.name);
-					for (const String& s : sub) d.Add(StrDbl(s));
+					String name = v.name;
+					Vector<String> values;
+					Vector<String> nameVal = Split(v.comment.c_str(), ':');
+					if (nameVal.GetCount() == 2) {
+						name = nameVal[0] + "(" + name + ")";
+						values = Split(nameVal[1], ',');
+					} else {
+						values = Split(v.comment.c_str(), ',');
+					}
+					Vector<double>& d = variables.data.Add(name);
+					for (const String& s : values) d.Add(StrDbl(s));
 				}
 			}
 		} catch (const Kompas3DException& e) {
@@ -142,11 +169,11 @@ private:
 			PropertyList   embodiment {"Исполнение"};
 		} main{"Основные"};
 		struct : Panel::Tab {
-			PropertyList   l    {"Длина"};
 		} params{"Параметры"};
 	} panel{"Стандартные изделия"};
 	
 	StandardPartsSelector selector;
+	StandardPartsSelector::Embodiments emb;
 
 public:
 	StandardParts() {
@@ -154,23 +181,35 @@ public:
 			if (!Kompas3D::Connect()) return;
 			panel.Create();
 			panel.main.model.WhenClick = [=]() {
-				selector.Load();
 				if (selector.Execute() == IDOK) {
-					StandardPartsSelector::Embodiments emb = selector.GetSelected();
-					if (emb.data.GetCount()) {
-						panel.params.Clear();
-						panel.main.model.SetName("Model name");
-						PropertyList& embList = panel.main.embodiment;
-						embList.Clear();
+					panel.params.Clear();
+					panel.main.embodiment.Clear();
+					emb = selector.GetSelected();
+					if (emb) {
+						panel.main.model.SetName(emb.name.ToStd());
 						for (const String& key : emb.data.GetKeys()) {
-							embList.Add(key.ToStd());
+							panel.main.embodiment.Add(key.ToStd());
 						}
+						Kompas3D::Error(emb.path.ToStd());
 					}
-					//Kompas3D::Error(model.ToStd());
+					panel.Update();
 				}
 			};
 			panel.main.embodiment.WhenChange = [=]() {
-				Kompas3D::Error("Change ");
+				if (emb) {
+					std::string val = std::get<std::string>((PropertyVariant)panel.main.embodiment);
+					StandardPartsSelector::Embodiments::Variables& variables = emb.data.Get(val);
+					panel.params.Clear();
+					for (const String& v : variables.data.GetKeys()) {
+						PropertyList var(v.ToStd().c_str());
+						panel.params.Add(var);
+						for (double d : variables.data.Get(v)) {
+							var.Add(d);
+						}
+					}
+					panel.Update();
+					Kompas3D::Error("Embodiment:" + val);
+				}
 			};
 			panel.WhenButtonClick = [=](int buttonId) {
 				try {
@@ -190,6 +229,7 @@ public:
 	
 	void Run() {
 		panel.Show();
+		selector.Load();
 	}
 	
 	void Scan() {

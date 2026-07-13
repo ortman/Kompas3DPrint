@@ -14,6 +14,17 @@ _variant_t ToVariantT(const PropertyVariant& boxVar) {
 	}, boxVar);
 }
 
+PropertyVariant FromVariantT(const _variant_t& var) {
+	switch (var.vt) {
+		case VT_I4:   return int(var);
+		case VT_R8:   return double(var);
+		case VT_BSTR: return Node::Cp1251ToUtf8(_bstr_t(var.bstrVal));
+		case VT_I2:   return static_cast<int>(var);
+		case VT_R4:   return static_cast<double>(var);
+		default: throw Kompas3DException("Unsupported _variant_t type");
+	}
+}
+
 class PropertyManagerNotifyLoc : public ComEvent {
 private:
 	Panel* panel;
@@ -107,6 +118,14 @@ bool Panel::Create() {
 	return true;
 }
 
+Panel& Panel::Update() {
+	K7::IPropertyManagerPtr manager(pManager);
+	manager->HideTabs();
+	manager->ShowTabs();
+	//manager->UpdateTabs();
+	return *this;
+}
+
 Panel& Panel::Show(bool isShow) {
 	K7::IPropertyManagerPtr manager(pManager);
 	if (!manager) throw Kompas3DException("Can not get PropertyManager");
@@ -131,12 +150,18 @@ Panel::Tab& Panel::Tab::Clear() {
 	K7::IPropertyControlsPtr ctrls = tab->PropertyControls;
 	int cnt = (int)props.size();
 	for (int i = cnt - 1; i >= 0; --i) {
-		if (props[i]->isAutoCreate) {
-			delete props[i];
-			props.erase(props.begin() + i);
-			ctrls->Delete(i);
-		}
+		ctrls->Delete(i);
 	}
+	props.clear();
+	return *this;
+}
+
+Panel::Tab& Panel::Tab::Add(Panel::Property& prop) {
+	K7::IPropertyTabPtr tab = pTab;
+	K7::IPropertyControlsPtr ctrls = tab->PropertyControls;
+	props.push_back(&prop);
+	K7::IPropertyControlPtr c = ctrls->Add((KConst::ControlTypeEnum)prop.type);
+	if (c) prop.Create(c.GetInterfacePtr());
 	return *this;
 }
 
@@ -172,6 +197,17 @@ PropertyList& PropertyList::Add(PropertyVariant val) {
 	K7::IPropertyListPtr prop(pProp);
 	prop->Add(ToVariantT(val));
 	return *this;
+}
+
+PropertyList::operator PropertyVariant() const {
+	K7::IPropertyListPtr prop(pProp);
+	return FromVariantT(prop->Value);
+}
+
+PropertyVariant PropertyList::operator=(PropertyVariant val) {
+	K7::IPropertyListPtr prop(pProp);
+	prop->Value = ToVariantT(val);
+	return val;
 }
 
 PropertyList& PropertyList::Clear() {

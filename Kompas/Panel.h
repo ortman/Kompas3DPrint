@@ -29,6 +29,7 @@ public:
 	}
 	~Panel();
 	bool Create();
+	Panel& Update();
 	Panel& Show(bool isShow = true);
 	Panel& Hide() { return Show(false); }
 	friend PropertyManagerNotifyLoc;
@@ -51,6 +52,7 @@ public:
 	}
 	~Tab();
 	Tab& Clear();
+	Tab& Add(Panel::Property& prop);
 	friend class Panel;
 	friend PropertyManagerNotifyLoc;
 };
@@ -59,7 +61,6 @@ using PropertyVariant = std::variant<int, double, std::string>;
 
 class Panel::Property {
 protected:
-	bool isAutoCreate = false;
 	IUnknown* pProp;
 	std::string name;
 	PropertyVariant defaultVal;
@@ -102,6 +103,8 @@ public:
 	PropertyList(const char* name) : Property(name, 7, "") {}
 	PropertyList& Add(PropertyVariant val);
 	PropertyList& Clear();
+	operator PropertyVariant() const;
+	PropertyVariant operator=(PropertyVariant);
 };
 
 class PropertyButton : public Panel::Property {
