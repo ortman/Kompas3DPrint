@@ -1,7 +1,7 @@
 #ifndef _ComTest_CutExtrusion_h_
 #define _ComTest_CutExtrusion_h_
 
-#include "../Sketch.h"
+#include "Sketch.h"
 
 class CutExtrusion : public Node {
 public:

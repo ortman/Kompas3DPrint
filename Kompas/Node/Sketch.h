@@ -3,7 +3,7 @@
 
 #include <unknwn.h>
 #include <memory>
-#include "Node/Plane.h"
+#include "Plane.h"
 
 enum class LineStyle : int {
     Main = 1,                           // Основная

@@ -2,6 +2,7 @@
 #define _Kompas3DPrint_Edge_h_
 
 #include "Face.h"
+#include "Vertex.h"
 
 class Edge : public Node {
 public:

@@ -2,7 +2,7 @@
 #define _ComTest_Kompas3D_h_
 
 #include "Doc3D.h"
-#include "Sketch.h"
+#include "Node/Sketch.h"
 
 #include "Node/NodeMacro.h"
 #include "Node/BaseExtrusion.h"

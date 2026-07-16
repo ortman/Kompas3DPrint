@@ -1,6 +1,6 @@
-#include "ComKompas.h"
+#include "../ComKompas.h"
 #include "Sketch.h"
-#include "Kompas3D.h"
+#include "../Kompas3D.h"
 
 Sketch::Sketch(IUnknown* p, Plane plane, double angle, double locX, double locY, const std::optional<std::string>& name) : Node(p) {
 	K5::ksEntityPtr entity = pEntity;

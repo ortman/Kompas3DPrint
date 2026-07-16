@@ -1,7 +1,7 @@
 #ifndef _ComTest_BaseExtrusion_h_
 #define _ComTest_BaseExtrusion_h_
 
-#include "../Sketch.h"
+#include "Sketch.h"
 
 class BaseExtrusion : public Node {
 public:
