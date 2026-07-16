@@ -27,17 +27,23 @@ public:
 	}
 
 private:
-	void CreateThread(Part& part, NodeMacro& macro, const ThreadDesignation& thread) {
-		Kompas3D::Error("Резьба " + std::to_string(thread.GetDiameter()) + (thread.IsForwardDir() ? " правая" : " левая"));
+	bool CreateThread(Part& part, NodeMacro& macro, const ThreadDesignation& thread) {
+		//Kompas3D::Error("Резьба " + std::to_string(thread.GetDiameter()) + (thread.IsForwardDir() ? " правая" : " левая"));
 		
 		Edge beginEdge = thread.GetBeginEdge();
 
-    //Face> planarFace = beginEdge->RightFace();
-    //Face> cylinderFace = beginEdge->LeftFace();
-    //if (!planarFace->IsPlanar()) {
-    //    planarFace = beginEdge->LeftFace();
-    //    cylinderFace = beginEdge->RightFace();
-    //}
+    Face planarFace = beginEdge.RightFace();
+    Face cylinderFace = beginEdge.LeftFace();
+    //Kompas3D::Error("Резьба " + std::to_string(thread.GetDiameter()) + (thread.IsForwardDir() ? " правая" : " левая"));
+    if (!planarFace.IsPlanar()) {
+        planarFace = beginEdge.LeftFace();
+        cylinderFace = beginEdge.RightFace();
+    }
+    if (!planarFace.IsPlanar() || !cylinderFace.IsCylinder()) return false;
+    // TODO: Get cx,cy,cz from beginEdge
+    ParallelPlane plt = part.Create<ParallelPlane>(planarFace/*, point */);
+    
+    return true;
 	}
 };
 

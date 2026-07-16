@@ -21,6 +21,7 @@ protected:
 public:
 	static int TYPE;
 	Node(IUnknown* pEntity);
+	Node(const Node& node) : Node(node.GetEntity()) {}
 	virtual ~Node();
 	IUnknown* GetEntity() const { pEntity->AddRef(); return pEntity; }
 	int GetType() const;

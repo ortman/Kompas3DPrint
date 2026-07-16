@@ -9,6 +9,7 @@ public:
 	Face(const Node& node) : Node(node.GetEntity()) {}
 	Face(IUnknown* pEntity) : Node(pEntity) {}
 	bool IsPlanar();
+	bool IsCylinder();
 };
 
 #endif
