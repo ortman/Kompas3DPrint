@@ -39,7 +39,8 @@ private:
     if (!planarFace.IsPlanar() || !cylinderFace.IsCylinder()) return false;
     // TODO: Get cx,cy,cz from beginEdge
     ParallelPlane plt = part.Create<ParallelPlane>(planarFace, beginEdge.GetBeginVertex());
-    macro.Add(plt);
+    ConeAxis axis = part.Create<ConeAxis>(cylinderFace);
+    macro.Add(plt).Add(axis);
     
     return true;
 	}
