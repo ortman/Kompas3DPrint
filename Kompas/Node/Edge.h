@@ -7,10 +7,11 @@
 class Edge : public Node {
 public:
 	static int TYPE;
-	Edge(const Node& node) : Node(node.GetEntity()) {}
-	Edge(IUnknown* pEntity) : Node(pEntity) {}
+	Edge(const Node& node) : Node(node.pEntity, node.pDefinition) {}
+	Edge(IUnknown* pEntity, IDispatch* pDefinition = NULL) : Node(pEntity, pDefinition) {}
 	Face LeftFace() const;
 	Face RightFace() const;
+	Vertex GetBeginVertex() const;
 };
 
 #endif

@@ -2,29 +2,26 @@
 #include "NodeMacro.h"
 #include "../Kompas3D.h"
 
-NodeMacro::NodeMacro(IUnknown* p, bool show, const std::optional<std::string>& name) : Node(p) {
+NodeMacro::NodeMacro(IUnknown* pE, IDispatch* pD, bool show, const std::optional<std::string>& name) : Node(pE, pD) {
 	if (!pEntity) return;
 	K5::ksEntityPtr entity = pEntity;
 	if (name.has_value()) entity->name = Utf8ToCp1251(name.value()).c_str();
-	K5::ksMacro3DDefinitionPtr def = entity->GetDefinition();
+	K5::ksMacro3DDefinitionPtr def = pDefinition;
 	if (!def) throw Kompas3DException("Не могу получить Macro3DDefinition, entityType=" + std::to_string(entity->type));
 	def->StaffVisible = show;
 	entity->Create();
 }
 
 NodeMacro& NodeMacro::Add(Node node) {
-	K5::ksEntityPtr entity = pEntity;
-	K5::ksMacro3DDefinitionPtr def = entity->GetDefinition();
-	K5::ksEntityPtr e = node.GetEntity();
+	K5::ksMacro3DDefinitionPtr def = pDefinition;
+	K5::ksEntityPtr e = node.pEntity;
 	if (def && e) def->Add(e);
 	return *this;
 }
 
 std::vector<Node> NodeMacro::GetNodes() {
 	std::vector<Node> nodes;
-	K5::ksEntityPtr entity = pEntity;
-	if (!entity) return nodes;
-	K5::ksMacro3DDefinitionPtr def = entity->GetDefinition();
+	K5::ksMacro3DDefinitionPtr def = pDefinition;
 	if (!def) return nodes;
 	K5::ksFeatureCollectionPtr subFeatures = def->FeatureCollection();
 	if (!subFeatures) return nodes;
@@ -39,18 +36,16 @@ std::vector<Node> NodeMacro::GetNodes() {
 }
 
 NodeMacro& NodeMacro::Show(bool show) {
-	K5::ksEntityPtr entity = pEntity;
-	K5::ksMacro3DDefinitionPtr def = entity->GetDefinition();
+	K5::ksMacro3DDefinitionPtr def = pDefinition;
 	if (def) def->StaffVisible = show;
 	return *this;
 }
 
 bool NodeMacro::SetUserParam(void* param, size_t size, int cmd) {
 	K5::ksUserParamPtr pParam = Kompas3D::GetParamStruct<K5::ksUserParamPtr>(KConst::ko_UserParam);
-	K5::ksEntityPtr entity = pEntity;
-	if (pParam && entity) {
+	if (pParam) {
 		pParam->Init();
-		if (K5::ksMacro3DDefinitionPtr def = entity->GetDefinition()) {
+		if (K5::ksMacro3DDefinitionPtr def = pDefinition) {
 			pParam->libName  = "Kompas 3D Print";
 	        pParam->fileName = "Kompas3DPrint.dll";
 	        pParam->number = cmd;
@@ -75,12 +70,9 @@ bool NodeMacro::SetUserParam(void* param, size_t size, int cmd) {
 bool NodeMacro::GetUserParam(void* param, size_t size) {
     if (!param || size == 0) return false;
 
-    K5::ksUserParamPtr pParam = Kompas3D::GetParamStruct<K5::ksUserParamPtr>(KConst::ko_UserParam);
-    K5::ksEntityPtr entity = pEntity;
-
-    if (pParam && entity) {
+    if (K5::ksUserParamPtr pParam = Kompas3D::GetParamStruct<K5::ksUserParamPtr>(KConst::ko_UserParam)) {
         pParam->Init();
-        if (K5::ksMacro3DDefinitionPtr def = entity->GetDefinition()) {
+        if (K5::ksMacro3DDefinitionPtr def = pDefinition) {
             // Инициализируем структуру теми же библиотечными данными для поиска
             pParam->libName  = "Kompas 3D Print";
             pParam->fileName = "Kompas3DPrint.dll";

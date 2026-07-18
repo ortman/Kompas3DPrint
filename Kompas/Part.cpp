@@ -8,8 +8,8 @@ Part::Part(IUnknown* d, IUnknown* p) : pDoc(d), pPart(p) {
 }
 
 Part::~Part() {
-	if (pDoc) pDoc->Release();
 	if (pPart) pPart->Release();
+	if (pDoc) pDoc->Release();
 }
 
 std::string Part::Name() {
@@ -31,7 +31,7 @@ std::vector<Node> Part::GetNodes() {
 		K5::ksFeaturePtr feature = subFeatures->GetByIndex(i);
 		K5::ksEntityPtr entity = feature->GetObject();
 		if (entity) {
-			entity.AddRef();
+			//entity.AddRef();
 			nodes.push_back(Node(entity.GetInterfacePtr()));
 		}
 	}
@@ -50,7 +50,7 @@ IUnknown* Part::CreateEntity(int type) {
 Part& Part::Remove(Node node) {
 	K5::ksDocument3DPtr doc = pDoc;
 	if (doc) {
-		K5::ksEntityPtr entity = node.GetEntity();
+		K5::ksEntityPtr entity = node.pEntity;
 		doc->DeleteObject(entity);
 	}
 	return *this;

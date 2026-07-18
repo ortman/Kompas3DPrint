@@ -2,14 +2,12 @@
 #include "Face.h"
 
 bool Face::IsPlanar() {
-	K5::ksEntityPtr entity = pEntity;
-	K5::ksFaceDefinitionPtr face = entity->GetDefinition();
+	K5::ksFaceDefinitionPtr face = pDefinition;
 	return face ? face->IsPlanar() : false;
 }
 
 bool Face::IsCylinder() {
-	K5::ksEntityPtr entity = pEntity;
-	K5::ksFaceDefinitionPtr face = entity->GetDefinition();
+	K5::ksFaceDefinitionPtr face = pDefinition;
 	return face ? face->IsCylinder() : false;
 }
 

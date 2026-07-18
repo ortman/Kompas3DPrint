@@ -17,7 +17,7 @@ public:
 			}
 		}
 		
-		NodeMacro macro = topPart.Create<NodeMacro>(false, "Реальные резьбы");
+		NodeMacro macro = topPart.Create<NodeMacro>(true, "Реальные резьбы");
 		for (Node& node : topPart.GetNodes()) {
 			if (node.IsType(ThreadDesignation::TYPE)) {
 				CreateThread(topPart, macro, ThreadDesignation(node));
@@ -28,20 +28,18 @@ public:
 
 private:
 	bool CreateThread(Part& part, NodeMacro& macro, const ThreadDesignation& thread) {
-		//Kompas3D::Error("Резьба " + std::to_string(thread.GetDiameter()) + (thread.IsForwardDir() ? " правая" : " левая"));
-		
 		Edge beginEdge = thread.GetBeginEdge();
 
     Face planarFace = beginEdge.RightFace();
     Face cylinderFace = beginEdge.LeftFace();
-    //Kompas3D::Error("Резьба " + std::to_string(thread.GetDiameter()) + (thread.IsForwardDir() ? " правая" : " левая"));
     if (!planarFace.IsPlanar()) {
         planarFace = beginEdge.LeftFace();
         cylinderFace = beginEdge.RightFace();
     }
     if (!planarFace.IsPlanar() || !cylinderFace.IsCylinder()) return false;
     // TODO: Get cx,cy,cz from beginEdge
-    ParallelPlane plt = part.Create<ParallelPlane>(planarFace/*, point */);
+    ParallelPlane plt = part.Create<ParallelPlane>(planarFace, beginEdge.GetBeginVertex());
+    macro.Add(plt);
     
     return true;
 	}

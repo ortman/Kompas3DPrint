@@ -31,7 +31,7 @@ public:
 		static_assert(std::is_base_of<Node, T>::value, "T must be derived from Node");
 		IUnknown* entity = CreateEntity(T::TYPE);
 		if (!entity) throw Kompas3DException(std::string("Не могу создать объект ") + typeid(T).name());
-		return T(entity, std::forward<Args>(args)...);
+		return T(entity, NULL, std::forward<Args>(args)...);
 	}
 	std::string Name();
 	Part& Remove(Node node);

@@ -7,8 +7,8 @@
 class NodeMacro : public Node {
 public:
 	static int TYPE;
-	NodeMacro(const Node& node) : Node(node.GetEntity()) {}
-	NodeMacro(IUnknown* pEntity, bool show = true, const std::optional<std::string>& name = std::nullopt);
+	NodeMacro(const Node& node) : Node(node.pEntity, node.pDefinition) {}
+	NodeMacro(IUnknown* pEntity, IDispatch* pDefinition = NULL, bool show = true, const std::optional<std::string>& name = std::nullopt);
 	NodeMacro& Add(Node node);
 	std::vector<Node> GetNodes();
 	bool SetUserParam(void* param, size_t size, int cmd);

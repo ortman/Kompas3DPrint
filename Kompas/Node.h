@@ -15,15 +15,14 @@ public:
 };
 
 class Node {
-protected:
-	IUnknown* pEntity;
-
 public:
+	IUnknown* pEntity;
+	IDispatch* pDefinition;
+	
 	static int TYPE;
-	Node(IUnknown* pEntity);
-	Node(const Node& node) : Node(node.GetEntity()) {}
+	Node(IUnknown* pEntity, IDispatch* pDefinition = NULL);
+	Node(const Node& node) : Node(node.pEntity, node.pDefinition) {}
 	virtual ~Node();
-	IUnknown* GetEntity() const { pEntity->AddRef(); return pEntity; }
 	int GetType() const;
 	bool IsType(int type) const { return GetType() == type; }
 	std::string GetName() const;
@@ -33,4 +32,5 @@ public:
 	static std::string Cp1251ToUtf8(const char* cp1251Str);
 	operator bool() const { return pEntity; }
 };
+
 #endif

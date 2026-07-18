@@ -6,8 +6,8 @@
 class Vertex : public Node {
 public:
 	static int TYPE;
-	Vertex(const Node& node) : Node(node.GetEntity()) {}
-	Vertex(IUnknown* pEntity) : Node(pEntity) {}
+	Vertex(const Node& node) : Node(node.pEntity, node.pDefinition) {}
+	Vertex(IUnknown* pEntity, IDispatch* pDefinition = NULL) : Node(pEntity, pDefinition) {}
 };
 
 #endif

@@ -1,14 +1,20 @@
 #include "ComKompas.h"
 #include "Node.h"
 
-Node::Node(IUnknown* f) : pEntity(f) {
-	if (pEntity)
-		pEntity->AddRef();
+Node::Node(IUnknown* pE, IDispatch* pD) : pEntity(pE), pDefinition(pD) {
+	if (pEntity) pEntity->AddRef();
+	if (pDefinition) pDefinition->AddRef();
+	if (pEntity && !pDefinition) {
+		K5::ksEntityPtr entity = pEntity;
+		IDispatchPtr def = entity->GetDefinition();
+		def.AddRef();
+		pDefinition = def.GetInterfacePtr();
+	}
 }
 
 Node::~Node() {
-	if (pEntity)
-		pEntity->Release();
+	if (pDefinition) pDefinition->Release();
+	if (pEntity) pEntity->Release();
 }
 
 int Node::GetType() const {

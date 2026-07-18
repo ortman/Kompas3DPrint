@@ -6,7 +6,7 @@
 class ThreadDesignation : public Node {
 public:
 	static int TYPE;
-	ThreadDesignation(const Node& node) : Node(node.GetEntity()) {}
+	ThreadDesignation(const Node& node) : Node(node.pEntity, node.pDefinition) {}
 	double GetLength() const;
 	double GetPitch() const;
 	double GetDiameter() const;

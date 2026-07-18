@@ -2,12 +2,12 @@
 #include "Sketch.h"
 #include "../Kompas3D.h"
 
-Sketch::Sketch(IUnknown* p, Plane plane, double angle, double locX, double locY, const std::optional<std::string>& name) : Node(p) {
+Sketch::Sketch(IUnknown* pE, IDispatch* pD, Plane plane, double angle, double locX, double locY, const std::optional<std::string>& name) : Node(pE, pD) {
 	K5::ksEntityPtr entity = pEntity;
 	if (name.has_value()) entity->name = Utf8ToCp1251(name.value()).c_str();
-	K5::ksSketchDefinitionPtr def = entity->GetDefinition();
+	K5::ksSketchDefinitionPtr def = pDefinition;
 	if (!def) throw Kompas3DException("Не могу получить SketchDefinition, entityType=" + std::to_string(entity->type));
-	K5::ksEntityPtr planeEntity = plane.GetEntity();
+	K5::ksEntityPtr planeEntity = plane.pEntity;
 	if (!planeEntity) throw Kompas3DException("Не могу получить Plane для Эскиза");
 	def->angle = angle;
 	def->SetPlane(planeEntity);
@@ -17,9 +17,8 @@ Sketch::Sketch(IUnknown* p, Plane plane, double angle, double locX, double locY,
 
 Sketch& Sketch::BeginEdit() {
 	if (eDef) return *this;
-	K5::ksEntityPtr entity = pEntity;
-	K5::ksSketchDefinitionPtr def = entity->GetDefinition();
-	if (!def) throw Kompas3DException("Не могу получить SketchDefinition, entityType=" + std::to_string(entity->type));
+	K5::ksSketchDefinitionPtr def = pDefinition;
+	if (!def) throw Kompas3DException("Не могу получить SketchDefinition");
 	K5::ksDocument2DPtr doc2D = def->BeginEdit();
 	if (!doc2D) {
 		eDef = nullptr;
@@ -32,9 +31,8 @@ Sketch& Sketch::BeginEdit() {
 
 void Sketch::EndEdit() {
 	if (eDef) {
-		K5::ksEntityPtr entity = pEntity;
-		K5::ksSketchDefinitionPtr def = entity->GetDefinition();
-		if (!def) throw Kompas3DException("Не могу получить SketchDefinition, entityType=" + std::to_string(entity->type));
+		K5::ksSketchDefinitionPtr def = pDefinition;
+		if (!def) throw Kompas3DException("Не могу получить SketchDefinition");
 		def->EndEdit();
 		eDef->Release();
 		eDef = nullptr;

@@ -41,9 +41,9 @@ private:
 	double lastY = 0.0;
 public:
 	static int TYPE;
-	Sketch(const Node& node) : Node(node.GetEntity()) {}
-	Sketch(IUnknown* pSketch, Plane plane, double angle = 0.0, double locX = 0.0, double locY = 0.0, const std::optional<std::string>& name = std::nullopt);
-	Sketch(IUnknown* pSketch, Plane plane, const std::optional<std::string>& name = std::nullopt) : Sketch(pSketch, std::move(plane), 0.0, 0.0, 0.0, name) {}
+	Sketch(const Node& node) : Node(node.pEntity, node.pDefinition) {}
+	Sketch(IUnknown* pEntity, IDispatch* pDefinition, Plane plane, double angle = 0.0, double locX = 0.0, double locY = 0.0, const std::optional<std::string>& name = std::nullopt);
+	Sketch(IUnknown* pEntity, IDispatch* pDefinition, Plane plane, const std::optional<std::string>& name = std::nullopt) : Sketch(pEntity, pDefinition, std::move(plane), 0.0, 0.0, 0.0, name) {}
 	Sketch& BeginEdit();
 	void EndEdit();
 	bool IsEdit() { return eDef; }
