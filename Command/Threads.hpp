@@ -38,9 +38,42 @@ private:
     }
     if (!planarFace.IsPlanar() || !cylinderFace.IsCylinder()) return false;
     // TODO: Get cx,cy,cz from beginEdge
+    // Базовая плоскость спирали
     ParallelPlane plt = part.Create<ParallelPlane>(planarFace, beginEdge.GetBeginVertex());
+    // Создаём спираль
+    CylindricSpiral helix = part.Create<CylindricSpiral>();
+    //helix = topPart.NewEntity(const3d.o3d_cylindricSpiral);
+    //helix.name = "Спираль_{0}".format(opNum)
+    helix.SetDiam(thread.GetDiameter())
+         .SetStep(thread.GetPitch())
+         .SetHeight(thread.GetLength())
+         .TurnDir(thread.IsForwardDir())
+         .BuildDir(false)
+         .BuildMode(CylindricSpiral::ModeStepHeight)
+         .SetPlane(plt)
+         .SetLocation(0, 0)
+         .Create();
+    //surfPl = plt.GetSurface().GetSurfaceParam().GetPlacement();
+    //_, loc_x, loc_y = surfPl.PointProjection(cx, cy, cz);
+    //_, x0, y0 = surfPl.PointProjection(0, 0, 0);
+    //helix.SetPlane(plt);
+    //helix.SetLocation(loc_x - x0, loc_y - y0);
+    
+    // Ось резьбы
     ConeAxis axis = part.Create<ConeAxis>(cylinderFace);
-    macro.Add(plt).Add(axis);
+    
+    // Плоскость эскиза
+    Vertex startVertex = helix.GetBeginVertex();
+    EdgePointPlane sketchPlane = part.Create<EdgePointPlane>(axis, startVertex);
+    
+    // TODO: Профиль резьбы
+    
+    // TODO: Фаска резьбы
+    
+    macro.Add(plt)
+         .Add(helix)
+         .Add(axis)
+         .Add(sketchPlane);
     
     return true;
 	}

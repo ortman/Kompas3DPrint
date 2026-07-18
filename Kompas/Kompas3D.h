@@ -10,6 +10,7 @@
 #include "Node/MeshCopy.h"
 #include "Node/CircularCopy.h"
 #include "Node/ThreadDesignation.h"
+#include "Node/CylindricSpiral.h"
 
 #include "Panel.h"
 

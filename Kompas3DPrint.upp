@@ -63,7 +63,9 @@ file
 	Kompas/Node/CircularCopy.h,
 	Kompas/Node/CircularCopy.cpp,
 	Kompas/Node/ThreadDesignation.h,
-	Kompas/Node/ThreadDesignation.cpp;
+	Kompas/Node/ThreadDesignation.cpp,
+	Kompas/Node/CylindricSpiral.h,
+	Kompas/Node/CylindricSpiral.cpp;
 
 mainconfig
 	"App" = "GUI",
