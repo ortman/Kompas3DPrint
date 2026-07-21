@@ -169,6 +169,8 @@ KOMPAS_PARAM(ksUserParam)
 #define KOMPAS_API7(p) template K7::p##Ptr Kompas3D::ToApi7(IUnknown*);
 KOMPAS_API7(IEmbodimentsManager)
 KOMPAS_API7(IThread)
+KOMPAS_API7(IAxis3D)
+KOMPAS_API7(ICutRotated)
 
 #define KOMPAS_API5(p) template K5::p##Ptr Kompas3D::ToApi5(IUnknown*);
 KOMPAS_API5(ksPart)

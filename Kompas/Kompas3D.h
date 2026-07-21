@@ -7,6 +7,8 @@
 #include "Node/NodeMacro.h"
 #include "Node/BaseExtrusion.h"
 #include "Node/CutExtrusion.h"
+#include "Node/CutEvolution.h"
+#include "Node/CutRotated.h"
 #include "Node/MeshCopy.h"
 #include "Node/CircularCopy.h"
 #include "Node/ThreadDesignation.h"

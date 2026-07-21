@@ -1,7 +1,6 @@
 #include "../ComKompas.h"
 #include "CircularCopy.h"
 
-
 CircularCopy::CircularCopy(IUnknown* pE, IDispatch* pD,
 		int CCount, double CStep, bool CFactor,
 		int RCount, double RStep, bool RFactor,
