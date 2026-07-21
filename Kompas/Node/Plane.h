@@ -8,9 +8,20 @@
 
 class Plane : public Node {
 public:
+	struct Point2D {
+		double x, y;
+	};
+	enum AxisType {
+		OX = 0,
+		OY = 1,
+		OZ = 2
+	};
 	static int TYPE;
 	Plane(const Node& node) : Node(node.pEntity, node.pDefinition) {}
 	Plane(IUnknown* pEntity, IDispatch* pDefinition = NULL) : Node(pEntity, pDefinition) {}
+	Vertex::Point3D GetVector(AxisType type);
+	Plane::Point2D Projection(const Vertex::Point3D& point);
+	Vertex::Point3D Projection(const Plane::Point2D& point);
 };
 
 class ParallelPlane : public Plane {

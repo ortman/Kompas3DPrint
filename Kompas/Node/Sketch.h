@@ -42,8 +42,9 @@ private:
 public:
 	static int TYPE;
 	Sketch(const Node& node) : Node(node.pEntity, node.pDefinition) {}
-	Sketch(IUnknown* pEntity, IDispatch* pDefinition, Plane plane, double angle = 0.0, double locX = 0.0, double locY = 0.0, const std::optional<std::string>& name = std::nullopt);
-	Sketch(IUnknown* pEntity, IDispatch* pDefinition, Plane plane, const std::optional<std::string>& name = std::nullopt) : Sketch(pEntity, pDefinition, std::move(plane), 0.0, 0.0, 0.0, name) {}
+	Sketch(IUnknown* pEntity, IDispatch* pDefinition, const Plane& plane, double angle, double locX = 0.0, double locY = 0.0, const std::optional<std::string>& name = std::nullopt);
+	Sketch(IUnknown* pEntity, IDispatch* pDefinition, const Plane& plane, const std::optional<std::string>& name = std::nullopt) : Sketch(pEntity, pDefinition, plane, 0.0, 0.0, 0.0, name) {}
+	Plane::Point2D Projection(const Vertex::Point3D& point);
 	Sketch& BeginEdit();
 	void EndEdit();
 	bool IsEdit() { return eDef; }

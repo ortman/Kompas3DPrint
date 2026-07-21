@@ -23,4 +23,23 @@ Vertex Edge::GetBeginVertex() const {
 	return Vertex(NULL, p.GetInterfacePtr());
 }
 
+Vertex::Point3D Edge::GetOrigin() const {
+	K5::ksEdgeDefinitionPtr def = pDefinition;
+	K5::ksCurve3DPtr curve = def->GetCurve3D();
+	Vertex::Point3D res;
+	if (K5::ksArc3dParamPtr param = curve->GetCurveParam()) {
+		K5::ksPlacementPtr pl = param->GetPlacement();
+		if (pl && pl->GetOrigin(&res.x, &res.y, &res.z)) return res;
+	}
+	if (K5::ksCircle3dParamPtr param = curve->GetCurveParam()) {
+		K5::ksPlacementPtr pl = param->GetPlacement();
+		if (pl && pl->GetOrigin(&res.x, &res.y, &res.z)) return res;
+	}
+	if (K5::ksEllipse3dParamPtr param = curve->GetCurveParam()) {
+		K5::ksPlacementPtr pl = param->GetPlacement();
+		if (pl && pl->GetOrigin(&res.x, &res.y, &res.z)) return res;
+	}
+	return {0., 0., 0.};
+}
+
 int Edge::TYPE = KConst3D::o3d_edge;

@@ -12,6 +12,7 @@ public:
 	Face LeftFace() const;
 	Face RightFace() const;
 	Vertex GetBeginVertex() const;
+	Vertex::Point3D GetOrigin() const;
 };
 
 #endif

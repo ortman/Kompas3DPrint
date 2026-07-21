@@ -2,7 +2,7 @@
 #include "Sketch.h"
 #include "../Kompas3D.h"
 
-Sketch::Sketch(IUnknown* pE, IDispatch* pD, Plane plane, double angle, double locX, double locY, const std::optional<std::string>& name) : Node(pE, pD) {
+Sketch::Sketch(IUnknown* pE, IDispatch* pD, const Plane& plane, double angle, double locX, double locY, const std::optional<std::string>& name) : Node(pE, pD) {
 	K5::ksEntityPtr entity = pEntity;
 	if (name.has_value()) entity->name = Utf8ToCp1251(name.value()).c_str();
 	K5::ksSketchDefinitionPtr def = pDefinition;
@@ -13,6 +13,18 @@ Sketch::Sketch(IUnknown* pE, IDispatch* pD, Plane plane, double angle, double lo
 	def->SetPlane(planeEntity);
 	def->SetLocation(locX, locY);
 	entity->Create();
+}
+
+Plane::Point2D Sketch::Projection(const Vertex::Point3D& point) {
+	K5::ksSketchDefinitionPtr def = pDefinition;
+	K5::ksSurfacePtr surface = def->GetSurface();
+	K5::ksPlaneParamPtr param = surface->GetSurfaceParam();
+  K5::ksPlacementPtr surfPl = param->GetPlacement();
+  Plane::Point2D res;
+  if (surfPl->PointProjection(point.x, point.y, point.z, &res.x, &res.y)) {
+    return res;
+  }
+  return {0., 0.};
 }
 
 Sketch& Sketch::BeginEdit() {
