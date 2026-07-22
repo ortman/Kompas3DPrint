@@ -28,14 +28,14 @@ class ParallelPlane : public Plane {
 public:
 	static int TYPE;
 	ParallelPlane(const Node& node) : Plane(node.pEntity, node.pDefinition) {}
-	ParallelPlane(IUnknown* pEntity, IDispatch* pDefinition, const Face& planarFace, const Vertex& point);
+	ParallelPlane(IUnknown* pEntity, IDispatch* pDefinition, const Face& planarFace, const Vertex& point, bool show = false);
 };
 
 class EdgePointPlane : public Plane {
 public:
 	static int TYPE;
 	EdgePointPlane(const Node& node) : Plane(node.pEntity, node.pDefinition) {}
-	EdgePointPlane(IUnknown* pEntity, IDispatch* pDefinition, const Axis& axis, const Vertex& point);
+	EdgePointPlane(IUnknown* pEntity, IDispatch* pDefinition, const Axis& axis, const Vertex& point, bool show = false);
 };
 
 #endif

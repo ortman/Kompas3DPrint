@@ -50,8 +50,9 @@ CylindricSpiral& CylindricSpiral::SetLocation(double x, double y) {
 	return *this;
 }
 
-bool CylindricSpiral::Create() {
+bool CylindricSpiral::Create(bool show) {
 	K5::ksEntityPtr entity = pEntity;
+	entity->hidden = !show;
 	return entity->Create();
 }
 

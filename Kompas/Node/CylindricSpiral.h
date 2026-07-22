@@ -20,7 +20,7 @@ public:
 	CylindricSpiral& BuildMode(Mode mode);
 	CylindricSpiral& SetPlane(const Plane& plane);
 	CylindricSpiral& SetLocation(double x, double y);
-	bool Create();
+	bool Create(bool show = false);
 	Vertex GetBeginVertex() const;
 };
 

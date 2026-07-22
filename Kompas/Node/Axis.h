@@ -17,7 +17,7 @@ class ConeAxis : public Axis {
 public:
 	static int TYPE;
 	ConeAxis(const Node& node) : Axis(node.pEntity, node.pDefinition) {}
-	ConeAxis(IUnknown* pEntity, IDispatch* pDefinition, const Face& coneFace);
+	ConeAxis(IUnknown* pEntity, IDispatch* pDefinition, const Face& coneFace, bool show = false);
 };
 
 #endif
