@@ -131,7 +131,7 @@ private:
 			sketch.Line(x0 + shiftY + step / 2., y0 + h, x0 + shiftY, y0);
 		} else {
 			sketch.Line(x0, y0 + shiftY, x0, y0 + shiftY + step);
-			drawRoundedCorner(sketch, x0, y0 + shiftY, x0 + h, y0 + shiftY + step / 2., x0, y0 + shiftY + step, abs(step / (outside ? 6. : 12.)));
+			drawRoundedCorner(sketch, x0, y0 + shiftY, x0 + h, y0 + shiftY + step / 2., x0, y0 + shiftY + step, abs(step / (outside ? 7. : 13.)));
 		}
 	}
 
