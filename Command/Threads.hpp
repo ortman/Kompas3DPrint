@@ -30,8 +30,8 @@ public:
 
 private:
 	bool CreateThread(Part& part, NodeMacro& macro, const ThreadDesignation& thread) {
+		if (thread.GetDiameter() < minThreadDiameter) return false;
 		Edge beginEdge = thread.GetBeginEdge();
-		
 		Face planarFace = beginEdge.RightFace();
 		Face cylinderFace = beginEdge.LeftFace();
 		if (!planarFace.IsPlanar()) {
@@ -115,14 +115,19 @@ private:
 		}
 		double h = abs((sqrt(3.) / 2.) * step);
 		if (xPositive) h = -h;
+		double c = clearance;
 		if (outside) {
 			h = -h;
-			x0 = x0 + (xPositive ? clearance : -clearance) - h / 8.;
+			if (c > abs(h / 8.)) c = -h / 8. - 0.0001;
+			x0 = x0 + (xPositive ? c : -c) - h / 8.;
 		} else {
+			if (c > abs(h / 8.)) {
+				c = -h * 1.9 / 8.;
+			}
 			if (xyInvert) {
-				y0 -= h * 7. / 8. + clearance;
+				y0 -= h * 7. / 8. + c;
 			} else {
-				x0 -= h * 7. / 8. + clearance;
+				x0 -= h * 7. / 8. + c;
 			}
 		}
 		if (xyInvert) {
@@ -145,12 +150,12 @@ private:
 		if (xPositive) h = -h;
 		if (outside) {
 			h = -h;
-			x0 = x0 + (xPositive ? clearance : -clearance) - h / 8.;
+			x0 = x0 - h / 8.;
 		} else {
 			if (xyInvert) {
-				y0 = y0 - h * 7. / 8. + clearance;
+				y0 = y0 - h * 6. / 8.;
 			} else {
-				x0 = x0 - h * 7. / 8. + clearance;
+				x0 = x0 - h * 6. / 8.;
 			}
 		}
 		if (xyInvert) {

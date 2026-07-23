@@ -4,16 +4,16 @@
 Face Edge::LeftFace() const {
 	K5::ksEdgeDefinitionPtr def = pDefinition;
 	K5::ksFaceDefinitionPtr faceDef = def->GetAdjacentFace(true);
+	if (!faceDef) throw Kompas3DException("Не могу получить левую грань ребра");
 	K5::ksEntityPtr face = faceDef->GetEntity();
-	//face.AddRef();
 	return Face(face.GetInterfacePtr());
 }
 
 Face Edge::RightFace() const {
 	K5::ksEdgeDefinitionPtr def = pDefinition;
 	K5::ksFaceDefinitionPtr faceDef = def->GetAdjacentFace(false);
+	if (!faceDef) throw Kompas3DException("Не могу получить правую грань ребра");
 	K5::ksEntityPtr face = faceDef->GetEntity();
-	//face.AddRef();
 	return Face(face.GetInterfacePtr());
 }
 
