@@ -47,7 +47,7 @@ bool NodeMacro::SetUserParam(void* param, size_t size, int cmd) {
 		pParam->Init();
 		if (K5::ksMacro3DDefinitionPtr def = pDefinition) {
 			pParam->libName  = "Kompas 3D Print";
-	        pParam->fileName = "Kompas3DPrint.dll";
+	        pParam->fileName = "Kompas3DPrint.rtw";
 	        pParam->number = cmd;
 	        
 	        SAFEARRAY* pSafeArray = SafeArrayCreateVector(VT_UI1, 0, (ULONG)size);
@@ -75,7 +75,7 @@ bool NodeMacro::GetUserParam(void* param, size_t size) {
         if (K5::ksMacro3DDefinitionPtr def = pDefinition) {
             // Инициализируем структуру теми же библиотечными данными для поиска
             pParam->libName  = "Kompas 3D Print";
-            pParam->fileName = "Kompas3DPrint.dll";
+            pParam->fileName = "Kompas3DPrint.rtw";
 
             // Запрашиваем параметры у макрообъекта
             if (def->GetUserParam(pParam)) {

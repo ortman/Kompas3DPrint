@@ -3,34 +3,81 @@
 #include "../Kompas/Kompas3D.h"
 
 class Threads {
+private:
+	struct : Panel {
+		struct MainTab : Panel::Tab {
+			PropertyD minThreadDiameter {"Мин. диаметр резьбы",  3.0};
+			PropertyD clearance         {"Зазор", 0.06};
+		} main{"Параметры"};
+	} panel{"Параметры нарезания резьб"};
+
+	struct ThreadsParameters {
+		double minThreadDiameter;
+		double clearance;
+	};
+
+	NodeMacro edit = NodeMacro(nullptr);
+
 public:
-	double clearance = 0.06;
-	double minThreadDiameter = 0.0;
+	Threads() {
+		try {
+			if (!Kompas3D::Connect()) return;
+			panel.Create();
+			
+			panel.WhenButtonClick = [=](int buttonId) {
+				try {
+					if (buttonId == 1) {
+						Doc3D doc = Kompas3D::GetActiveDocument3D();
+						if (!doc) return false;
+						Part topPart = doc.GetTopPart();
+						// Удаляем макрос
+						for (Node& node : topPart.GetNodes()) {
+							if (node.IsType(NodeMacro::TYPE) && node.GetName() == "Реальные резьбы") {
+								topPart.Remove(node);
+							}
+						}
+						
+						NodeMacro macro = topPart.Create<NodeMacro>(false, "Реальные резьбы");
+						ThreadsParameters threadParam = {panel.main.minThreadDiameter, panel.main.clearance};
+						macro.SetUserParam(&threadParam, sizeof(threadParam), MENU_THREADS);
+						for (Node& node : topPart.GetNodes()) {
+							if (node.IsType(ThreadDesignation::TYPE)) {
+								CreateThread(topPart, macro, ThreadDesignation(node));
+							}
+						}
+						macro.Update();
+					}
+					edit = NodeMacro(nullptr);
+					panel.Hide();
+				} catch (const Kompas3DException& e) {
+					Kompas3D::Error(e.what());
+				}
+				return false;
+			};
+
+		} catch (const Kompas3DException&) {
+		}
+	}
 	
 	void Start() {
 		Doc3D doc = Kompas3D::GetActiveDocument3D();
 		if (!doc) return;
 		Part topPart = doc.GetTopPart();
 		
-		// Удаляем макрос
-		for (Node& node : topPart.GetNodes()) {
-			if (node.IsType(NodeMacro::TYPE) && node.GetName() == "Реальные резьбы") {
-				topPart.Remove(node);
+		edit = doc.GetEditMacroObject();
+		if (edit) {
+			ThreadsParameters threadsParam;
+			if (edit.GetUserParam(&threadsParam, sizeof(threadsParam))) {
+				panel.main.minThreadDiameter = threadsParam.minThreadDiameter;
+				panel.main.clearance = threadsParam.clearance;
 			}
 		}
-		
-		NodeMacro macro = topPart.Create<NodeMacro>(false, "Реальные резьбы");
-		for (Node& node : topPart.GetNodes()) {
-			if (node.IsType(ThreadDesignation::TYPE)) {
-				CreateThread(topPart, macro, ThreadDesignation(node));
-			}
-		}
-		macro.Update();
+		panel.Show();
 	}
 
 private:
 	bool CreateThread(Part& part, NodeMacro& macro, const ThreadDesignation& thread) {
-		if (thread.GetDiameter() < minThreadDiameter) return false;
+		if (thread.GetDiameter() < panel.main.minThreadDiameter) return false;
 		Edge beginEdge = thread.GetBeginEdge();
 		Face planarFace = beginEdge.RightFace();
 		Face cylinderFace = beginEdge.LeftFace();
@@ -115,7 +162,7 @@ private:
 		}
 		double h = abs((sqrt(3.) / 2.) * step);
 		if (xPositive) h = -h;
-		double c = clearance;
+		double c = panel.main.clearance;
 		if (outside) {
 			h = -h;
 			if (c > abs(h / 8.)) c = -h / 8. - 0.0001;
