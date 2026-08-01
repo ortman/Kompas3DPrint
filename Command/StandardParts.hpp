@@ -47,7 +47,9 @@ public:
 			do {
 				if (ff.IsFile()) {
 					if (ToLower(GetFileExt(ff.GetName())) == ".m3d") {
-						models.Add(parent, CtrlImg::File(), ff.GetPath(), ff.GetName());
+						String name = ff.GetName();
+						name.TrimLast(4);
+						models.Add(parent, CtrlImg::File(), ff.GetPath(), name);
 						++count;
 					}
 				} else if (ff.IsFolder()) {
@@ -87,6 +89,10 @@ public:
 								values = Split(nameVal[1], ',');
 							} else {
 								values = Split(v.comment.c_str(), ',');
+								if (values.GetCount() == 1) {
+									values.Clear();
+									name = v.comment + "(" + name + ")";
+								}
 							}
 							Vector<double>& d = variables.Add(name);
 							for (const String& s : values) d.Add(StrDbl(s));
@@ -128,7 +134,9 @@ public:
 					panel.main.embodiment.Clear();
 					sel = selector.GetSelected();
 					if (sel) {
-						panel.main.model.SetName(sel.path.ToStd());
+						String name = GetFileName(sel.path);
+						name.TrimLast(4);
+						panel.main.model.SetName(name.ToStd());
 						for (const String& key : sel.embodiments.GetKeys()) {
 							panel.main.embodiment.Add(key.ToStd());
 						}
