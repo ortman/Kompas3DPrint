@@ -55,6 +55,7 @@ void LIBRARYENTRY(unsigned int comm) {
 		case MENU_RACK:        rack->Start(); break;
 		case MENU_GEAR:        gear->Start(); break;
 		case MENU_THREADS:     threads->Start(); break;
+		case MENU_STANDARD:    standardParts->Start(); break;
 	}
 }
 
@@ -96,8 +97,7 @@ public:
 		bGear       << [=]() { LIBRARYENTRY(MENU_GEAR); };
 		bRack       << [=]() { LIBRARYENTRY(MENU_RACK); };
 		bThreads    << [=]() { LIBRARYENTRY(MENU_THREADS); };
-		bStIndex    << [=]() { standardParts->Scan(); };
-		bStRun      << [=]() { standardParts->Run(); };
+		bStRun      << [=]() { LIBRARYENTRY(MENU_STANDARD); };
 	}
 };
 
