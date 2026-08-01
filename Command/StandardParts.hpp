@@ -190,7 +190,6 @@ public:
 						for (const String& key : emb.data.GetKeys()) {
 							panel.main.embodiment.Add(key.ToStd());
 						}
-						Kompas3D::Error(emb.path.ToStd());
 					}
 					panel.Update();
 				}
@@ -198,17 +197,14 @@ public:
 			panel.main.embodiment.WhenChange = [=]() {
 				if (emb) {
 					std::string val = std::get<std::string>((PropertyVariant)panel.main.embodiment);
+					if (emb.data.Find(val) < 0) return;
 					StandardPartsSelector::Embodiments::Variables& variables = emb.data.Get(val);
 					panel.params.Clear();
 					for (const String& v : variables.data.GetKeys()) {
-						PropertyList var(v.ToStd().c_str());
-						panel.params.Add(var);
-						for (double d : variables.data.Get(v)) {
-							var.Add(d);
-						}
+						PropertyList& var = panel.params.Create<PropertyList>(v.ToStd().c_str());
+						for (double d : variables.data.Get(v)) var.Add(d);
 					}
 					panel.Update();
-					Kompas3D::Error("Embodiment:" + val);
 				}
 			};
 			panel.WhenButtonClick = [=](int buttonId) {
@@ -226,6 +222,9 @@ public:
 		} catch (const Kompas3DException&) {
 		}
 	}
+	
+	//~StandardParts() {
+	//}
 	
 	void Run() {
 		panel.Show();

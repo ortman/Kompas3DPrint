@@ -52,8 +52,11 @@ public:
 							if (p->GetId() == buttonId.lVal) {
 								PropertyButton* b = dynamic_cast<PropertyButton*>(p);
 								if (b) b->WhenClick();
+								t = NULL;
+								break;
 							}
 						}
+						if (!t) break;
 					}
 				}
 				break;
@@ -67,8 +70,11 @@ public:
 							for (Panel::Property* p : t->props) {
 								if (pCtrl->Id == p->GetId()) {
 									p->WhenChange();
+									t = NULL;
+									break;
 								}
 							}
+							if (!t) break;
 						}
 					}
 				}
@@ -104,11 +110,8 @@ bool Panel::Create() {
 			if (pTab) {
 				pTab.AddRef();
 				t->pTab = pTab.GetInterfacePtr();
-				K7::IPropertyControlsPtr ctrls = pTab->PropertyControls;
-				if (!ctrls) throw Kompas3DException("Can not get PropertyControls of Tab");
 				for (Property* p : t->props) {
-					K7::IPropertyControlPtr c = ctrls->Add((KConst::ControlTypeEnum)p->type);
-					if (c) p->Create(c.GetInterfacePtr());
+					t->Create(p);
 				}
 			}
 		}
@@ -120,9 +123,9 @@ bool Panel::Create() {
 
 Panel& Panel::Update() {
 	K7::IPropertyManagerPtr manager(pManager);
+	//manager->UpdateTabs(); // not working
 	manager->HideTabs();
 	manager->ShowTabs();
-	//manager->UpdateTabs();
 	return *this;
 }
 
@@ -141,6 +144,7 @@ Panel* Panel::currentPanel = nullptr;
 
 // Tab
 Panel::Tab::~Tab() {
+	for (Property* p : createdProps) delete p;
 	if (pTab) pTab->Release();
 	currentTab = nullptr;
 }
@@ -153,17 +157,36 @@ Panel::Tab& Panel::Tab::Clear() {
 		ctrls->Delete(i);
 	}
 	props.clear();
+	for (Property* p : createdProps) delete p;
+	createdProps.clear();
 	return *this;
 }
 
-Panel::Tab& Panel::Tab::Add(Panel::Property& prop) {
-	K7::IPropertyTabPtr tab = pTab;
+void Panel::Tab::Create(Panel::Property* property) {
+	K7::IPropertyTabPtr tab(pTab);
 	K7::IPropertyControlsPtr ctrls = tab->PropertyControls;
-	props.push_back(&prop);
-	K7::IPropertyControlPtr c = ctrls->Add((KConst::ControlTypeEnum)prop.type);
-	if (c) prop.Create(c.GetInterfacePtr());
-	return *this;
+	if (!ctrls) throw Kompas3DException("Can not get PropertyControls of Tab");
+	K7::IPropertyControlPtr c = ctrls->Add((KConst::ControlTypeEnum)property->type);
+	if (c) property->Create(c.GetInterfacePtr());
 }
+
+//void Panel::Tab::Remove(Panel::Property& prop) {
+//	K7::IPropertyTabPtr tab(pTab);
+//	K7::IPropertyControlsPtr ctrls = tab->PropertyControls;
+//	int cnt = (int)props.size();
+//	for (int i = 0; i < cnt; ++i) {
+//		if (props[i] == &prop) {
+//			prop.tab = NULL;
+//			props.erase(props.begin() + i);
+//			if (prop.pProp) {
+//				ctrls->Delete(i);
+//				prop.pProp->Release();
+//				prop.pProp = NULL;
+//			}
+//			break;
+//		}
+//	}
+//}
 
 Panel::Tab* Panel::Tab::currentTab = nullptr;
 
@@ -182,6 +205,7 @@ void Panel::Property::Create(IUnknown* pControls) {
 }
 
 int Panel::Property::GetId() {
+	if (!pProp) return 0;
 	K7::IPropertyControlPtr c = pProp;
 	return c->Id;
 }
@@ -195,7 +219,7 @@ int Panel::Property::nextId = 1;
 
 PropertyList& PropertyList::Add(PropertyVariant val) {
 	K7::IPropertyListPtr prop(pProp);
-	prop->Add(ToVariantT(val));
+	if (prop) prop->Add(ToVariantT(val));
 	return *this;
 }
 

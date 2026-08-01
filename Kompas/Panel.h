@@ -39,6 +39,8 @@ class Panel::Tab {
 private:
 	IUnknown* pTab;
 	std::string name;
+	std::vector<Panel::Property*> createdProps;
+	void Create(Property* property);
 	
 public:
 	static Tab* currentTab;
@@ -52,7 +54,16 @@ public:
 	}
 	~Tab();
 	Tab& Clear();
-	Tab& Add(Panel::Property& prop);
+	template <typename T>
+	T& Create(const char* name) {
+		currentTab = this;
+		T* p = new T(name);
+		createdProps.push_back(p);
+		Create(p);
+		return *p;
+	}
+	//void Remove(Panel::Property& prop);
+	
 	friend class Panel;
 	friend PropertyManagerNotifyLoc;
 };
@@ -66,9 +77,13 @@ protected:
 	PropertyVariant defaultVal;
 	int type;
 	static int nextId;
+	Panel::Tab* tab = NULL;
 
 	Property(const char* name, int type, PropertyVariant val) : name(name), type(type), defaultVal(val) {
-		if (Panel::Tab::currentTab) Panel::Tab::currentTab->props.push_back(this);
+		if (Panel::Tab::currentTab) {
+			Panel::Tab::currentTab->props.push_back(this);
+			tab = Panel::Tab::currentTab;
+		}
 	}
 	
 	virtual void Create(IUnknown* pControls);
@@ -78,6 +93,7 @@ public:
 	KompasEvent<void(void)> WhenChange;
 	
 	virtual ~Property();
+	
 	void SetName(const std::string& name);
 
 	friend class Panel;
