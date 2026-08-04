@@ -1,6 +1,7 @@
 #ifndef _ComTest_Document3D_h_
 #define _ComTest_Document3D_h_
 
+#include <concepts>
 #include "Part.h"
 #include "KompasEvent.h"
 #include "Node/NodeMacro.h"
@@ -11,6 +12,42 @@
 #define SETTINGS_ANGLE_MIN  0.1
 #define SETTINGS_RIDGE_MIN  0.01
 #define SETTINGS_RIDGE_MAX  100.0
+
+class Doc3D;
+class Process3DNotifyLoc;
+class KProcess3D {
+protected:
+	Doc3D* doc = nullptr;
+	IUnknown* pProc3D = nullptr;
+	Process3DNotifyLoc* comEvent = nullptr;
+	
+  bool hasPlacementChangeMethod = false;
+  bool hasFilterObjectMethod = false;
+  
+	virtual bool OnPlacementChange(Node* node) { return false; }
+	virtual bool OnFilterObject(Node* node) { return false; }
+
+public:
+	virtual ~KProcess3D();
+	bool Run(bool prop, bool cmd);
+	
+	friend class Doc3D;
+	friend class Process3DNotifyLoc;
+};
+
+template <typename T>
+concept CheckOnPlacementChange = requires(T a, Node* node) { { a.OnPlacementChange(node) } -> std::same_as<bool>; };
+template <typename T>
+concept CheckOnFilterObject    = requires(T a, Node* node) { { a.OnFilterObject(node)    } -> std::same_as<bool>; };
+
+template <typename ProcClass>
+class Process3D : public KProcess3D {
+public:
+	Process3D() {
+		if constexpr (CheckOnPlacementChange<ProcClass>) hasPlacementChangeMethod = true;
+		if constexpr (CheckOnFilterObject<ProcClass>) hasFilterObjectMethod = true;
+	}
+};
 
 class DocumentFileNotifyLoc;
 class Doc3D {
@@ -111,6 +148,7 @@ public:
 private:
 	IUnknown* pDoc;
 	DocumentFileNotifyLoc *comEvent = nullptr;
+	KProcess3D* proc3D = nullptr;
 
 public:
 	KompasEvent<void()> WhenBeginCloseDocument;
@@ -120,6 +158,7 @@ public:
 	KompasEvent<void()> WhenActiveDocument;
 	
 	Doc3D(IUnknown* pDoc);
+	Doc3D(const Doc3D& doc) : Doc3D(doc.pDoc) {}
 	~Doc3D();
 	std::string GetPath();
 	Part GetTopPart();
@@ -131,6 +170,15 @@ public:
 	std::string GetEmbodimentName(int i);
 	Part GetEmbodiment(int i);
 	operator bool() const { return pDoc; }
+	template <typename T>
+	T& CreatePorcess() {
+		if (proc3D) delete proc3D;
+		T* proc = new T();
+		proc->doc = this;
+		proc3D = proc;
+		return *proc;
+	}
+	friend class KProcess3D;
 };
 
 #endif

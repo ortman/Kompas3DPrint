@@ -4,6 +4,74 @@
 #include "Kompas3D.h"
 #include <filesystem>
 
+class Process3DNotifyLoc : public ComEvent {
+private:
+	KProcess3D* proc;
+public:
+	Process3DNotifyLoc(KProcess3D* p) : ComEvent(K7::DIID_ksProcess3DNotify), proc(p) {}
+	
+	STDMETHODIMP Invoke(DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags,
+	                    DISPPARAMS* pDispParams, VARIANT* pVarResult,
+	                    EXCEPINFO* pExcepInfo, UINT* puArgErr) override {
+		switch ((int)dispIdMember) {
+			case KConst::ksProcess3DFilterObjects:
+				if (proc && proc->hasFilterObjectMethod) {
+					VariantInit(pVarResult);
+					pVarResult->vt = VT_BOOL;
+					pVarResult->boolVal = proc->OnFilterObject(nullptr);
+				}
+				break;
+			case KConst::ksProcess3DPlacementChanged:
+				if (proc && proc->hasPlacementChangeMethod) {
+					proc->OnPlacementChange(nullptr);
+				}
+				break;
+		}
+		return S_OK;
+	}
+};
+
+KProcess3D::~KProcess3D() {
+	if (comEvent) {
+		comEvent->Unsubscribe(pProc3D);
+		pProc3D->Release();
+		delete comEvent;
+	}
+}
+
+bool KProcess3D::Run(bool modal, bool postMessage) {
+	if (comEvent) {
+		comEvent->Unsubscribe(pProc3D);
+		pProc3D->Release();
+		delete comEvent;
+		comEvent = nullptr;
+	}
+	K7::IKompasDocument3D1Ptr pDoc1 = Kompas3D::ToApi7<K7::IKompasDocument3D1Ptr>(doc->pDoc);
+	if (!pDoc1) return false;
+	K7::IProcess3DPtr proc3D = pDoc1->GetLibProcess(KConst::ksProcess3DPlacementAndEntity);
+	if (!proc3D) return false;
+	comEvent = new Process3DNotifyLoc(this);
+	pProc3D = (IUnknown*)proc3D.GetInterfacePtr();
+	pProc3D->AddRef();
+	HRESULT hr = comEvent->Subscribe(pProc3D);
+	if (SUCCEEDED(hr)) {
+		K7::IProcessPtr proc(pProc3D);
+		if (!proc) {
+			comEvent->Unsubscribe(pProc3D);
+			pProc3D->Release();
+			delete comEvent;
+			comEvent = nullptr;
+			return false;
+		}
+		proc->Caption = "Test";
+		proc->Dynamic = true;
+		proc->Run(modal, postMessage);
+		comEvent->Unsubscribe(pProc3D);
+		return true;
+	}
+	return false;
+}
+
 class DocumentFileNotifyLoc : public ComEvent {
 private:
 	Doc3D* doc;
@@ -13,7 +81,7 @@ public:
 	STDMETHODIMP Invoke(DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags,
 	                    DISPPARAMS* pDispParams, VARIANT* pVarResult,
 	                    EXCEPINFO* pExcepInfo, UINT* puArgErr) override {
-		switch((int)dispIdMember) {
+		switch ((int)dispIdMember) {
 			case KConst::kdBeginCloseDocument:
 				if (doc) doc->WhenBeginCloseDocument();
 				break;
@@ -35,12 +103,15 @@ public:
 };
 
 Doc3D::Doc3D(IUnknown* d) : pDoc(d) {
-	if (pDoc) pDoc->AddRef();
-	comEvent = new DocumentFileNotifyLoc(this);
-	comEvent->Subscribe(pDoc);
+	if (pDoc) {
+		pDoc->AddRef();
+		comEvent = new DocumentFileNotifyLoc(this);
+		comEvent->Subscribe(pDoc);
+	}
 }
 
 Doc3D::~Doc3D() {
+	if (proc3D) delete proc3D;
 	if (comEvent) {
 		comEvent->Unsubscribe(pDoc);
 		delete comEvent;

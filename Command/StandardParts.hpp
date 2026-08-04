@@ -108,6 +108,20 @@ public:
 	}
 };
 
+class InsertModelProc : public Process3D<InsertModelProc> {
+public:
+	bool OnPlacementChange(Node* node) override {
+		//...
+		Kompas3D::Error("OnPlacementChange");
+		return true;
+	}
+	bool OnFilterObject(Node* node) override {
+		//...
+		//Kompas3D::Error("OnFilterObject");
+		return true;
+	}
+};
+	
 class StandardParts {
 private:
 	struct : Panel {
@@ -121,6 +135,7 @@ private:
 	
 	StandardPartsSelector selector;
 	StandardPartsSelector::ModelData sel;
+	Doc3D doc = nullptr;
 
 public:
 	StandardParts() {
@@ -161,6 +176,10 @@ public:
 				try {
 					if (buttonId == 1) {
 						//todo: paste;
+						if (doc) {
+							InsertModelProc& proc = doc.CreatePorcess<InsertModelProc>();
+							proc.Run(false, true);
+						}
 					} else {
 						panel.Hide();
 					}
@@ -178,6 +197,7 @@ public:
 	
 	void Start() {
 		panel.Show();
+		doc = Kompas3D::GetActiveDocument3D();
 		//selector.Load();
 	}
 };
