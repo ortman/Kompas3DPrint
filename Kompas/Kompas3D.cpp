@@ -175,3 +175,5 @@ KOMPAS_API7(IKompasDocument3D1)
 
 #define KOMPAS_API5(p) template K5::p##Ptr Kompas3D::ToApi5(IUnknown*);
 KOMPAS_API5(ksPart)
+KOMPAS_API5(ksFaceDefinition)
+KOMPAS_API5(ksEdgeDefinition)

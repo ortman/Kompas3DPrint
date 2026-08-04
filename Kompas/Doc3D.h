@@ -24,8 +24,8 @@ protected:
   bool hasPlacementChangeMethod = false;
   bool hasFilterObjectMethod = false;
   
-	virtual bool OnPlacementChange(Node* node) { return false; }
-	virtual bool OnFilterObject(Node* node) { return false; }
+	virtual bool OnPlacementChange(const Node& node) { return false; }
+	virtual bool OnFilterObject(const Node& node) { return false; }
 
 public:
 	virtual ~KProcess3D();
@@ -36,9 +36,9 @@ public:
 };
 
 template <typename T>
-concept CheckOnPlacementChange = requires(T a, Node* node) { { a.OnPlacementChange(node) } -> std::same_as<bool>; };
+concept CheckOnPlacementChange = requires(T a, const Node& node) { { a.OnPlacementChange(node) } -> std::same_as<bool>; };
 template <typename T>
-concept CheckOnFilterObject    = requires(T a, Node* node) { { a.OnFilterObject(node)    } -> std::same_as<bool>; };
+concept CheckOnFilterObject    = requires(T a, const Node& node) { { a.OnFilterObject(node)    } -> std::same_as<bool>; };
 
 template <typename ProcClass>
 class Process3D : public KProcess3D {
@@ -159,6 +159,16 @@ public:
 	
 	Doc3D(IUnknown* pDoc);
 	Doc3D(const Doc3D& doc) : Doc3D(doc.pDoc) {}
+	Doc3D& operator=(Doc3D&& doc) noexcept {
+		if (this == &doc) return *this;
+		pDoc = doc.pDoc;
+		comEvent = doc.comEvent;
+		proc3D = doc.proc3D;
+		doc.pDoc = nullptr;
+		doc.comEvent = nullptr;
+		doc.proc3D = nullptr;
+		return *this;
+	}
 	~Doc3D();
 	std::string GetPath();
 	Part GetTopPart();

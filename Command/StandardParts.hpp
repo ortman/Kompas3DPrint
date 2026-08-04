@@ -110,15 +110,27 @@ public:
 
 class InsertModelProc : public Process3D<InsertModelProc> {
 public:
-	bool OnPlacementChange(Node* node) override {
-		//...
-		Kompas3D::Error("OnPlacementChange");
-		return true;
+	Face plane = nullptr;
+	Face axis = nullptr;
+
+	bool OnPlacementChange(const Node& node) override {
+		if (node.GetType() != Face::TYPE) return false;
+		Face face(node);
+		if (face.IsPlanar()) {
+			plane = face;
+			return true;
+		}
+		if (face.IsCylinder()) {
+			axis = face;
+			return true;
+		}
+		return false;
 	}
-	bool OnFilterObject(Node* node) override {
-		//...
-		//Kompas3D::Error("OnFilterObject");
-		return true;
+
+	bool OnFilterObject(const Node& node) override {
+		if (node.GetType() != Face::TYPE) return false;
+		Face face(node);
+		return face.IsCylinder() || face.IsPlanar();
 	}
 };
 	
@@ -175,10 +187,13 @@ public:
 			panel.WhenButtonClick = [=](int buttonId) {
 				try {
 					if (buttonId == 1) {
-						//todo: paste;
 						if (doc) {
 							InsertModelProc& proc = doc.CreatePorcess<InsertModelProc>();
-							proc.Run(false, true);
+							if (proc.Run(true, true)) {
+								if (proc.plane && proc.axis) {
+									Kompas3D::Error(proc.plane.IsPlanar() && proc.axis.IsCylinder() ? "YES!" : "Oh nooo :(");
+								}
+							}
 						}
 					} else {
 						panel.Hide();
@@ -192,13 +207,9 @@ public:
 		}
 	}
 	
-	//~StandardParts() {
-	//}
-	
 	void Start() {
 		panel.Show();
 		doc = Kompas3D::GetActiveDocument3D();
-		//selector.Load();
 	}
 };
 

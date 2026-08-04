@@ -16,16 +16,65 @@ public:
 		switch ((int)dispIdMember) {
 			case KConst::ksProcess3DFilterObjects:
 				if (proc && proc->hasFilterObjectMethod) {
-					VariantInit(pVarResult);
-					pVarResult->vt = VT_BOOL;
-					pVarResult->boolVal = proc->OnFilterObject(nullptr);
+					VARIANT& obj = pDispParams->rgvarg[pDispParams->cArgs - 1];
+					if (obj.vt == VT_DISPATCH) {
+						IUnknownPtr entity;
+						K5::ksFaceDefinitionPtr face;
+						K5::ksEdgeDefinitionPtr edge;
+						IDispatch* definition = obj.pdispVal;
+						K7::IModelObjectPtr model = definition;
+						if (model) {
+							int type = model->ModelObjectType;
+							if (type == KConst3D::o3d_face) {
+								if (face = Kompas3D::ToApi5<K5::ksFaceDefinitionPtr>(definition)) entity = face->GetEntity();
+							} else if (type == KConst3D::o3d_edge) {
+								if (edge = Kompas3D::ToApi5<K5::ksEdgeDefinitionPtr>(definition)) entity = edge->GetEntity();
+							}
+							VariantInit(pVarResult);
+							pVarResult->vt = VT_BOOL;
+							pVarResult->boolVal = proc->OnFilterObject(Node(entity));
+						}
+					}
 				}
 				break;
 			case KConst::ksProcess3DPlacementChanged:
 				if (proc && proc->hasPlacementChangeMethod) {
-					proc->OnPlacementChange(nullptr);
+					VARIANT& obj = pDispParams->rgvarg[pDispParams->cArgs - 1];
+					if (obj.vt == VT_DISPATCH) {
+						IUnknownPtr entity;
+						K5::ksFaceDefinitionPtr face;
+						K5::ksEdgeDefinitionPtr edge;
+						IDispatch* definition = obj.pdispVal;
+						K7::IModelObjectPtr model = definition;
+						if (model) {
+							int type = model->ModelObjectType;
+							if (type == KConst3D::o3d_face) {
+								if (face = Kompas3D::ToApi5<K5::ksFaceDefinitionPtr>(definition)) entity = face->GetEntity();
+							} else if (type == KConst3D::o3d_edge) {
+								if (edge = Kompas3D::ToApi5<K5::ksEdgeDefinitionPtr>(definition)) entity = edge->GetEntity();
+							}
+							VariantInit(pVarResult);
+							pVarResult->vt = VT_BOOL;
+							bool res = proc->OnPlacementChange(Node(entity));
+							if (res) {
+								// TODO: Оставляем висеть в памяти указатели, если объекты будут использованы,
+								// но это приводит к утечке памяти, надо как-то решить эту проблему
+								if (face) face.AddRef();
+								if (edge) edge.AddRef();
+							}
+							pVarResult->boolVal = res;
+						}
+					}
 				}
 				break;
+			//case KConst::ksProcess3DEndProcess:
+				//if (proc && proc->comEvent) {
+					//proc->comEvent->Unsubscribe(proc->pProc3D);
+					//proc->pProc3D->Release();
+				//}
+				//break;
+			//case KConst::ksProcess3DStop:
+			//	break;
 		}
 		return S_OK;
 	}
@@ -65,9 +114,7 @@ bool KProcess3D::Run(bool modal, bool postMessage) {
 		}
 		proc->Caption = "Test";
 		proc->Dynamic = true;
-		proc->Run(modal, postMessage);
-		comEvent->Unsubscribe(pProc3D);
-		return true;
+		return proc->Run(modal, postMessage);
 	}
 	return false;
 }
