@@ -1,8 +1,8 @@
-#define _USE_MATH_DEFINES
 #include "ComKompas.h"
 #include "Doc3D.h"
 #include "Kompas3D.h"
 #include <filesystem>
+#include <numbers>
 
 class Process3DNotifyLoc : public ComEvent {
 private:
@@ -18,7 +18,7 @@ public:
 				if (proc && proc->hasFilterObjectMethod) {
 					VARIANT& obj = pDispParams->rgvarg[pDispParams->cArgs - 1];
 					if (obj.vt == VT_DISPATCH) {
-						IUnknownPtr entity;
+						K5::ksEntityPtr entity;
 						K5::ksFaceDefinitionPtr face;
 						K5::ksEdgeDefinitionPtr edge;
 						IDispatch* definition = obj.pdispVal;
@@ -32,7 +32,7 @@ public:
 							}
 							VariantInit(pVarResult);
 							pVarResult->vt = VT_BOOL;
-							pVarResult->boolVal = proc->OnFilterObject(Node(entity));
+							pVarResult->boolVal = proc->OnFilterObject(Node(entity.GetInterfacePtr()));
 						}
 					}
 				}
@@ -41,7 +41,7 @@ public:
 				if (proc && proc->hasPlacementChangeMethod) {
 					VARIANT& obj = pDispParams->rgvarg[pDispParams->cArgs - 1];
 					if (obj.vt == VT_DISPATCH) {
-						IUnknownPtr entity;
+						K5::ksEntityPtr entity;
 						K5::ksFaceDefinitionPtr face;
 						K5::ksEdgeDefinitionPtr edge;
 						IDispatch* definition = obj.pdispVal;
@@ -55,7 +55,7 @@ public:
 							}
 							VariantInit(pVarResult);
 							pVarResult->vt = VT_BOOL;
-							bool res = proc->OnPlacementChange(Node(entity));
+							bool res = proc->OnPlacementChange(Node(entity.GetInterfacePtr()));
 							if (res) {
 								// TODO: Оставляем висеть в памяти указатели, если объекты будут использованы,
 								// но это приводит к утечке памяти, надо как-то решить эту проблему
@@ -222,9 +222,9 @@ bool Doc3D::SaveAs(const ExportParams& params, const std::string& path) {
 	}
 	if (params.isAngle) {
 		stepType |= KConst3D::ksDeviationStep;
-		formatParam->angle = params.angleVal * M_PI / 180.0;
+		formatParam->angle = params.angleVal * std::numbers::pi / 180.0;
 	} else {
-		formatParam->angle = SETTINGS_ANGLE_MAX * M_PI / 180.0;
+		formatParam->angle = SETTINGS_ANGLE_MAX * std::numbers::pi / 180.0;
 	}
 	if (params.isRidge) {
 		stepType |= KConst3D::ksMetricStep;
@@ -274,7 +274,9 @@ Part Doc3D::GetEmbodiment(int i) {
 bool Doc3D::AddMateConstraint(MateType type, const Node& object1, const Node& object2, MateDir direction, MateFixed fixed, double value) {
 	if (!object1.pEntity || !object2.pEntity) return false;
 	K5::ksDocument3DPtr doc = pDoc;
-	return doc->AddMateConstraint(type, K5::ksEntityPtr(object1.pEntity), K5::ksEntityPtr(object2.pEntity), direction, fixed, value);
+	K5::ksEntityPtr obj1 = object1.pEntity;
+	K5::ksEntityPtr obj2 = object2.pEntity;
+	return doc->AddMateConstraint(type, obj1, obj2, direction, fixed, value);
 }
 
 Part Doc3D::AddPart(const Part& part, const std::optional<std::string>& filePath) {
@@ -283,8 +285,8 @@ Part Doc3D::AddPart(const Part& part, const std::optional<std::string>& filePath
 		bool isPath = filePath.has_value();
 		if (doc->SetPartFromFile((isPath ? Node::Utf8ToCp1251(filePath.value()).c_str() : ""), K5::ksPartPtr(part.pPart), isPath)) {
 			int partIdx = 0;
-			K5::ksPartPtr newPart;
-			while (newPart = doc->GetPart(partIdx++)) {}
+			K5::ksPartPtr p, newPart;
+			while (p = doc->GetPart(partIdx++)) newPart = p;
 			return Part(pDoc, newPart.GetInterfacePtr());
 		}
 	}

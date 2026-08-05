@@ -77,14 +77,6 @@ class App : public WithAppLay<TopWindow> {
 public:
 	App() {
 		CtrlLayout(*this, LIB_NAME);
-		if (!Kompas3D::Connect()) {
-			DisableCtrls({
-				&bSettings, &bAbout, &bOpenSlicer, &bGear, &bRack,
-				&bExportSTL, &bExportSTEP, &bExportIGS, &bExportX_T, &bExportACIS, &bExportVRLM
-			});
-			ErrorOK("Kompas3D не запущен! Перерапустите приложение.");
-			return;
-		}
 		bSettings   << [=]() { LIBRARYENTRY(MENU_SETTINGS); };
 		bOpenSlicer << [=]() { LIBRARYENTRY(MENU_OPEN_SLICER); };
 		bExportSTL  << [=]() { LIBRARYENTRY(MENU_EXPORT_STL); };
@@ -102,6 +94,10 @@ public:
 };
 
 GUI_APP_MAIN {
-	if (Kompas3D::Connect()) MainStart();
-	App().Run();
+	if (Kompas3D::Connect()) {
+		MainStart();
+		App().Run();
+	} else {
+		ErrorOK("Kompas3D не запущен! Перерапустите приложение.");
+	}
 }

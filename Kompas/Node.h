@@ -31,6 +31,7 @@ public:
 	static std::string Utf8ToCp1251(const std::string& utf8Str);
 	static std::string Cp1251ToUtf8(const char* cp1251Str);
 	operator bool() const { return pEntity; }
+	Node& operator=(const Node& other);
 };
 
 #endif

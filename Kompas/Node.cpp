@@ -42,6 +42,24 @@ Node& Node::Update() {
 	return *this;
 }
 
+Node& Node::operator=(const Node& other) {
+	if (this == &other) return *this;
+	if (pDefinition) pDefinition->Release();
+	if (pEntity) pEntity->Release();
+
+	pEntity = other.pEntity;
+	if (pEntity) pEntity->AddRef();
+	pDefinition = other.pDefinition;
+	if (pDefinition) pDefinition->AddRef();
+	if (pEntity && !pDefinition) {
+		K5::ksEntityPtr entity = pEntity;
+		IDispatchPtr def = entity->GetDefinition();
+		def.AddRef();
+		pDefinition = def.GetInterfacePtr();
+	}
+	return *this;
+}
+
 std::string Node::Cp1251ToUtf8(const char* cp1251Str) {
     if (!cp1251Str || strlen(cp1251Str) == 0) return "";
 
