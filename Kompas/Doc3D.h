@@ -58,6 +58,7 @@ protected:
 public:
 	virtual ~KProcess3D();
 	bool Run(bool prop, bool cmd);
+	bool Stop();
 	void SetPhantom(const Part& part);
 	
 	friend class Doc3D;

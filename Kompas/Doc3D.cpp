@@ -67,14 +67,6 @@ public:
 					}
 				}
 				break;
-			//case KConst::ksProcess3DEndProcess:
-				//if (proc && proc->comEvent) {
-					//proc->comEvent->Unsubscribe(proc->pProc3D);
-					//proc->pProc3D->Release();
-				//}
-				//break;
-			//case KConst::ksProcess3DStop:
-			//	break;
 		}
 		return S_OK;
 	}
@@ -99,7 +91,6 @@ void KProcess3D::Init(Doc3D* doc) {
 KProcess3D::~KProcess3D() {
 	if (comEvent) {
 		comEvent->Unsubscribe(pProc3D);
-		pProc3D->Release();
 		delete comEvent;
 	}
 }
@@ -108,6 +99,11 @@ bool KProcess3D::Run(bool modal, bool postMessage) {
 	if (!pProc3D) return false;
 	K7::IProcessPtr proc(pProc3D);
 	return proc->Run(modal, postMessage);
+}
+
+bool KProcess3D::Stop() {
+	K7::IProcessPtr proc(pProc3D);
+	return proc->Stop();
 }
 
 void KProcess3D::SetPhantom(const Part& part) {

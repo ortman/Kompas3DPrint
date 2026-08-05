@@ -194,7 +194,7 @@ public:
 								InsertModelProc& proc = doc.CreatePorcess<InsertModelProc>();
 								proc.SetPhantom(emb);
 								if (proc.Run(true, true)) {
-									if (proc.plane && proc.axis/* && proc.plane.IsPlanar() && proc.axis.IsCylinder()*/) {
+									if (proc.plane && proc.axis) {
 										if (Part newPart = doc.AddPart(emb)) {
 											doc.AddMateConstraint(MateCoincidence, proc.plane, newPart.GetPlaneXOY(), MateDirSame, MateFixedNone);
 											doc.AddMateConstraint(MateConcentric, proc.axis, newPart.GetAxisOZ(), MateDirUndefined, MateFixedNone);
