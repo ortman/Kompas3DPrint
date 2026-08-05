@@ -13,6 +13,33 @@
 #define SETTINGS_RIDGE_MIN  0.01
 #define SETTINGS_RIDGE_MAX  100.0
 
+enum MateType : int {
+	MateCoincidence   = 0,  // совпадение объектов
+	MateParallel      = 1,  // параллельность
+	MatePerpendicular = 2,  // перпендикулярность
+	MateTangency      = 3,  // касательность
+	MateConcentric    = 4,  // концентричность
+	MateDistance      = 5,  // постоянное расстояние между объектами
+	MateAngle         = 6,  // постоянный угол между объектами
+	MateInPlace       = 7,  // создание компонента "на месте"
+	MateTransmission  = 9,  // Механическая передача
+	MateCamGear       = 10, // Кулачковый механизм. Кулачек-толкатель
+	MateSymmetric     = 11, // Симметрия
+	MateDependent     = 14  // Зависимое положение
+};
+
+enum MateDir : int {
+	MateDirUndefined  = 0,  // направление не учитывается
+	MateDirSame       = 1,  // объекты однонаправленные
+	MateDirOpposite   = -1  // объекты разнонаправленные
+};
+
+enum MateFixed : int {
+	MateFixedNone   = 0,    // детали не фиксируются
+	MateFixedFirst  = 1,    // фиксируется первая деталь
+	MateFixedSecond = 2     // фиксируется вторая деталь
+};
+
 class Doc3D;
 class Process3DNotifyLoc;
 class KProcess3D {
@@ -20,6 +47,7 @@ protected:
 	Doc3D* doc = nullptr;
 	IUnknown* pProc3D = nullptr;
 	Process3DNotifyLoc* comEvent = nullptr;
+	void Init(Doc3D* doc);
 	
   bool hasPlacementChangeMethod = false;
   bool hasFilterObjectMethod = false;
@@ -30,6 +58,7 @@ protected:
 public:
 	virtual ~KProcess3D();
 	bool Run(bool prop, bool cmd);
+	void SetPhantom(const Part& part);
 	
 	friend class Doc3D;
 	friend class Process3DNotifyLoc;
@@ -180,11 +209,13 @@ public:
 	std::string GetEmbodimentName(int i);
 	Part GetEmbodiment(int i);
 	operator bool() const { return pDoc; }
+	bool AddMateConstraint(MateType type, const Node& object1, const Node& object2, MateDir direction, MateFixed fixed, double value = 0.0);
+	Part AddPart(const Part& part, const std::optional<std::string>& filePath = std::nullopt);
 	template <typename T>
 	T& CreatePorcess() {
 		if (proc3D) delete proc3D;
 		T* proc = new T();
-		proc->doc = this;
+		proc->Init(this);
 		proc3D = proc;
 		return *proc;
 	}

@@ -187,12 +187,21 @@ public:
 			panel.WhenButtonClick = [=](int buttonId) {
 				try {
 					if (buttonId == 1) {
-						if (doc) {
-							InsertModelProc& proc = doc.CreatePorcess<InsertModelProc>();
-							if (proc.Run(true, true)) {
-								if (proc.plane && proc.axis) {
-									Kompas3D::Error(proc.plane.IsPlanar() && proc.axis.IsCylinder() ? "YES!" : "Oh nooo :(");
+						if (doc && sel) {
+							Doc3D	stDoc = Kompas3D::Open3D(sel.path.ToStd(), false);
+							if (stDoc) {
+								Part emb = stDoc.GetEmbodiment(0);
+								InsertModelProc& proc = doc.CreatePorcess<InsertModelProc>();
+								proc.SetPhantom(emb);
+								if (proc.Run(true, true)) {
+									if (proc.plane && proc.axis/* && proc.plane.IsPlanar() && proc.axis.IsCylinder()*/) {
+										if (Part newPart = doc.AddPart(emb)) {
+											doc.AddMateConstraint(MateCoincidence, proc.plane, newPart.GetPlaneXOY(), MateDirSame, MateFixedNone);
+											doc.AddMateConstraint(MateConcentric, proc.axis, newPart.GetAxisOZ(), MateDirUndefined, MateFixedNone);
+										}
+									}
 								}
+								stDoc.Close();
 							}
 						}
 					} else {

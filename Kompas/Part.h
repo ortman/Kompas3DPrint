@@ -18,11 +18,11 @@ public:
 
 private:
 	IUnknown* pDoc;
-	IUnknown* pPart;
 	IUnknown* CreateEntity(int type);
 	IUnknown* GetDefaultEntity(int type);
 	
 public:
+	IUnknown* pPart;
 	Part(IUnknown* pDoc, IUnknown* pPart);
 	~Part();
 	std::vector<Node> GetNodes();

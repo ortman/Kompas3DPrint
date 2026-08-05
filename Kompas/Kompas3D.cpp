@@ -172,6 +172,7 @@ KOMPAS_API7(IThread)
 KOMPAS_API7(IAxis3D)
 KOMPAS_API7(ICutRotated)
 KOMPAS_API7(IKompasDocument3D1)
+KOMPAS_API7(IPart7)
 
 #define KOMPAS_API5(p) template K5::p##Ptr Kompas3D::ToApi5(IUnknown*);
 KOMPAS_API5(ksPart)

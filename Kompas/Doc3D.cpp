@@ -80,6 +80,22 @@ public:
 	}
 };
 
+void KProcess3D::Init(Doc3D* doc) {
+	K7::IKompasDocument3D1Ptr pDoc1 = Kompas3D::ToApi7<K7::IKompasDocument3D1Ptr>(doc->pDoc);
+	if (!pDoc1) throw Kompas3DException("У процесса нет документа");
+	K7::IProcess3DPtr proc3D = pDoc1->GetLibProcess(KConst::ksProcess3DPlacementAndEntity);
+	if (!proc3D) throw Kompas3DException("Не могу создать процесс");
+	comEvent = new Process3DNotifyLoc(this);
+	pProc3D = (IUnknown*)proc3D.GetInterfacePtr();
+	pProc3D->AddRef();
+	HRESULT hr = comEvent->Subscribe(pProc3D);
+	if (FAILED(hr)) throw Kompas3DException("Не могу подписать события на процесс");
+	K7::IProcessPtr proc(pProc3D);
+	if (!proc) throw Kompas3DException("Не могу получить базовый процесс от 3D");
+	proc->Caption = "Test";
+	proc->Dynamic = true;
+}
+
 KProcess3D::~KProcess3D() {
 	if (comEvent) {
 		comEvent->Unsubscribe(pProc3D);
@@ -89,34 +105,17 @@ KProcess3D::~KProcess3D() {
 }
 
 bool KProcess3D::Run(bool modal, bool postMessage) {
-	if (comEvent) {
-		comEvent->Unsubscribe(pProc3D);
-		pProc3D->Release();
-		delete comEvent;
-		comEvent = nullptr;
-	}
-	K7::IKompasDocument3D1Ptr pDoc1 = Kompas3D::ToApi7<K7::IKompasDocument3D1Ptr>(doc->pDoc);
-	if (!pDoc1) return false;
-	K7::IProcess3DPtr proc3D = pDoc1->GetLibProcess(KConst::ksProcess3DPlacementAndEntity);
-	if (!proc3D) return false;
-	comEvent = new Process3DNotifyLoc(this);
-	pProc3D = (IUnknown*)proc3D.GetInterfacePtr();
-	pProc3D->AddRef();
-	HRESULT hr = comEvent->Subscribe(pProc3D);
-	if (SUCCEEDED(hr)) {
-		K7::IProcessPtr proc(pProc3D);
-		if (!proc) {
-			comEvent->Unsubscribe(pProc3D);
-			pProc3D->Release();
-			delete comEvent;
-			comEvent = nullptr;
-			return false;
-		}
-		proc->Caption = "Test";
-		proc->Dynamic = true;
-		return proc->Run(modal, postMessage);
-	}
-	return false;
+	if (!pProc3D) return false;
+	K7::IProcessPtr proc(pProc3D);
+	return proc->Run(modal, postMessage);
+}
+
+void KProcess3D::SetPhantom(const Part& part) {
+	if (!pProc3D) return;
+	K7::IProcess3DPtr proc3D(pProc3D);
+	K7::IPart7Ptr part7 = Kompas3D::ToApi7<K7::IPart7Ptr>(part.pPart);
+	part7.AddRef();
+	proc3D->PhantomObject = part7;
 }
 
 class DocumentFileNotifyLoc : public ComEvent {
@@ -270,4 +269,24 @@ Part Doc3D::GetEmbodiment(int i) {
 		}
 	}
 	return Part(pDoc, nullptr);
+}
+
+bool Doc3D::AddMateConstraint(MateType type, const Node& object1, const Node& object2, MateDir direction, MateFixed fixed, double value) {
+	if (!object1.pEntity || !object2.pEntity) return false;
+	K5::ksDocument3DPtr doc = pDoc;
+	return doc->AddMateConstraint(type, K5::ksEntityPtr(object1.pEntity), K5::ksEntityPtr(object2.pEntity), direction, fixed, value);
+}
+
+Part Doc3D::AddPart(const Part& part, const std::optional<std::string>& filePath) {
+	K5::ksDocument3DPtr doc = pDoc;
+	if (part.pPart) {
+		bool isPath = filePath.has_value();
+		if (doc->SetPartFromFile((isPath ? Node::Utf8ToCp1251(filePath.value()).c_str() : ""), K5::ksPartPtr(part.pPart), isPath)) {
+			int partIdx = 0;
+			K5::ksPartPtr newPart;
+			while (newPart = doc->GetPart(partIdx++)) {}
+			return Part(pDoc, newPart.GetInterfacePtr());
+		}
+	}
+	return Part(nullptr, nullptr);
 }
