@@ -102,6 +102,7 @@ bool KProcess3D::Run(bool modal, bool postMessage) {
 }
 
 bool KProcess3D::Stop() {
+	if (!pProc3D) return false;
 	K7::IProcessPtr proc(pProc3D);
 	return proc->Stop();
 }
@@ -109,9 +110,61 @@ bool KProcess3D::Stop() {
 void KProcess3D::SetPhantom(const Part& part) {
 	if (!pProc3D) return;
 	K7::IProcess3DPtr proc3D(pProc3D);
-	K7::IPart7Ptr part7 = Kompas3D::ToApi7<K7::IPart7Ptr>(part.pPart);
-	part7.AddRef();
-	proc3D->PhantomObject = part7;
+	if (proc3D) {
+		K7::IPart7Ptr part7 = Kompas3D::ToApi7<K7::IPart7Ptr>(part.pPart);
+		if (part7) {
+			part7.AddRef(); //TODO: do remove?
+			proc3D->PhantomObject = part7;
+		}
+	}
+}
+
+Part KProcess3D::GetPhantom() {
+	if (pProc3D) {
+		K7::IProcess3DPtr proc3D(pProc3D);
+		K7::IModelObjectPtr phModel = proc3D->PhantomObject;
+		if (phModel && phModel->Type == KConst3D::o3d_part) {
+			phModel.AddRef(); // TODO:
+			K5::ksPartPtr part = Kompas3D::ToApi5<K5::ksPartPtr>(phModel);
+			if (part) {
+				return Part(doc->pDoc, part.GetInterfacePtr());
+			}
+		}
+	}
+	return Part(nullptr, nullptr);
+}
+
+
+MateConstraint::MateConstraint(IUnknown* m, MateType t, MateDir d, MateFixed f, const Node& obj1, const Node& obj2, double val)
+		: mate(m), type(t), dir(d), fixed(f), first(obj1), second(obj2), value(val) {
+	if (mate) mate->AddRef();
+}
+
+MateConstraint::~MateConstraint() {
+	if (mate) mate->Release();
+}
+
+MateConstraint& MateConstraint::SetSecond(const Node& node) {
+	second = node;
+	if (mate) {
+		K7::IMateConstraint3DPtr m(mate);
+		//K7::??? obj7 = Kompas3D::ToApi7<K7::???>(node.pDefinition);
+		if (m) {
+			//m->BaseObject2 = obj7;
+		}
+	}
+	return *this;
+}
+
+MateConstraint KProcess3D::AddMateConstraint(MateType type, const Node& object1, const Node& object2, MateDir direction, MateFixed fixed, double value) {
+	//if (!pProc3D) return nullptr;
+	K7::IProcess3DPtr proc3D(pProc3D);
+	K7::IMateConstraints3DPtr mcs = proc3D->MateConstraints;
+	K7::IMateConstraint3DPtr mc = mcs->Add((KConst3D::MateConstraintType)type);
+	mc->Alignment = (KConst3D::ksMateConstraintAlignmentEnum) direction;
+	mc->Fixed = (KConst3D::ksMateFixedTypeEnum) fixed;
+	mc->ParamValue = value;
+	return MateConstraint((IUnknown*)mc.GetInterfacePtr(), type, direction, fixed, object1, object2, value);
 }
 
 class DocumentFileNotifyLoc : public ComEvent {

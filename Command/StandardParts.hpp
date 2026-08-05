@@ -112,16 +112,26 @@ class InsertModelProc : public Process3D<InsertModelProc> {
 public:
 	Face plane = nullptr;
 	Face axis = nullptr;
+	MateConstraint planeMate;
+	MateConstraint axisMate;
 
 	bool OnPlacementChange(const Node& node) override {
 		if (node.GetType() != Face::TYPE) return false;
 		Face face(node);
 		if (face.IsPlanar()) {
 			plane = face;
+			if (!planeMate) {
+				planeMate = AddMateConstraint(MateCoincidence, GetPhantom().GetPlaneXOY(), nullptr, MateDirSame);
+			}
+			planeMate.SetSecond(plane);
 			return true;
 		}
 		if (face.IsCylinder()) {
 			axis = face;
+			if (!axisMate) {
+				axisMate = AddMateConstraint(MateConcentric, GetPhantom().GetAxisOZ(), nullptr, MateDirUndefined);
+			}
+			axisMate.SetSecond(axis);
 			return true;
 		}
 		return false;

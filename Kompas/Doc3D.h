@@ -40,6 +40,28 @@ enum MateFixed : int {
 	MateFixedSecond = 2     // фиксируется вторая деталь
 };
 
+class MateConstraint {
+private:
+	IUnknown* mate;
+	MateType type;
+	MateDir dir;
+	MateFixed fixed;
+	Node first;
+	Node second;
+	double value;
+public:
+	MateConstraint() : mate(nullptr), first(nullptr), second(nullptr) {}
+	MateConstraint(IUnknown* mate, MateType type, MateDir dir, MateFixed fixed, const Node& first, const Node& second, double value);
+	~MateConstraint();
+	MateConstraint& SetType(MateType type);
+	MateConstraint& SetDir(MateDir dir);
+	MateConstraint& SetFixed(MateFixed fixed);
+	MateConstraint& SetFirst(const Node& node);
+	MateConstraint& SetSecond(const Node& node);
+	operator bool() const { return mate; }
+	friend class Doc3D;
+};
+
 class Doc3D;
 class Process3DNotifyLoc;
 class KProcess3D {
@@ -60,6 +82,8 @@ public:
 	bool Run(bool prop, bool cmd);
 	bool Stop();
 	void SetPhantom(const Part& part);
+	Part GetPhantom();
+	MateConstraint AddMateConstraint(MateType type, const Node& object1, const Node& object2, MateDir direction, MateFixed fixed = MateFixedNone, double value = 0.0);
 	
 	friend class Doc3D;
 	friend class Process3DNotifyLoc;
