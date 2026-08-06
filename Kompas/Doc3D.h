@@ -52,12 +52,15 @@ private:
 public:
 	MateConstraint() : mate(nullptr), first(nullptr), second(nullptr) {}
 	MateConstraint(IUnknown* mate, MateType type, MateDir dir, MateFixed fixed, const Node& first, const Node& second, double value);
+	MateConstraint(const MateConstraint& m);
 	~MateConstraint();
 	MateConstraint& SetType(MateType type);
 	MateConstraint& SetDir(MateDir dir);
 	MateConstraint& SetFixed(MateFixed fixed);
 	MateConstraint& SetFirst(const Node& node);
 	MateConstraint& SetSecond(const Node& node);
+	Node& GetFirst() { return first; }
+	Node& GetSecond() { return second; }
 	operator bool() const { return mate; }
 	friend class Doc3D;
 };
@@ -212,17 +215,10 @@ public:
 	KompasEvent<void()> WhenActiveDocument;
 	
 	Doc3D(IUnknown* pDoc);
-	Doc3D(const Doc3D& doc) : Doc3D(doc.pDoc) {}
-	Doc3D& operator=(Doc3D&& doc) noexcept {
-		if (this == &doc) return *this;
-		pDoc = doc.pDoc;
-		comEvent = doc.comEvent;
-		proc3D = doc.proc3D;
-		doc.pDoc = nullptr;
-		doc.comEvent = nullptr;
-		doc.proc3D = nullptr;
-		return *this;
-	}
+	Doc3D(const Doc3D& other) = delete; // Конструктор копирования
+  Doc3D& operator=(const Doc3D& other) = delete; // Оператор копирующего присваивания
+	//Doc3D(Doc3D&& doc) noexcept : Doc3D(doc.pDoc) {} // Конструктор перемещения
+	Doc3D& operator=(Doc3D&& doc) noexcept; // Оператор перемещающего присваивания
 	~Doc3D();
 	std::string GetPath();
 	Part GetTopPart();

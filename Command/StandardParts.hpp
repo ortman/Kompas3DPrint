@@ -110,8 +110,6 @@ public:
 
 class InsertModelProc : public Process3D<InsertModelProc> {
 public:
-	Face plane = nullptr;
-	Face axis = nullptr;
 	MateConstraint planeMate;
 	MateConstraint axisMate;
 
@@ -119,19 +117,17 @@ public:
 		if (node.GetType() != Face::TYPE) return false;
 		Face face(node);
 		if (face.IsPlanar()) {
-			plane = face;
 			if (!planeMate) {
 				planeMate = AddMateConstraint(MateCoincidence, GetPhantom().GetPlaneXOY(), nullptr, MateDirSame);
 			}
-			planeMate.SetSecond(plane);
+			planeMate.SetSecond(face);
 			return true;
 		}
 		if (face.IsCylinder()) {
-			axis = face;
 			if (!axisMate) {
 				axisMate = AddMateConstraint(MateConcentric, GetPhantom().GetAxisOZ(), nullptr, MateDirUndefined);
 			}
-			axisMate.SetSecond(axis);
+			axisMate.SetSecond(face);
 			return true;
 		}
 		return false;
@@ -150,10 +146,10 @@ private:
 		struct : Panel::Tab {
 			PropertyButton model      {"Выберите модель"};
 			PropertyList   embodiment {"Исполнение"};
-		} main{"Основные"};
+		} main {"Основные"};
 		struct : Panel::Tab {
-		} params{"Параметры"};
-	} panel{"Стандартные изделия"};
+		} params {"Параметры"};
+	} panel {"Стандартные изделия"};
 	
 	StandardPartsSelector selector;
 	StandardPartsSelector::ModelData sel;
@@ -204,10 +200,12 @@ public:
 								InsertModelProc& proc = doc.CreatePorcess<InsertModelProc>();
 								proc.SetPhantom(emb);
 								if (proc.Run(true, true)) {
-									if (proc.plane && proc.axis) {
+									if (proc.planeMate && proc.axisMate) {
 										if (Part newPart = doc.AddPart(emb)) {
-											doc.AddMateConstraint(MateCoincidence, proc.plane, newPart.GetPlaneXOY(), MateDirSame, MateFixedNone);
-											doc.AddMateConstraint(MateConcentric, proc.axis, newPart.GetAxisOZ(), MateDirUndefined, MateFixedNone);
+											doc.AddMateConstraint(MateCoincidence, proc.planeMate.GetSecond(),
+													newPart.GetPlaneXOY(), MateDirSame, MateFixedNone);
+											doc.AddMateConstraint(MateConcentric, proc.axisMate.GetSecond(),
+													newPart.GetAxisOZ(), MateDirUndefined, MateFixedNone);
 										}
 									}
 								}

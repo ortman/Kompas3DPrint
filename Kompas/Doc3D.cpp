@@ -73,6 +73,7 @@ public:
 };
 
 void KProcess3D::Init(Doc3D* doc) {
+	this->doc = doc;
 	K7::IKompasDocument3D1Ptr pDoc1 = Kompas3D::ToApi7<K7::IKompasDocument3D1Ptr>(doc->pDoc);
 	if (!pDoc1) throw Kompas3DException("У процесса нет документа");
 	K7::IProcess3DPtr proc3D = pDoc1->GetLibProcess(KConst::ksProcess3DPlacementAndEntity);
@@ -123,7 +124,7 @@ Part KProcess3D::GetPhantom() {
 	if (pProc3D) {
 		K7::IProcess3DPtr proc3D(pProc3D);
 		K7::IModelObjectPtr phModel = proc3D->PhantomObject;
-		if (phModel && phModel->Type == KConst3D::o3d_part) {
+		if (phModel && phModel->ModelObjectType == KConst3D::o3d_part) {
 			phModel.AddRef(); // TODO:
 			K5::ksPartPtr part = Kompas3D::ToApi5<K5::ksPartPtr>(phModel);
 			if (part) {
@@ -140,17 +141,34 @@ MateConstraint::MateConstraint(IUnknown* m, MateType t, MateDir d, MateFixed f, 
 	if (mate) mate->AddRef();
 }
 
+MateConstraint::MateConstraint(const MateConstraint& m) : mate(m.mate), type(m.type), dir(m.dir)
+		, fixed(m.fixed), first(m.first), second(m.second), value(m.value) {
+	if (mate) mate->AddRef();
+}
+
 MateConstraint::~MateConstraint() {
 	if (mate) mate->Release();
 }
 
-MateConstraint& MateConstraint::SetSecond(const Node& node) {
-	second = node;
-	if (mate) {
+MateConstraint& MateConstraint::SetFirst(const Node& node) {
+	if (mate && node) {
+		first = node;
 		K7::IMateConstraint3DPtr m(mate);
-		//K7::??? obj7 = Kompas3D::ToApi7<K7::???>(node.pDefinition);
 		if (m) {
-			//m->BaseObject2 = obj7;
+			K7::IModelObjectPtr obj7 = Kompas3D::ToApi7<K7::IModelObjectPtr>(node.pDefinition);
+			m->BaseObject1 = obj7;
+		}
+	}
+	return *this;
+}
+
+MateConstraint& MateConstraint::SetSecond(const Node& node) {
+	if (mate && node) {
+		second = node;
+		K7::IMateConstraint3DPtr m(mate);
+		if (m) {
+			K7::IModelObjectPtr obj7 = Kompas3D::ToApi7<K7::IModelObjectPtr>(node.pDefinition);
+			m->BaseObject2 = obj7;
 		}
 	}
 	return *this;
@@ -164,7 +182,10 @@ MateConstraint KProcess3D::AddMateConstraint(MateType type, const Node& object1,
 	mc->Alignment = (KConst3D::ksMateConstraintAlignmentEnum) direction;
 	mc->Fixed = (KConst3D::ksMateFixedTypeEnum) fixed;
 	mc->ParamValue = value;
-	return MateConstraint((IUnknown*)mc.GetInterfacePtr(), type, direction, fixed, object1, object2, value);
+	mc.AddRef();
+	return MateConstraint((IUnknown*)mc.GetInterfacePtr(), type, direction, fixed, object1, object2, value)
+		.SetFirst(object1)
+		.SetSecond(object2);
 }
 
 class DocumentFileNotifyLoc : public ComEvent {
@@ -195,6 +216,7 @@ public:
 		}
 		return S_OK;
 	}
+	friend class Doc3D;
 };
 
 Doc3D::Doc3D(IUnknown* d) : pDoc(d) {
@@ -203,6 +225,30 @@ Doc3D::Doc3D(IUnknown* d) : pDoc(d) {
 		comEvent = new DocumentFileNotifyLoc(this);
 		comEvent->Subscribe(pDoc);
 	}
+}
+
+Doc3D& Doc3D::operator=(Doc3D&& doc) noexcept {
+	if (this == &doc) return *this;
+	pDoc = doc.pDoc;
+	comEvent = doc.comEvent;
+	proc3D = doc.proc3D;
+	if (comEvent) comEvent->doc = this;
+	if (proc3D) proc3D->doc = this;
+	WhenBeginCloseDocument = doc.WhenBeginCloseDocument;
+	WhenCloseDocument = doc.WhenCloseDocument;
+	WhenBeginSaveDocument = doc.WhenBeginSaveDocument;
+	WhenSaveDocument = doc.WhenSaveDocument;
+	WhenActiveDocument = doc.WhenActiveDocument;
+	
+	doc.proc3D = nullptr;
+	doc.comEvent = nullptr;
+	doc.pDoc = nullptr;
+	doc.WhenBeginCloseDocument.Clear();
+	doc.WhenCloseDocument.Clear();
+	doc.WhenBeginSaveDocument.Clear();
+	doc.WhenSaveDocument.Clear();
+	doc.WhenActiveDocument.Clear();
+	return *this;
 }
 
 Doc3D::~Doc3D() {
