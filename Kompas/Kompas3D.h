@@ -38,8 +38,11 @@ public:
 	static std::string ConfigPath();
 	
 	friend class Panel;
+	friend class KProcess3D;
+
 private:
 	static IUnknown* CreatePropertyManager();
+	static IUnknown* CreateProcessParam();
 };
 
 #endif

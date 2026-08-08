@@ -133,6 +133,16 @@ IUnknown* Kompas3D::CreatePropertyManager() {
 	return manager.GetInterfacePtr();
 }
 
+IUnknown* Kompas3D::CreateProcessParam() {
+	if (!Connect()) throw Kompas3DException("Kompas not connected");
+	K7::IApplicationPtr kompas7(pKompas7);
+	if (!pKompas7) throw Kompas3DException("Kompas not connected");
+	K7::IProcessParamPtr param = kompas7->CreateProcessParam();
+	if (!param) throw Kompas3DException("Can not create ProcessParam");
+	param.AddRef();
+	return param.GetInterfacePtr();
+}
+
 void Kompas3D::Message(const std::string& txt) {
 	if (Connect()) {
 		K5::KompasObjectPtr kompas(pKompas);
