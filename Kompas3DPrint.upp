@@ -39,6 +39,8 @@ file
 	Kompas/Panel.cpp,
 	Kompas/KompasEvent.h,
 	Kompas/KompasEvent.cpp,
+	Kompas/Process3D.h,
+	Kompas/Process3D.cpp,
 	Nodes readonly separator,
 	Kompas/Node/Vertex.h,
 	Kompas/Node/Vertex.cpp,
