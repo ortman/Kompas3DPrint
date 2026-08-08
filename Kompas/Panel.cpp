@@ -99,7 +99,7 @@ bool Panel::Create() {
 	try {
 		pManager = Kompas3D::CreatePropertyManager();
 		K7::IPropertyManagerPtr manager(pManager);
-		manager->Caption = Node::Utf8ToCp1251(name).c_str();
+		if (!name.empty()) manager->Caption = Node::Utf8ToCp1251(name).c_str();
 		manager->SpecToolbar = KConst::pnEnterEscHelp;
 		comEvent = new PropertyManagerNotifyLoc(this);
 		comEvent->Subscribe(pManager);
@@ -121,15 +121,14 @@ bool Panel::Create() {
 	return true;
 }
 
-Panel& Panel::Update() {
+void Panel::Update() {
 	K7::IPropertyManagerPtr manager(pManager);
 	//manager->UpdateTabs(); // not working
 	manager->HideTabs();
 	manager->ShowTabs();
-	return *this;
 }
 
-Panel& Panel::Show(bool isShow) {
+void Panel::Show(bool isShow) {
 	K7::IPropertyManagerPtr manager(pManager);
 	if (!manager) throw Kompas3DException("Can not get PropertyManager");
 	if (isShow) {
@@ -137,7 +136,6 @@ Panel& Panel::Show(bool isShow) {
 	} else {
 		manager->HideTabs();
 	}
-	return *this;
 }
 
 Panel* Panel::currentPanel = nullptr;

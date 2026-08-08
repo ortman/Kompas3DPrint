@@ -21,7 +21,6 @@ private:
 	static Panel* currentPanel;
 	
 public:
-	
 	KompasEvent<bool(int buttonId)> WhenButtonClick;
 	
 	Panel(const char* name) : name(name), pManager(nullptr) {
@@ -29,10 +28,11 @@ public:
 	}
 	~Panel();
 	bool Create();
-	Panel& Update();
-	Panel& Show(bool isShow = true);
-	Panel& Hide() { return Show(false); }
-	friend PropertyManagerNotifyLoc;
+	void Update();
+	void Show(bool isShow = true);
+	void Hide() { Show(false); }
+
+	friend class PropertyManagerNotifyLoc;
 };
 
 class Panel::Tab {
@@ -65,7 +65,8 @@ public:
 	//void Remove(Panel::Property& prop);
 	
 	friend class Panel;
-	friend PropertyManagerNotifyLoc;
+	friend class KProcess3D;
+	friend class PropertyManagerNotifyLoc;
 };
 
 using PropertyVariant = std::variant<int, double, std::string>;
@@ -97,7 +98,7 @@ public:
 	void SetName(const std::string& name);
 
 	friend class Panel;
-	friend PropertyManagerNotifyLoc;
+	friend class PropertyManagerNotifyLoc;
 };
 
 class PropertyI : public Panel::Property {
