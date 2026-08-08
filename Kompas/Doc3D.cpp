@@ -85,7 +85,6 @@ void KProcess3D::Init(Doc3D* doc) {
 	if (FAILED(hr)) throw Kompas3DException("Не могу подписать события на процесс");
 	K7::IProcessPtr proc(pProc3D);
 	if (!proc) throw Kompas3DException("Не могу получить базовый процесс от 3D");
-	proc->Caption = "Test";
 	proc->Dynamic = true;
 }
 
@@ -93,6 +92,11 @@ KProcess3D::~KProcess3D() {
 	if (comEvent) {
 		comEvent->Unsubscribe(pProc3D);
 		delete comEvent;
+	}
+	if (pProc3D) {
+		K7::IProcessPtr proc(pProc3D);
+		proc->Stop();
+		pProc3D->Release();
 	}
 }
 
@@ -135,6 +139,12 @@ Part KProcess3D::GetPhantom() {
 	return Part(nullptr, nullptr);
 }
 
+void KProcess3D::SetCaption(const std::string& caption) {
+	if (pProc3D) {
+		K7::IProcessPtr proc(pProc3D);
+		proc->Caption = Node::Utf8ToCp1251(caption).c_str();
+	}
+}
 
 MateConstraint::MateConstraint(IUnknown* m, MateType t, MateDir d, MateFixed f, const Node& obj1, const Node& obj2, double val)
 		: mate(m), type(t), dir(d), fixed(f), first(obj1), second(obj2), value(val) {
@@ -225,6 +235,10 @@ Doc3D::Doc3D(IUnknown* d) : pDoc(d) {
 		comEvent = new DocumentFileNotifyLoc(this);
 		comEvent->Subscribe(pDoc);
 	}
+}
+
+Doc3D::Doc3D(Doc3D&& doc) noexcept : Doc3D(doc.pDoc) {
+	*this = std::move(doc);
 }
 
 Doc3D& Doc3D::operator=(Doc3D&& doc) noexcept {

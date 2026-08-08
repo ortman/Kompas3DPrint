@@ -5,6 +5,7 @@
 #include "Part.h"
 #include "KompasEvent.h"
 #include "Node/NodeMacro.h"
+#include "Panel.h"
 
 #define SETTINGS_LINEAR_MAX 1.0
 #define SETTINGS_LINEAR_MIN 0.001
@@ -87,6 +88,7 @@ public:
 	void SetPhantom(const Part& part);
 	Part GetPhantom();
 	MateConstraint AddMateConstraint(MateType type, const Node& object1, const Node& object2, MateDir direction, MateFixed fixed = MateFixedNone, double value = 0.0);
+	void SetCaption(const std::string& caption);
 	
 	friend class Doc3D;
 	friend class Process3DNotifyLoc;
@@ -217,7 +219,7 @@ public:
 	Doc3D(IUnknown* pDoc);
 	Doc3D(const Doc3D& other) = delete; // Конструктор копирования
   Doc3D& operator=(const Doc3D& other) = delete; // Оператор копирующего присваивания
-	//Doc3D(Doc3D&& doc) noexcept : Doc3D(doc.pDoc) {} // Конструктор перемещения
+	Doc3D(Doc3D&& doc) noexcept; // Конструктор перемещения
 	Doc3D& operator=(Doc3D&& doc) noexcept; // Оператор перемещающего присваивания
 	~Doc3D();
 	std::string GetPath();
