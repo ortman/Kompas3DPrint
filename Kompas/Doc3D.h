@@ -124,6 +124,7 @@ public:
 	KompasEvent<void()> WhenActiveDocument;
 	
 	Doc3D(IUnknown* pDoc);
+	Doc3D() : Doc3D(nullptr) {}
 	Doc3D(const Doc3D& other) = delete; // Конструктор копирования
   Doc3D& operator=(const Doc3D& other) = delete; // Оператор копирующего присваивания
 	Doc3D(Doc3D&& doc) noexcept; // Конструктор перемещения
@@ -138,6 +139,7 @@ public:
 	int GetEmbodimentsCount();
 	std::string GetEmbodimentName(int i);
 	Part GetEmbodiment(int i);
+	bool SetCurrentEmbodiment(int i);
 	operator bool() const { return pDoc; }
 	bool AddMateConstraint(MateType type, const Node& object1, const Node& object2, MateDir direction, MateFixed fixed, double value = 0.0);
 	Part AddPart(const Part& part, const std::optional<std::string>& filePath = std::nullopt);

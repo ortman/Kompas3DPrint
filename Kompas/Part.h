@@ -24,6 +24,11 @@ private:
 public:
 	IUnknown* pPart;
 	Part(IUnknown* pDoc, IUnknown* pPart);
+	Part() : Part(nullptr, nullptr) {}
+	Part(const Part& part);                // Конструктор копирования
+	Part& operator=(const Part& part);     // Оператор копирующего присваивания
+	Part(Part&& part) noexcept;            // Конструктор перемещения
+	Part& operator=(Part&& part) noexcept; // Оператор перемещающего присваивания
 	~Part();
 	std::vector<Node> GetNodes();
 	template <typename T, typename... Args>

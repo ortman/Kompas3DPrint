@@ -7,6 +7,40 @@ Part::Part(IUnknown* d, IUnknown* p) : pDoc(d), pPart(p) {
 	if (pPart) pPart->AddRef();
 }
 
+Part::Part(const Part& part) { // Конструктор копирования
+	pPart = part.pPart;
+	if (pPart) pPart->AddRef();
+	pDoc = part.pDoc;
+	if (pDoc) pDoc->AddRef();
+}
+
+Part& Part::operator=(const Part& part) { // Оператор копирующего присваивания
+	pPart = part.pPart;
+	if (pPart) pPart->AddRef();
+	pDoc = part.pDoc;
+	if (pDoc) pDoc->AddRef();
+	return *this;
+}
+
+Part::Part(Part&& part) noexcept { // Конструктор перемещения
+	if (pPart) pPart->Release();
+	if (pDoc) pDoc->Release();
+	pPart = part.pPart;
+	part.pPart = nullptr;
+	pDoc = part.pDoc;
+	part.pDoc = nullptr;
+}
+
+Part& Part::operator=(Part&& part) noexcept { // Оператор перемещающего присваивания
+	if (pPart) pPart->Release();
+	if (pDoc) pDoc->Release();
+	pPart = part.pPart;
+	part.pPart = nullptr;
+	pDoc = part.pDoc;
+	part.pDoc = nullptr;
+	return *this;
+}
+
 Part::~Part() {
 	if (pPart) pPart->Release();
 	if (pDoc) pDoc->Release();

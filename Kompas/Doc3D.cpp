@@ -186,6 +186,15 @@ Part Doc3D::GetEmbodiment(int i) {
 	return Part(pDoc, nullptr);
 }
 
+bool Doc3D::SetCurrentEmbodiment(int i) {
+	if (K7::IEmbodimentsManagerPtr em = Kompas3D::ToApi7<K7::IEmbodimentsManagerPtr>(pDoc)) {
+		if (i < em->EmbodimentCount) {
+			return em->SetCurrentEmbodiment(i);
+		}
+	}
+	return false;
+}
+
 bool Doc3D::AddMateConstraint(MateType type, const Node& object1, const Node& object2, MateDir direction, MateFixed fixed, double value) {
 	if (!object1.pEntity || !object2.pEntity) return false;
 	K5::ksDocument3DPtr doc = pDoc;
