@@ -12,11 +12,13 @@ public:
 	class Tab;
 	class Property;
 	
-private:
+protected:
 	IUnknown* pManager = nullptr;
 	std::string name;
 	std::vector<Panel::Tab*> tabs;
 	PropertyManagerNotifyLoc *comEvent = nullptr;
+	void CreatePropertyManagerNotify(IUnknown* p);
+	void RemovePropertyManagerNotify(IUnknown* p);
 	
 	static Panel* currentPanel;
 	
@@ -26,6 +28,10 @@ public:
 	Panel(const char* name) : name(name), pManager(nullptr) {
 		currentPanel = this;
 	}
+	Panel(const Panel& panel) = delete; // Конструктор копирования
+  Panel& operator=(const Panel& panel) = delete; // Оператор копирующего присваивания
+	Panel(Panel&& panel) noexcept = delete; // Конструктор перемещения
+	Panel& operator=(Panel&& panel) noexcept = delete; // Оператор перемещающего присваивания
 	~Panel();
 	bool Create();
 	void Update();
@@ -120,6 +126,7 @@ public:
 	PropertyList(const char* name) : Property(name, 7, "") {}
 	PropertyList& Add(PropertyVariant val);
 	PropertyList& Clear();
+	int Find(PropertyVariant val);
 	operator PropertyVariant() const;
 	PropertyVariant operator=(PropertyVariant);
 };

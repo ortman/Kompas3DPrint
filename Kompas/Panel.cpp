@@ -85,24 +85,32 @@ public:
 	}
 };
 
-// Panel
 Panel::~Panel() {
-	if (comEvent) {
-		comEvent->Unsubscribe(pManager);
-		delete comEvent;
-	}
+	RemovePropertyManagerNotify(pManager);
 	if (pManager) pManager->Release();
 	currentPanel = nullptr;
 }
 
+void Panel::CreatePropertyManagerNotify(IUnknown* p) {
+	comEvent = new PropertyManagerNotifyLoc(this);
+	comEvent->Subscribe(p);
+}
+
+void Panel::RemovePropertyManagerNotify(IUnknown* p) {
+	if (comEvent && p) {
+		comEvent->Unsubscribe(p);
+		delete comEvent;
+	}
+}
+
 bool Panel::Create() {
+	currentPanel = nullptr;
 	try {
 		pManager = Kompas3D::CreatePropertyManager();
 		K7::IPropertyManagerPtr manager(pManager);
 		if (!name.empty()) manager->Caption = Node::Utf8ToCp1251(name).c_str();
 		manager->SpecToolbar = KConst::pnEnterEscHelp;
-		comEvent = new PropertyManagerNotifyLoc(this);
-		comEvent->Subscribe(pManager);
+		CreatePropertyManagerNotify(pManager);
 		K7::IPropertyTabsPtr pTabs = manager->PropertyTabs;
 		if (!pTabs) throw Kompas3DException("Can not get PropertyTabs of PropertyManager");
 		for (Tab* t : tabs) {
@@ -236,6 +244,11 @@ PropertyList& PropertyList::Clear() {
 	K7::IPropertyListPtr prop(pProp);
 	prop->ClearList();
 	return *this;
+}
+
+int PropertyList::Find(PropertyVariant val) {
+	K7::IPropertyListPtr prop(pProp);
+	return prop->Find(ToVariantT(val));
 }
 
 double PropertyD::operator=(double val) {

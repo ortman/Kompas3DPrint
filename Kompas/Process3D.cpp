@@ -123,25 +123,45 @@ public:
 };
 
 void KProcess3D::Init(Doc3D* doc) {
+	currentPanel = nullptr;
 	this->doc = doc;
 	K7::IKompasDocument3D1Ptr pDoc1 = Kompas3D::ToApi7<K7::IKompasDocument3D1Ptr>(doc->pDoc);
 	if (!pDoc1) throw Kompas3DException("У процесса нет документа");
 	K7::IProcess3DPtr proc3D = pDoc1->GetLibProcess(KConst::ksProcess3DPlacementAndEntity);
 	if (!proc3D) throw Kompas3DException("Не могу создать процесс");
-	comEvent = new Process3DNotifyLoc(this);
+	procEvent = new Process3DNotifyLoc(this);
 	pProc3D = (IUnknown*)proc3D.GetInterfacePtr();
 	pProc3D->AddRef();
-	HRESULT hr = comEvent->Subscribe(pProc3D);
+	HRESULT hr = procEvent->Subscribe(pProc3D);
 	if (FAILED(hr)) throw Kompas3DException("Не могу подписать события на процесс");
 	K7::IProcessPtr proc(pProc3D);
 	if (!proc) throw Kompas3DException("Не могу получить базовый процесс от 3D");
 	proc->Dynamic = true;
+	
+	K7::IProcessParamPtr procParam = Kompas3D::CreateProcessParam();
+	procParam->AutoReduce = false;
+	procParam->SpecToolbar = KConst::pnEnterEscHelp;
+	K7::IPropertyTabsPtr pTabs = procParam->PropertyTabs;
+	if (!pTabs) throw Kompas3DException("Can not get PropertyTabs of Process3D");
+	for (Panel::Tab* t : tabs) {
+		K7::IPropertyTabPtr pTab = pTabs->Add(Node::Utf8ToCp1251(t->name).c_str());
+		if (pTab) {
+			pTab.AddRef();
+			t->pTab = pTab.GetInterfacePtr();
+			for (Panel::Property* p : t->props) {
+				t->Create(p);
+			}
+		}
+	}
+	proc->ProcessParam = procParam;
+	CreatePropertyManagerNotify(procParam);
 }
 
 KProcess3D::~KProcess3D() {
-	if (comEvent) {
-		comEvent->Unsubscribe(pProc3D);
-		delete comEvent;
+	RemovePropertyManagerNotify(pProc3D);
+	if (procEvent) {
+		procEvent->Unsubscribe(pProc3D);
+		delete procEvent;
 	}
 	if (pProc3D) {
 		K7::IProcessPtr proc(pProc3D);
@@ -192,6 +212,11 @@ Part KProcess3D::GetPhantom() {
 void KProcess3D::SetCaption(const std::string& caption) {
 	if (pProc3D) {
 		K7::IProcessPtr proc(pProc3D);
-		proc->Caption = Node::Utf8ToCp1251(caption).c_str();
+		K7::IProcessParamPtr procParam = proc->ProcessParam;
+		if (procParam) {
+			procParam->Caption = Node::Utf8ToCp1251(caption).c_str();
+		} else {
+			proc->Caption = Node::Utf8ToCp1251(caption).c_str(); //TODO: unused!
+		}
 	}
 }

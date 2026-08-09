@@ -3,6 +3,7 @@
 
 #include "Node.h"
 #include "Part.h"
+#include "Panel.h"
 
 enum MateType : int {
 	MateCoincidence   = 0,  // совпадение объектов
@@ -26,9 +27,9 @@ enum MateDir : int {
 };
 
 enum MateFixed : int {
-	MateFixedNone   = 0,    // детали не фиксируются
-	MateFixedFirst  = 1,    // фиксируется первая деталь
-	MateFixedSecond = 2     // фиксируется вторая деталь
+	MateFixedNone     = 0,  // детали не фиксируются
+	MateFixedFirst    = 1,  // фиксируется первая деталь
+	MateFixedSecond   = 2   // фиксируется вторая деталь
 };
 
 class MateConstraint {
@@ -58,11 +59,12 @@ public:
 
 class Doc3D;
 class Process3DNotifyLoc;
-class KProcess3D {
+class KProcess3D : public Panel {
 protected:
 	Doc3D* doc = nullptr;
 	IUnknown* pProc3D = nullptr;
-	Process3DNotifyLoc* comEvent = nullptr;
+	Process3DNotifyLoc* procEvent = nullptr;
+
 	void Init(Doc3D* doc);
 	
   bool hasPlacementChangeMethod = false;
@@ -72,6 +74,11 @@ protected:
 	virtual bool OnFilterObject(const Node& node) { return false; }
 
 public:
+	KProcess3D() : Panel("") {}
+	KProcess3D(const KProcess3D& proc) = delete; // Конструктор копирования
+  KProcess3D& operator=(const KProcess3D& proc) = delete; // Оператор копирующего присваивания
+	KProcess3D(KProcess3D&& proc) noexcept = delete; // Конструктор перемещения
+	KProcess3D& operator=(KProcess3D&& proc) noexcept = delete; // Оператор перемещающего присваивания
 	virtual ~KProcess3D();
 	bool Run(bool prop, bool cmd);
 	bool Stop();
@@ -79,6 +86,10 @@ public:
 	Part GetPhantom();
 	MateConstraint AddMateConstraint(MateType type, const Node& object1, const Node& object2, MateDir direction, MateFixed fixed = MateFixedNone, double value = 0.0);
 	void SetCaption(const std::string& caption);
+	bool Create() { return false; }
+	void Update() {}
+	void Show(bool isShow = true) {}
+	void Hide() { Show(false); }
 	
 	friend class Doc3D;
 	friend class Process3DNotifyLoc;
