@@ -112,8 +112,22 @@ Doc3D& Doc3D::Reopen() {
 }
 
 void Doc3D::Close() {
+	if (!pDoc) return;
 	K5::ksDocument3DPtr doc = pDoc;
-	if (doc) doc->close();
+	if (doc) {
+		if (proc3D) {
+			delete proc3D;
+			proc3D = nullptr;
+		}
+		if (comEvent) {
+			comEvent->Unsubscribe(pDoc);
+			delete comEvent;
+			comEvent = nullptr;
+		}
+		doc->close();
+		if (pDoc) pDoc->Release();
+		pDoc = nullptr;
+	}
 }
 
 bool Doc3D::SaveAs(const ExportParams& params, const std::string& path) {

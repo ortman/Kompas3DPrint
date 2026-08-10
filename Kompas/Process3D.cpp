@@ -190,6 +190,7 @@ void KProcess3D::SetPhantom(const Part& part) {
 		if (part7) {
 			part7.AddRef(); //TODO: do remove?
 			proc3D->PhantomObject = part7;
+			//Update();
 		}
 	}
 }
@@ -207,6 +208,12 @@ Part KProcess3D::GetPhantom() {
 		}
 	}
 	return Part(nullptr, nullptr);
+}
+
+void KProcess3D::Update() {
+	if (!pProc3D) return;
+	K7::IProcessPtr proc(pProc3D);
+	proc->Update();
 }
 
 void KProcess3D::SetCaption(const std::string& caption) {

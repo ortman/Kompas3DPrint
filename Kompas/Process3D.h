@@ -87,7 +87,7 @@ public:
 	MateConstraint AddMateConstraint(MateType type, const Node& object1, const Node& object2, MateDir direction, MateFixed fixed = MateFixedNone, double value = 0.0);
 	void SetCaption(const std::string& caption);
 	bool Create() { return false; }
-	void Update() {}
+	void Update();
 	void Show(bool isShow = true) {}
 	void Hide() { Show(false); }
 	

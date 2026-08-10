@@ -118,6 +118,7 @@ class StandardParts {
 	InsertModelProc* proc = nullptr;
 	Part embodiment;
 	Doc3D doc;
+	bool restartProcess = false;
 
 public:
 	void Start() {
@@ -146,6 +147,7 @@ public:
 		};
 
 		proc->mainTab.embodiment.WhenChange = [=]() {
+			restartProcess = true;
 			proc->Stop();
 			Doc3D& sel = selector.GetSelected();
 			int embIndex = proc->mainTab.embodiment.Find(proc->mainTab.embodiment);
@@ -175,20 +177,24 @@ public:
 		};
 		
 		proc->WhenButtonClick = [=](int buttonId) {
-			if (buttonId != 1 || !embodiment || !proc->planeMate || !proc->axisMate) return false;
 			try {
-				if (Part newPart = doc.AddPart(embodiment)) {
-					doc.AddMateConstraint(MateCoincidence, proc->planeMate.GetSecond(),
-							newPart.GetPlaneXOY(), MateDirSame, MateFixedNone);
-					doc.AddMateConstraint(MateConcentric, proc->axisMate.GetSecond(),
-							newPart.GetAxisOZ(), MateDirUndefined, MateFixedNone);
+				if (buttonId == 1 && embodiment && proc->planeMate && proc->axisMate) {
+					if (Part newPart = doc.AddPart(embodiment)) {
+						doc.AddMateConstraint(MateCoincidence, proc->planeMate.GetSecond(),
+								newPart.GetPlaneXOY(), MateDirSame, MateFixedNone);
+						doc.AddMateConstraint(MateConcentric, proc->axisMate.GetSecond(),
+								newPart.GetAxisOZ(), MateDirUndefined, MateFixedNone);
+					}
 				}
 			} catch (const Kompas3DException& e) {
 				Kompas3D::Error(e.what());
 			}
-			Doc3D& sel = selector.GetSelected();
-			if (sel) sel.Close();
-			embodiment = Part(nullptr, nullptr);
+			if (!restartProcess) {
+				Doc3D& sel = selector.GetSelected();
+				if (sel) sel.Close();
+				embodiment = Part(nullptr, nullptr);
+				restartProcess = false;
+			}
 			return true;
 		};
 		proc->Run(false, true);
