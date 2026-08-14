@@ -4,10 +4,14 @@
 #include "../Node.h"
 
 class Face : public Node {
+private:
+	class K3D_Face : public Node::K3D_Node {
+	};
+
 public:
 	static int TYPE;
-	Face(const Node& node) : Node(node.pEntity, node.pDefinition) {}
-	Face(IUnknown* pEntity, IDispatch* pDefinition = NULL) : Node(pEntity, pDefinition) {}
+	Face(const Node& node) : Node(node) {}
+	Face(K3D_Face p) : Node(p) {}
 	bool IsPlanar();
 	bool IsCylinder();
 };

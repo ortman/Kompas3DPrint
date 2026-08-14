@@ -1,13 +1,12 @@
 #ifndef _ComTest_Node_h_
 #define _ComTest_Node_h_
 
-#include <unknwn.h>
 #include <string>
 #include <exception>
 #include <optional>
 
 class Kompas3DException : public std::exception {
-private:
+protected:
     std::string message;
 public:
     Kompas3DException(std::string msg) : message(std::move(msg)) {}
@@ -15,22 +14,31 @@ public:
 };
 
 class Node {
+protected:
+	class K3D_Node {
+	public:
+		virtual int GetType() const;
+		virtual std::string GetName() const;
+		virtual void SetName(const std::string& name);
+		virtual void Update();
+		virtual operator bool() const;
+	};
+
 public:
-	IUnknown* pEntity;
-	IDispatch* pDefinition;
+	K3D_Node p;
 	
 	static int TYPE;
-	Node(IUnknown* pEntity, IDispatch* pDefinition = NULL);
-	Node(const Node& node) : Node(node.pEntity, node.pDefinition) {}
+	Node(const K3D_Node& p) : p(p) {}
+	Node(const Node& node) : Node(node.p) {}
 	virtual ~Node();
-	int GetType() const;
-	bool IsType(int type) const { return GetType() == type; }
-	std::string GetName() const;
-	Node& SetName(const std::string& name);
-	Node& Update();
+	int GetType() const { return p.GetType(); }
+	bool IsType(int type) const { return p.GetType() == type; }
+	std::string GetName() const { return p.GetName(); }
+	Node& SetName(const std::string& name) { p.SetName(name); return *this; }
+	Node& Update() { p.Update(); return *this; }
 	static std::string Utf8ToCp1251(const std::string& utf8Str);
 	static std::string Cp1251ToUtf8(const char* cp1251Str);
-	operator bool() const { return pEntity; }
+	operator bool() const { return p; }
 	Node& operator=(const Node& other);
 };
 

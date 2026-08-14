@@ -2,11 +2,13 @@
 #define _ComTest_Document3D_h_
 
 #include <concepts>
-#include "Part.h"
+#include <string>
+#include <memory>
+//#include "Part.h"
 #include "KompasEvent.h"
-#include "Node/NodeMacro.h"
-#include "Panel.h"
-#include "Process3D.h"
+//#include "Node/NodeMacro.h"
+//#include "Panel.h"
+//#include "Process3D.h"
 
 #define SETTINGS_LINEAR_MAX 1.0
 #define SETTINGS_LINEAR_MIN 0.001
@@ -112,46 +114,54 @@ public:
 	};
 	
 private:
-	IUnknown* pDoc;
-	DocumentFileNotifyLoc *comEvent = nullptr;
-	KProcess3D* proc3D = nullptr;
+	class K3D_Doc3D {
+	public:
+		virtual operator bool() const { return false; }
+		virtual std::string GetPath() { return ""; }
+		virtual bool SaveAs(const ExportParams& params, const std::string& path) { return false; }
+		virtual ~K3D_Doc3D() = default;
+	};
+	//IUnknown* pDoc;
+	//DocumentFileNotifyLoc *comEvent = nullptr;
+	//KProcess3D* proc3D = nullptr;
 
 public:
+	K3D_Doc3D p;
 	KompasEvent<void()> WhenBeginCloseDocument;
 	KompasEvent<void()> WhenCloseDocument;
 	KompasEvent<void()> WhenBeginSaveDocument;
 	KompasEvent<void()> WhenSaveDocument;
 	KompasEvent<void()> WhenActiveDocument;
 	
-	Doc3D(IUnknown* pDoc);
-	Doc3D() : Doc3D(nullptr) {}
-	Doc3D(const Doc3D& other) = delete; // Конструктор копирования
-  Doc3D& operator=(const Doc3D& other) = delete; // Оператор копирующего присваивания
-	Doc3D(Doc3D&& doc) noexcept; // Конструктор перемещения
-	Doc3D& operator=(Doc3D&& doc) noexcept; // Оператор перемещающего присваивания
-	~Doc3D();
-	std::string GetPath();
-	Part GetTopPart();
-	NodeMacro GetEditMacroObject();
-	bool SaveAs(const ExportParams& params, const std::string& path);
-	Doc3D& Reopen();
-	void Close();
-	int GetEmbodimentsCount();
-	std::string GetEmbodimentName(int i);
-	Part GetEmbodiment(int i);
-	bool SetCurrentEmbodiment(int i);
-	operator bool() const { return pDoc; }
-	bool AddMateConstraint(MateType type, const Node& object1, const Node& object2, MateDir direction, MateFixed fixed, double value = 0.0);
-	Part AddPart(const Part& part, const std::optional<std::string>& filePath = std::nullopt);
-	template <typename T>
-	T& CreatePorcess() {
-		if (proc3D) delete proc3D;
-		T* proc = new T();
-		proc->Init(this);
-		proc3D = proc;
-		return *proc;
-	}
-	friend class KProcess3D;
+	//Doc3D(K3D_Doc3D& p) : p(p) {}
+	Doc3D() {}
+//	Doc3D(const Doc3D& other) = delete; // Конструктор копирования
+//  Doc3D& operator=(const Doc3D& other) = delete; // Оператор копирующего присваивания
+//	Doc3D(Doc3D&& doc) noexcept; // Конструктор перемещения
+//	Doc3D& operator=(Doc3D&& doc) noexcept; // Оператор перемещающего присваивания
+//	~Doc3D();
+	std::string GetPath() { return p.GetPath(); }
+//	Part GetTopPart();
+//	NodeMacro GetEditMacroObject();
+	bool SaveAs(const ExportParams& params, const std::string& path) { return p.SaveAs(params, path); }
+//	Doc3D& Reopen();
+//	void Close();
+//	int GetEmbodimentsCount();
+//	std::string GetEmbodimentName(int i);
+//	Part GetEmbodiment(int i);
+//	bool SetCurrentEmbodiment(int i);
+	operator bool() const { return p; }
+//	bool AddMateConstraint(MateType type, const Node& object1, const Node& object2, MateDir direction, MateFixed fixed, double value = 0.0);
+//	Part AddPart(const Part& part, const std::optional<std::string>& filePath = std::nullopt);
+//	template <typename T>
+//	T& CreatePorcess() {
+//		if (proc3D) delete proc3D;
+//		T* proc = new T();
+//		proc->Init(this);
+//		proc3D = proc;
+//		return *proc;
+//	}
+//	friend class KProcess3D;
 };
 
 #endif

@@ -5,29 +5,29 @@ using namespace Upp;
 
 #include "Command/AboutDlg.hpp"
 #include "Command/Settings.hpp"
-#include "Command/Rack.hpp"
-#include "Command/Gear.hpp"
+//#include "Command/Rack.hpp"
+//#include "Command/Gear.hpp"
 #include "Command/Export.hpp"
-#include "Command/Threads.hpp"
-#include "Command/StandardParts.hpp"
+//#include "Command/Threads.hpp"
+//#include "Command/StandardParts.hpp"
 
 std::unique_ptr<AboutDlg>    aboutDlg;
 std::unique_ptr<Export>      exprt;
 std::unique_ptr<Settings>    settings;
-std::unique_ptr<Rack>        rack;
-std::unique_ptr<Gear>        gear;
-std::unique_ptr<Threads>     threads;
-std::unique_ptr<StandardParts> standardParts;
+//std::unique_ptr<Rack>        rack;
+//std::unique_ptr<Gear>        gear;
+//std::unique_ptr<Threads>     threads;
+//std::unique_ptr<StandardParts> standardParts;
 
 void MainStart() {
+	StdLogSetup(LOG_FILE, "C:/smcLog/kompas3dprint.log");
 	aboutDlg = std::make_unique<AboutDlg>();
 	exprt    = std::make_unique<Export>();
 	settings = std::make_unique<Settings>(exprt->GetTypes());
-	settings->Load();
-	rack     = std::make_unique<Rack>();
-	gear     = std::make_unique<Gear>();
-	threads  = std::make_unique<Threads>();
-	standardParts = std::make_unique<StandardParts>();
+	//rack     = std::make_unique<Rack>();
+	//gear     = std::make_unique<Gear>();
+	//threads  = std::make_unique<Threads>();
+	//standardParts = std::make_unique<StandardParts>();
 }
 
 void Export(Doc3D::Format format) {
@@ -36,13 +36,14 @@ void Export(Doc3D::Format format) {
 	exprt->SaveAs(params);
 }
 
-void LIBRARYENTRY(unsigned int comm) {
+//void LIBRARYENTRY(unsigned int comm) {
+void Kompas3D::RunCommand(uint32_t comm) {
 	switch (comm) {
-		case MENU_SETTINGS:    settings->Open(); break;
+		case MENU_SETTINGS:    settings->Load(); settings->Open(); break;
 		case MENU_OPEN_SLICER: {
-			Doc3D::ExportParams params = settings->GetExportParams();
-			params.format = settings->GetSlicerFormat();
-			exprt->Slicer(params, settings->GetSlicerPath());
+		//	Doc3D::ExportParams params = settings->GetExportParams();
+		//	params.format = settings->GetSlicerFormat();
+		//	exprt->Slicer(params, settings->GetSlicerPath());
 			break;
 		}
 		case MENU_EXPORT_STL:  Export(Doc3D::Format::STL); break;
@@ -52,10 +53,10 @@ void LIBRARYENTRY(unsigned int comm) {
 		case MENU_EXPORT_ACIS: Export(Doc3D::Format::ACIS); break;
 		case MENU_EXPORT_VRLM: Export(Doc3D::Format::VRLM); break;
 		case MENU_ABOUT:       aboutDlg->Open(); break;
-		case MENU_RACK:        rack->Start(); break;
-		case MENU_GEAR:        gear->Start(); break;
-		case MENU_THREADS:     threads->Start(); break;
-		case MENU_STANDARD:    standardParts->Start(); break;
+		//case MENU_RACK:        rack->Start(); break;
+		//case MENU_GEAR:        gear->Start(); break;
+		//case MENU_THREADS:     threads->Start(); break;
+		//case MENU_STANDARD:    standardParts->Start(); break;
 	}
 }
 
@@ -71,33 +72,4 @@ int DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved) {
 		UPP::Ctrl::ShutdownThreads();
 	}
 	return 1;
-}
-
-class App : public WithAppLay<TopWindow> {
-public:
-	App() {
-		CtrlLayout(*this, LIB_NAME);
-		bSettings   << [=]() { LIBRARYENTRY(MENU_SETTINGS); };
-		bOpenSlicer << [=]() { LIBRARYENTRY(MENU_OPEN_SLICER); };
-		bExportSTL  << [=]() { LIBRARYENTRY(MENU_EXPORT_STL); };
-		bExportSTEP << [=]() { LIBRARYENTRY(MENU_EXPORT_STEP); };
-		bExportIGS  << [=]() { LIBRARYENTRY(MENU_EXPORT_IGS); };
-		bExportX_T  << [=]() { LIBRARYENTRY(MENU_EXPORT_X_T); };
-		bExportACIS << [=]() { LIBRARYENTRY(MENU_EXPORT_ACIS); };
-		bExportVRLM << [=]() { LIBRARYENTRY(MENU_EXPORT_VRLM); };
-		bAbout      << [=]() { LIBRARYENTRY(MENU_ABOUT); };
-		bGear       << [=]() { LIBRARYENTRY(MENU_GEAR); };
-		bRack       << [=]() { LIBRARYENTRY(MENU_RACK); };
-		bThreads    << [=]() { LIBRARYENTRY(MENU_THREADS); };
-		bStRun      << [=]() { LIBRARYENTRY(MENU_STANDARD); };
-	}
-};
-
-GUI_APP_MAIN {
-	if (Kompas3D::Connect()) {
-		MainStart();
-		App().Run();
-	} else {
-		ErrorOK("Kompas3D не запущен! Перерапустите приложение.");
-	}
 }

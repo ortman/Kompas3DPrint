@@ -6,9 +6,8 @@ uses
 library(WIN32) "kernel32 user32 advapi32 shell32 winmm";
 
 include
-	"C:/Program Files/ASCON/KOMPAS-3D v24 Home/SDK/Include",
-	"C:/Program Files/ASCON/KOMPAS-3D v24 Home/SDK/lib",
-	C:/PROJECTS/UPP/out/gitProjects/Kompas3DPrint/MSVS22x64.Debug.Debug_Full.Dll.Gui.Main;
+	C:/KSDK24/Include,
+	C:/KSDK24;
 
 file
 	Kompas3DPrint.cpp,
@@ -25,8 +24,6 @@ file
 	Command/Threads.hpp,
 	Command/StandardParts.hpp,
 	Kompas readonly separator,
-	Kompas/ComKompas.h,
-	Kompas/ComKompas.cpp,
 	Kompas/Kompas3D.h,
 	Kompas/Kompas3D.cpp,
 	Kompas/Doc3D.h,
@@ -38,7 +35,6 @@ file
 	Kompas/Panel.h,
 	Kompas/Panel.cpp,
 	Kompas/KompasEvent.h,
-	Kompas/KompasEvent.cpp,
 	Kompas/Process3D.h,
 	Kompas/Process3D.cpp,
 	Nodes readonly separator,
@@ -71,7 +67,8 @@ file
 	Kompas/Node/ThreadDesignation.h,
 	Kompas/Node/ThreadDesignation.cpp,
 	Kompas/Node/CylindricSpiral.h,
-	Kompas/Node/CylindricSpiral.cpp;
+	Kompas/Node/CylindricSpiral.cpp,
+	srcimp.tpp;
 
 mainconfig
 	"App" = "GUI",
