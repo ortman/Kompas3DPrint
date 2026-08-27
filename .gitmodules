@@ -1,0 +1,3 @@
+[submodule "KompasAPI"]
+	path = KompasAPI
+	url = https://github.com/ortman/KompasAPI.git
