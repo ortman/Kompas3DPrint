@@ -2,7 +2,7 @@
 #define _Kompas3DPrint_Export_hpp_
 
 #include <CtrlLib/CtrlLib.h>
-#include "../Kompas/Kompas3D.h"
+#include "../KompasAPI/Include/Kompas3D.h"
 #include <filesystem>
 
 class Export {
@@ -31,7 +31,7 @@ public:
 	
 	void Slicer(Doc3D::ExportParams& params, const String& slicerPath) {
 		if (!FileExists(slicerPath)) {
-		  Kompas3D::Message(("Неправильно указан путь до слайсера :" + slicerPath).ToWString());
+		  Kompas3D::Message(("Неправильно указан путь до слайсера :" + slicerPath).ToStd());
 		}
 		LocalProcess slicer;
 		slicer.Start(slicerPath, {"C:/Users/User/Documents/Деталь.stl"}, NULL, GetFileFolder(slicerPath));
@@ -41,7 +41,7 @@ public:
 	void SaveAs(Doc3D::ExportParams& params) {
 		Doc3D doc = Kompas3D::GetActiveDocument3D();
 		if (!doc) {
-			Kompas3D::Error(L"Не обноружен активный 3D документ");
+			Kompas3D::Error("Не обноружен активный 3D документ");
 			return;
 		}
 		std::string path = doc.GetPath();

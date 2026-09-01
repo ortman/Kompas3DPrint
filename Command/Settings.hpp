@@ -2,7 +2,7 @@
 #define _Kompas3DPrint_Settings_hpp_
 
 #include <CtrlLib/CtrlLib.h>
-#include "../Kompas/Kompas3D.h"
+#include "../KompasAPI/Include/Kompas3D.h"
 #include "../Resources.h"
 
 #define SETTINGS_INI_BLOCK_MAIN             "Autoexport"
@@ -61,10 +61,10 @@ public:
 	Doc3D::Format GetSlicerFormat() { return (Doc3D::Format::Value)(int)~dlSlicerFormat; }
 	
 	bool Load() {
-		std::wstring dir = Kompas3D::ConfigPath();
+		String dir = Kompas3D::ConfigPath();
 		LOG(dir);
-		if (dir.empty()) return false;
-		VectorMap<String, String> ini = LoadIniFile(WString(dir + L"/Kompas3DPrint.ini").ToString());
+		if (dir.IsEmpty()) return false;
+		VectorMap<String, String> ini = LoadIniFile(dir + "/Kompas3DPrint.ini");
 		if (ini.GetCount() == 0) return false;
 		oAutoExportEn   <<= GetIniBool(ini, SETTINGS_INI_AUTOEXPORT_EN, true);
 		oCreateFolder   <<= GetIniBool(ini, SETTINGS_INI_CREATE_FOLDER, false);
@@ -92,9 +92,9 @@ public:
 	}
 	
 	bool Save() {
-		std::wstring dir = Kompas3D::ConfigPath();
-		if (dir.empty()) return false;
-		FileOut ini(WString(dir + L"/Kompas3DPrint.ini").ToString());
+		String dir = Kompas3D::ConfigPath();
+		if (dir.IsEmpty()) return false;
+		FileOut ini(dir + "/Kompas3DPrint.ini");
 		SetIniStr( ini, SETTINGS_INI_FORMAT,      params.format.Name());
 		SetIniBool(ini, SETTINGS_INI_OBJ_BODY,    params.objBody);
 		SetIniBool(ini, SETTINGS_INI_OBJ_SURFACE, params.objSurface);

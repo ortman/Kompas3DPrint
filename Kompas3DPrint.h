@@ -1,5 +1,5 @@
-#ifndef _Kompas3DPrint_Kompas3DPrint_h
-#define _Kompas3DPrint_Kompas3DPrint_h
+#ifndef _Kompas3DPrint_h
+#define _Kompas3DPrint_h
 
 #include "Resources.h"
 
@@ -7,6 +7,5 @@
 
 DllExport int DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved);
 DllExport int LIBRARYID() { return IDR_LIBID; }
-DllExport void LIBRARYENTRY(unsigned int comm);
 
 #endif
