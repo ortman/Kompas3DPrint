@@ -24,9 +24,11 @@ file
 	Command/Settings.hpp,
 	Command/AboutDlg.hpp,
 	Command/Export.hpp charset "UTF-8",
+	Command/Slicer.hpp,
 	Command/Threads.hpp,
 	Command/StandardParts.hpp;
 
 mainconfig
-	"Kompas3DPrint.rtw" = "GUI DLL";
+	"Kompas3DPrint.rtw" = "GUI DLL",
+	"App" = "GUI";
 

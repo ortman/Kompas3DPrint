@@ -3,6 +3,7 @@
 
 using namespace Upp;
 
+#include "Command/Slicer.hpp"
 #include "Command/AboutDlg.hpp"
 #include "Command/Settings.hpp"
 //#include "Command/Rack.hpp"
@@ -11,6 +12,7 @@ using namespace Upp;
 //#include "Command/Threads.hpp"
 //#include "Command/StandardParts.hpp"
 
+Slicer slicer;
 std::unique_ptr<AboutDlg>    aboutDlg;
 std::unique_ptr<Export>      exprt;
 std::unique_ptr<Settings>    settings;
@@ -31,19 +33,29 @@ void MainStart() {
 }
 
 void Export(Doc3D::Format format) {
+	settings->Load();
 	Doc3D::ExportParams params = settings->GetExportParams();
 	params.format = format;
-	exprt->SaveAs(params);
+	if (exprt->SaveAs(params).IsEmpty()) {
+		Kompas3D::Error("Ошибка экспорта");
+	} else {
+		Kompas3D::Error("Успешно экспортирован");
+	}
 }
 
-//void LIBRARYENTRY(unsigned int comm) {
 void Kompas3D::RunCommand(uint32_t comm) {
 	switch (comm) {
 		case MENU_SETTINGS:    settings->Load(); settings->Open(); break;
 		case MENU_OPEN_SLICER: {
-		//	Doc3D::ExportParams params = settings->GetExportParams();
-		//	params.format = settings->GetSlicerFormat();
-		//	exprt->Slicer(params, settings->GetSlicerPath());
+			settings->Load();
+			Doc3D::ExportParams params = settings->GetExportParams();
+			params.format = settings->GetSlicerFormat();
+			String exportPath = exprt->SaveAs(params, true);
+			if (exportPath.IsEmpty()) {
+				Kompas3D::Error("Ошибка экспорта");
+			} else {
+				slicer.Open(exportPath);
+			}
 			break;
 		}
 		case MENU_EXPORT_STL:  Export(Doc3D::Format::STL); break;
@@ -72,4 +84,33 @@ int DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved) {
 		UPP::Ctrl::ShutdownThreads();
 	}
 	return 1;
+}
+
+class App : public WithAppLay<TopWindow> {
+public:
+	App() {
+		CtrlLayout(*this, LIB_NAME);
+		bSettings   << [=]() { Kompas3D::RunCommand(MENU_SETTINGS); };
+		bOpenSlicer << [=]() { Kompas3D::RunCommand(MENU_OPEN_SLICER); };
+		bExportSTL  << [=]() { Kompas3D::RunCommand(MENU_EXPORT_STL); };
+		bExportSTEP << [=]() { Kompas3D::RunCommand(MENU_EXPORT_STEP); };
+		bExportIGS  << [=]() { Kompas3D::RunCommand(MENU_EXPORT_IGS); };
+		bExportX_T  << [=]() { Kompas3D::RunCommand(MENU_EXPORT_X_T); };
+		bExportACIS << [=]() { Kompas3D::RunCommand(MENU_EXPORT_ACIS); };
+		bExportVRLM << [=]() { Kompas3D::RunCommand(MENU_EXPORT_VRLM); };
+		bAbout      << [=]() { Kompas3D::RunCommand(MENU_ABOUT); };
+		bGear       << [=]() { Kompas3D::RunCommand(MENU_GEAR); };
+		bRack       << [=]() { Kompas3D::RunCommand(MENU_RACK); };
+		bThreads    << [=]() { Kompas3D::RunCommand(MENU_THREADS); };
+		bStRun      << [=]() { Kompas3D::RunCommand(MENU_STANDARD); };
+	}
+};
+
+GUI_APP_MAIN {
+	if (Kompas3D::ComConnect()) {
+		MainStart();
+		App().Run();
+	} else {
+		ErrorOK("Kompas3D не запущен! Перерапустите приложение.");
+	}
 }

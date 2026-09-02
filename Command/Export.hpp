@@ -28,34 +28,33 @@ public:
 			saveDlg.Type(type.Name(), String("*") + type.Ext());
 		}
 	}
-	
-	void Slicer(Doc3D::ExportParams& params, const String& slicerPath) {
-		if (!FileExists(slicerPath)) {
-		  Kompas3D::Message(("Неправильно указан путь до слайсера :" + slicerPath).ToStd());
-		}
-		LocalProcess slicer;
-		slicer.Start(slicerPath, {"C:/Users/User/Documents/Деталь.stl"}, NULL, GetFileFolder(slicerPath));
-		slicer.Detach();
-	}
-	
-	void SaveAs(Doc3D::ExportParams& params) {
+
+	String SaveAs(Doc3D::ExportParams& params, bool isTmp = false) {
 		Doc3D doc = Kompas3D::GetActiveDocument3D();
-		if (!doc) {
+		if (doc) {
+			String path = doc.GetPath();
+			if (path.IsEmpty()) {
+				path = AppendFileName(Upp::GetDocumentsFolder(), "Деталь.m3d");
+			}
+			path = ForceExt(path, params.format.Ext());
+			if (isTmp) {
+				path = AppendFileName(GetTempDirectory(), GetFileName(path));
+			} else {
+				saveDlg.ActiveDir(GetFileDirectory(path));
+				saveDlg.DefaultName(GetFileName(path));
+				saveDlg.ActiveType(FormatIndex(params.format));
+				if (!saveDlg.ExecuteSaveAs()) return String();
+				int typeIdx = saveDlg.GetActiveType();
+				params.format = types[typeIdx];
+				path = ForceExt(path, params.format.Ext());
+			}
+			if (doc.SaveAs(params, path.ToStd())) {
+				return path;
+			}
+		} else {
 			Kompas3D::Error("Не обноружен активный 3D документ");
-			return;
 		}
-		std::string path = doc.GetPath();
-		if (path.empty()) path = "Деталь.m3d";
-		std::filesystem::path fp(path);
-		fp.replace_extension(params.format.Ext());
-		saveDlg.ActiveDir(fp.parent_path().string());
-		saveDlg.DefaultName(fp.filename().string());
-		saveDlg.ActiveType(FormatIndex(params.format));
-		if (saveDlg.ExecuteSaveAs()) {
-			int typeIdx = saveDlg.GetActiveType();
-			params.format = types[typeIdx];
-			doc.SaveAs(params, saveDlg.Get().ToStd());
-		}
+		return String();
 	}
 	
 	const std::vector<Doc3D::Format>& GetTypes() {
