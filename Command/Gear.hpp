@@ -1,6 +1,7 @@
 #ifndef _Kompas3DPrint_Gear_hpp_
 #define _Kompas3DPrint_Gear_hpp_
-#include "Kompas/Kompas3D.h"
+
+#include "../KompasAPI/Include/Kompas3D.h"
 #include <sstream>
 
 class Gear {
@@ -19,12 +20,11 @@ private:
 		double think;
 	};
 
-	NodeMacro edit = NodeMacro(nullptr);
+	NodeMacro edit;
 
 public:
 	Gear() {
 		try {
-			if (!Kompas3D::Connect()) return;
 			panel.Create();
 		
 			panel.WhenButtonClick = [=](int buttonId) {
@@ -101,11 +101,11 @@ private:
 		double m = panel.main.m;
 		int count = panel.main.count;
 		double think = panel.main.think;
-		Sketch sketchBlank = Sketch(nullptr);
-		BaseExtrusion blank = BaseExtrusion(nullptr);
-		Sketch sketchToth = Sketch(nullptr);
-		CutExtrusion toth = CutExtrusion(nullptr);
-		CircularCopy tothArray = CircularCopy(nullptr);
+		Sketch sketchBlank;
+		BaseExtrusion blank;
+		Sketch sketchToth;
+		CutExtrusion toth;
+		CircularCopy tothArray;
 		for (Node& node : edit.GetNodes()) {
 			if (node.IsType(Sketch::TYPE) && node.GetName() == "BlankSketch") {
 				sketchBlank = Sketch(node);

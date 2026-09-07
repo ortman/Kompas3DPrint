@@ -1,6 +1,7 @@
 #ifndef _Kompas3DPrint_RealThreads_hpp_
 #define _Kompas3DPrint_RealThreads_hpp_
-#include "../Kompas/Kompas3D.h"
+
+#include "../KompasAPI/Include/Kompas3D.h"
 
 class Threads {
 private:
@@ -16,12 +17,11 @@ private:
 		double clearance;
 	};
 
-	NodeMacro edit = NodeMacro(nullptr);
+	NodeMacro edit;
 
 public:
 	Threads() {
 		try {
-			if (!Kompas3D::Connect()) return;
 			panel.Create();
 			
 			panel.WhenButtonClick = [=](int buttonId) {

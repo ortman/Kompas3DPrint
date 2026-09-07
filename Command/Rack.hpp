@@ -1,6 +1,7 @@
 #ifndef _Kompas3DPrint_Rack_hpp_
 #define _Kompas3DPrint_Rack_hpp_
-#include "Kompas/Kompas3D.h"
+
+#include "../KompasAPI/Include/Kompas3D.h"
 
 class Rack {
 private:
@@ -20,14 +21,12 @@ private:
 		double depth;
 	};
 	
-	NodeMacro edit = NodeMacro(nullptr);
+	NodeMacro edit;
 	
 public:
 	Rack() {
 		try {
-			if (!Kompas3D::Connect()) return;
 			panel.Create();
-			
 			panel.WhenButtonClick = [=](int buttonId) {
 				try {
 					if (buttonId == 1) {
@@ -37,14 +36,13 @@ public:
 							CreateRack();
 						}
 					}
-					edit = NodeMacro(nullptr);
+					edit = NodeMacro();
 					panel.Hide();
 				} catch (const Kompas3DException& e) {
 					Kompas3D::Error(e.what());
 				}
 				return false;
 			};
-
 		} catch (const Kompas3DException&) {
 		}
 	}
@@ -101,32 +99,34 @@ private:
 			.Add(tothArray)
 			.Update();
 	}
-	
+
 	void ReplaceRack() {
 		if (!edit) return;
 		double m = panel.main.m;
 		double length = panel.main.length;
 		double think = panel.main.think;
 		double depth = panel.main.depth;
-		Sketch sketchBlank(nullptr);
-		BaseExtrusion blank(nullptr);
-		Sketch sketchToth(nullptr);
-		CutExtrusion toth(nullptr);
-		MeshCopy tothArray(nullptr);
+		Sketch sketchBlank;
+		BaseExtrusion blank;
+		Sketch sketchToth;
+		CutExtrusion toth;
+		MeshCopy tothArray;
 		for (auto& node : edit.GetNodes()) {
-			if (node.IsType(Sketch::TYPE) && node.GetName() == "BlankSketch") {
-				sketchBlank = Sketch(node);
-			} else if ((node.IsType(BaseExtrusion::TYPE)
-				|| node.IsType(25))
-				&& node.GetName() == "Blank") {
-				blank = BaseExtrusion(node);
-			} else if (node.IsType(Sketch::TYPE) && node.GetName() == "TothSketch") {
-				sketchToth = Sketch(node);
-			} else if (node.IsType(CutExtrusion::TYPE) && node.GetName() == "TothCut") {
-				toth = CutExtrusion(node);
-			} else if (node.IsType(MeshCopy::TYPE) && node.GetName() == "TothCutArray") {
-				tothArray = MeshCopy(node);
-			}
+/*
+ * 			if (node.IsType(Sketch::TYPE) && node.GetName() == "BlankSketch") {
+ * 				sketchBlank = Sketch(node);
+ * 			} else if ((node.IsType(BaseExtrusion::TYPE)
+ * 				|| node.IsType(25))
+ * 				&& node.GetName() == "Blank") {
+ * 				blank = BaseExtrusion(node);
+ * 			} else if (node.IsType(Sketch::TYPE) && node.GetName() == "TothSketch") {
+ * 				sketchToth = Sketch(node);
+ * 			} else if (node.IsType(CutExtrusion::TYPE) && node.GetName() == "TothCut") {
+ * 				toth = CutExtrusion(node);
+ * 			} else if (node.IsType(MeshCopy::TYPE) && node.GetName() == "TothCutArray") {
+ * 				tothArray = MeshCopy(node);
+ * 			}
+ */
 		}
 		if (!sketchBlank || !blank || !sketchToth || !toth || !tothArray) return;
 		RackParameters rackParam = {m, length, think, depth};
@@ -143,7 +143,7 @@ private:
 		tothArray.SetParam1((int)(length / step) + 1, step);
 		edit.Hide().Update();
 	}
-	
+
 	void DrawTothSketch(Sketch& sketch, double m) {
 	    // 1. Основные параметры геометрии рейки (ГОСТ 13755)
 	    // Переводим 20 градусов в радианы

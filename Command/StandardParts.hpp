@@ -1,8 +1,9 @@
 #ifndef _Kompas3DPrint_StandardParts_hpp_
 #define _Kompas3DPrint_StandardParts_hpp_
+
 #include <CtrlLib/CtrlLib.h>
 #include "../Resources.h"
-#include "../Kompas/Kompas3D.h"
+#include "../KompasAPI/Include/Kompas3D.h"
 
 class StandardPartsSelector : public WithStandardPartsModelsLay<TopWindow>  {
 private:
