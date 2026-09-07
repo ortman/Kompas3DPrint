@@ -77,7 +77,7 @@ public:
 
 private:
 	bool CreateThread(Part& part, NodeMacro& macro, const ThreadDesignation& thread) {
-		if (thread.GetDiameter() < panel.main.minThreadDiameter) return false;
+		if (thread.GetDiameter() < (double)panel.main.minThreadDiameter) return false;
 		Edge beginEdge = thread.GetBeginEdge();
 		Face planarFace = beginEdge.RightFace();
 		Face cylinderFace = beginEdge.LeftFace();

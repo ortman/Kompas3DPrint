@@ -7,9 +7,9 @@ using namespace Upp;
 #include "Command/AboutDlg.hpp"
 #include "Command/Settings.hpp"
 #include "Command/Rack.hpp"
-//#include "Command/Gear.hpp"
+#include "Command/Gear.hpp"
 #include "Command/Export.hpp"
-//#include "Command/Threads.hpp"
+#include "Command/Threads.hpp"
 //#include "Command/StandardParts.hpp"
 
 Slicer slicer;
@@ -17,8 +17,8 @@ std::unique_ptr<AboutDlg>    aboutDlg;
 std::unique_ptr<Export>      exprt;
 std::unique_ptr<Settings>    settings;
 std::unique_ptr<Rack>        rack;
-//std::unique_ptr<Gear>        gear;
-//std::unique_ptr<Threads>     threads;
+std::unique_ptr<Gear>        gear;
+std::unique_ptr<Threads>     threads;
 //std::unique_ptr<StandardParts> standardParts;
 
 void MainStart() {
@@ -27,8 +27,8 @@ void MainStart() {
 	exprt    = std::make_unique<Export>();
 	settings = std::make_unique<Settings>(exprt->GetTypes());
 	rack     = std::make_unique<Rack>();
-	//gear     = std::make_unique<Gear>();
-	//threads  = std::make_unique<Threads>();
+	gear     = std::make_unique<Gear>();
+	threads  = std::make_unique<Threads>();
 	//standardParts = std::make_unique<StandardParts>();
 }
 
@@ -66,8 +66,8 @@ void Kompas3D::RunCommand(uint32_t comm) {
 		case MENU_EXPORT_VRLM: Export(Doc3D::Format::VRLM); break;
 		case MENU_ABOUT:       aboutDlg->Open(); break;
 		case MENU_RACK:        rack->Start(); break;
-		//case MENU_GEAR:        gear->Start(); break;
-		//case MENU_THREADS:     threads->Start(); break;
+		case MENU_GEAR:        gear->Start(); break;
+		case MENU_THREADS:     threads->Start(); break;
 		//case MENU_STANDARD:    standardParts->Start(); break;
 		default: Kompas3D::Error("Неизвестная команда");
 	}
