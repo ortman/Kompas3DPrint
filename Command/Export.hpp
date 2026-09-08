@@ -1,4 +1,4 @@
-#ifndef _Kompas3DPrint_Export_hpp_
+﻿#ifndef _Kompas3DPrint_Export_hpp_
 #define _Kompas3DPrint_Export_hpp_
 
 #include <CtrlLib/CtrlLib.h>
@@ -29,7 +29,7 @@ public:
 		}
 	}
 
-	String SaveAs(Doc3D::ExportParams& params, bool isTmp = false) {
+	String SaveAs(Doc3D::ExportParams& params, bool isTranslate = false, bool isTmp = false) {
 		Doc3D doc = Kompas3D::GetActiveDocument3D();
 		if (doc) {
 			String path = doc.GetPath();
@@ -37,11 +37,13 @@ public:
 				path = AppendFileName(Upp::GetDocumentsFolder(), "Деталь.m3d");
 			}
 			path = ForceExt(path, params.format.Ext());
+			String fileName = GetFileName(path);
+			if (isTranslate) fileName = TransliterateFileName(fileName);
 			if (isTmp) {
-				path = AppendFileName(GetTempDirectory(), GetFileName(path));
+				path = AppendFileName(GetTempDirectory(), fileName);
 			} else {
 				saveDlg.ActiveDir(GetFileDirectory(path));
-				saveDlg.DefaultName(GetFileName(path));
+				saveDlg.DefaultName(fileName);
 				saveDlg.ActiveType(FormatIndex(params.format));
 				if (!saveDlg.ExecuteSaveAs()) return String();
 				int typeIdx = saveDlg.GetActiveType();
@@ -68,6 +70,30 @@ private:
 			return (int)std::distance(types.begin(), it);
 		}
 		return -1;
+	}
+	String TransliterateFileName(const String& src) {
+		static VectorMap<wchar_t, WString> transMap = {
+			{ L'а', L"a" },   { L'б', L"b" },   { L'в', L"v" },   { L'г', L"g" },
+			{ L'д', L"d" },   { L'е', L"e" },   { L'ё', L"yo" },  { L'ж', L"zh" },
+			{ L'з', L"z" },   { L'и', L"i" },   { L'й', L"y" },   { L'к', L"k" },
+			{ L'л', L"l" },   { L'м', L"m" },   { L'н', L"n" },   { L'о', L"o" },
+			{ L'п', L"p" },   { L'р', L"r" },   { L'с', L"s" },   { L'т', L"t" },
+			{ L'у', L"u" },   { L'ф', L"f" },   { L'х', L"kh" },  { L'ц', L"ts" },
+			{ L'ч', L"ch" },  { L'ш', L"sh" },  { L'щ', L"shch" }, { L'ы', L"y" },
+			{ L'э', L"e" },   { L'ю', L"yu" },  { L'я', L"ya" },
+			{ L'ь', L"" },    { L'ъ', L"" },    { L' ', L"_" }
+		};
+		WString wsrc = ToLower(src.ToWString());
+		WString wres;
+		for (int i = 0; i < wsrc.GetLength(); i++) {
+			wchar_t c = wsrc[i];
+			int idx = transMap.Find(c);
+			if (idx >= 0)
+				wres.Cat(transMap[idx]);
+			else
+				wres.Cat(c);
+		}
+		return wres.ToString();
 	}
 };
 

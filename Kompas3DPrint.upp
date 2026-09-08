@@ -24,7 +24,7 @@ file
 	Command/Gear.hpp,
 	Command/Settings.hpp,
 	Command/AboutDlg.hpp,
-	Command/Export.hpp charset "UTF-8",
+	Command/Export.hpp charset "UTF-8-BOM",
 	Command/Slicer.hpp,
 	Command/Threads.hpp,
 	Command/StandardParts.hpp;

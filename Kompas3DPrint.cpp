@@ -36,7 +36,7 @@ void Export(Doc3D::Format format) {
 	settings->Load();
 	Doc3D::ExportParams params = settings->GetExportParams();
 	params.format = format;
-	if (exprt->SaveAs(params).IsEmpty()) {
+	if (exprt->SaveAs(params, false).IsEmpty()) {
 		Kompas3D::Error("Ошибка экспорта");
 	} else {
 		Kompas3D::Error("Успешно экспортирован");
@@ -54,7 +54,7 @@ void Kompas3D::RunCommand(uint32_t comm) {
 			settings->Load();
 			Doc3D::ExportParams params = settings->GetExportParams();
 			params.format = settings->GetSlicerFormat();
-			String exportPath = exprt->SaveAs(params, true);
+			String exportPath = exprt->SaveAs(params, false, true);
 			if (exportPath.IsEmpty()) {
 				Kompas3D::Error("Ошибка экспорта");
 			} else {
