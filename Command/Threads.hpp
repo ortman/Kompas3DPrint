@@ -22,8 +22,7 @@ private:
 public:
 	Threads() {
 		try {
-			panel.Create();
-			
+			if (!panel.Create()) return;
 			panel.WhenButtonClick = [=](int buttonId) {
 				try {
 					if (buttonId == 1) {

@@ -78,7 +78,7 @@ int DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved) {
 		AppInitEnvironment__();
 		GUI_APP_MAIN_HOOK
 		UPP::Ctrl::InitWin32(hInstance);
-		MainStart();
+		Kompas3D::WhenConnect = MainStart;
 	} else if (dwReason == DLL_PROCESS_DETACH) {
 		UPP::Ctrl::CloseTopCtrls();
 		UPP::Ctrl::ExitWin32();

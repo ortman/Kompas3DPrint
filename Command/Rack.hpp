@@ -26,7 +26,7 @@ private:
 public:
 	Rack() {
 		try {
-			panel.Create();
+			if (!panel.Create()) return;
 			panel.WhenButtonClick = [=](int buttonId) {
 				try {
 					if (buttonId == 1) {
@@ -43,7 +43,8 @@ public:
 				}
 				return false;
 			};
-		} catch (const Kompas3DException&) {
+		} catch (const Kompas3DException& e) {
+			Kompas3D::Error(e.what());
 		}
 	}
 	

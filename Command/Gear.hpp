@@ -25,8 +25,7 @@ private:
 public:
 	Gear() {
 		try {
-			panel.Create();
-		
+			if (!panel.Create()) return;
 			panel.WhenButtonClick = [=](int buttonId) {
 				try {
 					if (buttonId == 1) {
@@ -38,11 +37,13 @@ public:
 					}
 					edit = NodeMacro(nullptr);
 					panel.Hide();
-				} catch (const Kompas3DException&) {
+				} catch (const Kompas3DException& e) {
+					Kompas3D::Error(e.what());
 				}
 				return false;
 			};
-		} catch (const Kompas3DException&) {
+		} catch (const Kompas3DException& e) {
+			Kompas3D::Error(e.what());
 		}
 	}
 	
