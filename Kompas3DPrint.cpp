@@ -44,6 +44,10 @@ void Export(Doc3D::Format format) {
 }
 
 void Kompas3D::RunCommand(uint32_t comm) {
+	if (!settings) {
+		Kompas3D::Error("Библиотека не подключена к КОМПАС-3D");
+		return;
+	}
 	switch (comm) {
 		case MENU_SETTINGS:    settings->Load(); settings->Open(); break;
 		case MENU_OPEN_SLICER: {

@@ -59,19 +59,23 @@ public:
 	}
 	
 	void Start() {
-		Doc3D doc = Kompas3D::GetActiveDocument3D();
-		if (!doc) return;
-		Part topPart = doc.GetTopPart();
-		
-		edit = doc.GetEditMacroObject();
-		if (edit) {
-			ThreadsParameters threadsParam;
-			if (edit.GetUserParam(&threadsParam, sizeof(threadsParam))) {
-				panel.main.minThreadDiameter = threadsParam.minThreadDiameter;
-				panel.main.clearance = threadsParam.clearance;
+		try {
+			Doc3D doc = Kompas3D::GetActiveDocument3D();
+			if (!doc) return;
+			Part topPart = doc.GetTopPart();
+			
+			edit = doc.GetEditMacroObject();
+			if (edit) {
+				ThreadsParameters threadsParam;
+				if (edit.GetUserParam(&threadsParam, sizeof(threadsParam))) {
+					panel.main.minThreadDiameter = threadsParam.minThreadDiameter;
+					panel.main.clearance = threadsParam.clearance;
+				}
 			}
+			panel.Show();
+		} catch (const Kompas3DException& e) {
+			Kompas3D::Error(e.what());
 		}
-		panel.Show();
 	}
 
 private:

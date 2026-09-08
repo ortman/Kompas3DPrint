@@ -48,21 +48,25 @@ public:
 	}
 	
 	void Start() {
-		Doc3D doc = Kompas3D::GetActiveDocument3D();
-		if (!doc) {
-			Kompas3D::Error("Не найден активный 3D документ");
-			return;
-		}
-		edit = doc.GetEditMacroObject();
-		if (edit) {
-			GearParameters gearParam;
-			if (edit.GetUserParam(&gearParam, sizeof(gearParam))) {
-				panel.main.m = gearParam.m;
-				panel.main.count = gearParam.count;
-				panel.main.think = gearParam.think;
+		try {
+			Doc3D doc = Kompas3D::GetActiveDocument3D();
+			if (!doc) {
+				Kompas3D::Error("Не найден активный 3D документ");
+				return;
 			}
+			edit = doc.GetEditMacroObject();
+			if (edit) {
+				GearParameters gearParam;
+				if (edit.GetUserParam(&gearParam, sizeof(gearParam))) {
+					panel.main.m = gearParam.m;
+					panel.main.count = gearParam.count;
+					panel.main.think = gearParam.think;
+				}
+			}
+			panel.Show();
+		} catch (const Kompas3DException& e) {
+			Kompas3D::Error(e.what());
 		}
-		panel.Show();
 	}
 
 private:
