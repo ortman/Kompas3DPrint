@@ -1,4 +1,4 @@
-charset "UTF-8-BOM";
+﻿charset "UTF-8-BOM";
 
 uses
 	CtrlLib,
@@ -13,6 +13,7 @@ options(WIN32) -DKAPI7;
 options(UNIX) -DKSAPI;
 
 file
+	README.md,
 	Kompas3DPrint.cpp,
 	Resources.h,
 	Kompas3DPrint.h,
