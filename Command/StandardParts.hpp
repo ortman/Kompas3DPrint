@@ -81,35 +81,37 @@ public:
 	MateConstraint planeMate;
 	MateConstraint axisMate;
 
-	bool OnPlacementChange(const Node& node) override {
+	bool OnPlacementChange(Node&& node) override {
 		if (node.GetType() != Face::TYPE) return false;
-		Face face(node);
+		Face face(std::move(node));
 		if (face.IsPlanar()) {
 			if (!planeMate) {
 				Part phantom = GetPhantom();
-				planeMate = AddMateConstraint(MateCoincidence, phantom ? phantom.GetPlaneXOY() : nullptr, nullptr, MateDirSame);
+				planeMate = AddMateConstraint(MateCoincidence,
+					phantom ? Node(phantom.GetPlaneXOY()) : Node(nullptr), Node(nullptr), MateDirSame);
 			} else if (!planeMate.GetFirst() && GetPhantom()) {
 				planeMate.SetFirst(GetPhantom().GetPlaneXOY());
 			}
-			planeMate.SetSecond(face);
+			planeMate.SetSecond(std::move(face));
 			return true;
 		}
 		if (face.IsCylinder()) {
 			if (!axisMate) {
 				Part phantom = GetPhantom();
-				axisMate = AddMateConstraint(MateConcentric, phantom ? phantom.GetAxisOZ() : nullptr, nullptr, MateDirUndefined);
+				axisMate = AddMateConstraint(MateConcentric,
+					phantom ? Node(phantom.GetAxisOZ()) : Node(nullptr), Node(nullptr), MateDirUndefined);
 			} else if (!axisMate.GetFirst() && GetPhantom()) {
-				planeMate.SetFirst(GetPhantom().GetAxisOZ());
+				axisMate.SetFirst(GetPhantom().GetAxisOZ());
 			}
-			axisMate.SetSecond(face);
+			axisMate.SetSecond(std::move(face));
 			return true;
 		}
 		return false;
 	}
 
-	bool OnFilterObject(const Node& node) override {
+	bool OnFilterObject(Node&& node) override {
 		if (node.GetType() != Face::TYPE) return false;
-		Face face(node);
+		Face face(std::move(node));
 		return face.IsCylinder() || face.IsPlanar();
 	}
 };
@@ -193,7 +195,7 @@ public:
 			if (!restartProcess) {
 				Doc3D& sel = selector.GetSelected();
 				if (sel) sel.Close();
-				embodiment = Part(nullptr, nullptr);
+				embodiment = Part();
 				restartProcess = false;
 			}
 			return true;

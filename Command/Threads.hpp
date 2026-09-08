@@ -41,7 +41,7 @@ public:
 						macro.SetUserParam(&threadParam, sizeof(threadParam), MENU_THREADS);
 						for (Node& node : topPart.GetNodes()) {
 							if (node.IsType(ThreadDesignation::TYPE)) {
-								CreateThread(topPart, macro, ThreadDesignation(node));
+								CreateThread(topPart, macro, ThreadDesignation(std::move(node)));
 							}
 						}
 						macro.Update();
