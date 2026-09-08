@@ -125,6 +125,15 @@ class StandardParts {
 
 public:
 	void Start() {
+		try {
+			StartProc();
+		} catch (const Kompas3DException& e) {
+			Kompas3D::Error(e.what());
+		}
+	}
+
+private:
+	void StartProc() {
 		//if (!Kompas3D::Connect()) return;
 		doc = std::move(Kompas3D::GetActiveDocument3D());
 		if (!doc) return;
@@ -200,7 +209,7 @@ public:
 			}
 			return true;
 		};
-		proc->Run(false, true);
+		proc->Run(false, false);
 	}
 };
 
