@@ -162,7 +162,7 @@ private:
 			restartProcess = true;
 			proc->Stop();
 			Doc3D& sel = selector.GetSelected();
-			int embIndex = proc->mainTab.embodiment.Find(proc->mainTab.embodiment);
+			int embIndex = proc->mainTab.embodiment.GetIndex();
 			if (sel && embIndex >= 0) {
 				sel.SetCurrentEmbodiment(embIndex);
 				embodiment = sel.GetEmbodiment(embIndex);
