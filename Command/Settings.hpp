@@ -52,6 +52,15 @@ public:
 		eAngle.WhenAction  = [=]() { sAngle  <<= int(double(~eAngle)   * 1000.);};
 		sRidge.WhenAction  = [=]() { eRidge  <<= double(int(~sRidge))  / 1000.; };
 		eRidge.WhenAction  = [=]() { sRidge  <<= int(double(~eRidge)   * 1000.);};
+		
+		bSave << [=] {
+			Save();
+			Close();
+		};
+		bCancel << [=] {
+			Load();
+			Close();
+		};
 	}
 	
 	const Doc3D::ExportParams& GetExportParams() { return params;	}
@@ -65,7 +74,6 @@ public:
 		LOG(dir);
 		if (dir.IsEmpty()) return false;
 		VectorMap<String, String> ini = LoadIniFile(dir + "/Kompas3DPrint.ini");
-		if (ini.GetCount() == 0) return false;
 		oAutoExportEn   <<= GetIniBool(ini, SETTINGS_INI_AUTOEXPORT_EN, true);
 		oCreateFolder   <<= GetIniBool(ini, SETTINGS_INI_CREATE_FOLDER, false);
 		oRewriteOnly    <<= GetIniBool(ini, SETTINGS_INI_AUTOEXPORT_WHEN_EXISTS, false);
@@ -107,9 +115,9 @@ public:
 		SetIniBool(ini, SETTINGS_INI_IS_RIDGE,    params.isRidge);
 		SetIniDbl( ini, SETTINGS_INI_RIDGE_VAL,   params.ridgeVal);
 		
-		SetIniBool(ini, SETTINGS_INI_AUTOEXPORT_EN, true);
-		SetIniBool(ini, SETTINGS_INI_CREATE_FOLDER, false);
-		SetIniBool(ini, SETTINGS_INI_AUTOEXPORT_WHEN_EXISTS, false);
+		SetIniBool(ini, SETTINGS_INI_AUTOEXPORT_EN, (bool)~oAutoExportEn);
+		SetIniBool(ini, SETTINGS_INI_CREATE_FOLDER, (bool)~oCreateFolder);
+		SetIniBool(ini, SETTINGS_INI_AUTOEXPORT_WHEN_EXISTS, (bool)~oRewriteOnly);
 		SetIniStr( ini, SETTINGS_INI_SLICER_PATH, ~eSlicerPath);
 		SetIniStr( ini, SETTINGS_INI_SLICER_FORMAT, Doc3D::Format((Doc3D::Format::Value)(int)~dlSlicerFormat).Name());
 		ini.Close();
