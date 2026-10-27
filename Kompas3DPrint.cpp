@@ -1,5 +1,7 @@
 #include <CtrlLib/CtrlLib.h>
 #include "Kompas3DPrint.h"
+// До using namespace Upp: иначе ::Drawing конфликтует с Upp::Drawing
+#include "KompasAPI/Include/Kompas3D.h"
 
 using namespace Upp;
 
