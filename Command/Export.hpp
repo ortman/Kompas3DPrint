@@ -54,7 +54,7 @@ public:
 				return path;
 			}
 		} else {
-			Kompas3D::Error("Не обноружен активный 3D документ");
+			Kompas3D::Error("Не обнаружен активный 3D документ");
 		}
 		return String();
 	}

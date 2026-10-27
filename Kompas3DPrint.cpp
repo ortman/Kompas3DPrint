@@ -22,7 +22,7 @@ std::unique_ptr<Threads>     threads;
 std::unique_ptr<StandardParts> standardParts;
 
 void MainStart() {
-	StdLogSetup(LOG_FILE, "C:/smcLog/kompas3dprint.log");
+	StdLogSetup(LOG_FILE, AppendFileName(GetTempDirectory(), "kompas3dprint.log"));
 	aboutDlg = std::make_unique<AboutDlg>();
 	exprt    = std::make_unique<Export>();
 	settings = std::make_unique<Settings>(exprt->GetTypes());
@@ -116,6 +116,6 @@ GUI_APP_MAIN {
 		MainStart();
 		App().Run();
 	} else {
-		ErrorOK("Kompas3D не запущен! Перерапустите приложение.");
+		ErrorOK("Kompas3D не запущен! Перезапустите приложение.");
 	}
 }
