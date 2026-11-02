@@ -5,31 +5,115 @@
 #include "../Resources.h"
 #include "../KompasAPI/Include/Kompas3D.h"
 
+// Выбранное изделие: модель, исполнение и значения внешних переменных
+struct StandardPartChoice {
+	Doc3D doc;           // модель, открытая невидимой
+	String title;        // «DIN912 M3, L=10» — для кнопки на панели
+	int embodiment = -1; // индекс исполнения КОМПАС
+	VectorMap<String, double> params;
+};
+
+// Окно выбора изделия. Исполнение и параметры выбираются здесь, а не на панели процесса:
+// элементы, добавленные на панель работающего процесса, КОМПАС не показывает без перезапуска
+// процесса и не отдаёт их значения, а смена фантома у процесса его ломает
 class StandardPartsSelector : public WithStandardPartsModelsLay<TopWindow>  {
 private:
-	Doc3D selDoc = nullptr;
+	Doc3D doc;             // модель, выбранная в дереве
+	String docPath;
+	Vector<String> paramVars; // переменная каждой строки параметров
 
-public:
-	StandardPartsSelector() {
-		CtrlLayout(*this, t_("Select model"));
-		Zoomable().Sizeable();
-		models.WhenLeftDouble = [=]() {
-			Vector<int> sel = models.GetSel();
-			if (sel.GetCount() == 1 && sel[0] && !models.Get(sel[0]).IsNull()) {
-				AcceptBreak(IDOK);
+	// Размер из имени исполнения: «M2.5» → 2.5
+	static double EmbodimentSize(const String& name) {
+		const char* p = name;
+		while (*p && !IsDigit(*p)) ++p;
+		return *p ? ScanDouble(p) : Null;
+	}
+
+	// КОМПАС хранит исполнения не по порядку (базовое всегда последнее), поэтому сортируем по размеру
+	static bool EmbodimentLess(const String& a, const String& b) {
+		double sa = EmbodimentSize(a);
+		double sb = EmbodimentSize(b);
+		if (!IsNull(sa) && !IsNull(sb) && sa != sb) return sa < sb;
+		return a < b;
+	}
+
+	void CloseModel() {
+		if (doc) doc.Close();
+		doc = Doc3D();
+		docPath = Null;
+		embodiment.Clear();
+		params.Clear();
+		paramVars.Clear();
+	}
+
+	bool CanAccept() const {
+		return doc && !IsNull(~embodiment);
+	}
+
+	void OpenModel() {
+		String path = GetSelectedPath();
+		if (path == docPath) return;
+		CloseModel();
+		if (!IsNull(path)) {
+			try {
+				doc = std::move(Kompas3D::Open3D(path.ToStd(), false));
+			} catch (const Kompas3DException& e) {
+				Kompas3D::Error(e.what());
 			}
-		};
+			docPath = path;
+			if (doc) {
+				Vector<String> names;
+				for (int i = 0; i < doc.GetEmbodimentsCount(); ++i) {
+					names.Add(doc.GetEmbodimentName(i).c_str());
+				}
+				for (int i : GetSortOrder(names, &StandardPartsSelector::EmbodimentLess)) {
+					embodiment.Add(i, names[i]);
+				}
+				if (embodiment.GetCount()) embodiment.SetIndex(0);
+				LoadParams();
+			}
+		}
+		bOk.Enable(CanAccept());
 	}
-	
-	~StandardPartsSelector() {
-		if (selDoc) selDoc.Close();
-	}
-	
-	void Load() {
-		String path = AppendFileName(GetDocumentsFolder(), "Стандартные изделия");
-		models.Clear();
-		models.NoRoot();
-		LoadTree(0, path);
+
+	// Внешние переменные исполнения. Комментарий «Длина:4,5,6» задаёт название и список значений
+	void LoadParams() {
+		params.Clear();
+		paramVars.Clear();
+		if (!CanAccept()) return;
+		doc.SetCurrentEmbodiment(~embodiment);
+		doc.Rebuild();
+		Part top = doc.GetTopPart();
+		if (!top) return;
+		for (const Part::Variable& v : top.GetVariables(true)) {
+			String name = v.name;
+			Vector<String> values;
+			Vector<String> nameVal = Split(v.comment.c_str(), ':');
+			if (nameVal.GetCount() == 2) {
+				name = nameVal[0] + "(" + name + ")";
+				values = Split(nameVal[1], ',');
+			} else {
+				values = Split(v.comment.c_str(), ',');
+				if (values.GetCount() == 1) {
+					values.Clear();
+					name = String(v.comment) + "(" + name + ")";
+				}
+			}
+			int row = params.GetCount();
+			params.Add(name, v.value);
+			paramVars.Add(v.name);
+			if (values.GetCount()) {
+				DropList& list = params.CreateCtrl<DropList>(row, 1);
+				for (const String& s : values) {
+					double d = StrDbl(TrimBoth(s));
+					if (!IsNull(d)) list.Add(d, FormatDouble(d));
+				}
+				if (list.FindKey(v.value) < 0) list.Add(v.value, FormatDouble(v.value));
+				list <<= v.value;
+			} else {
+				params.CreateCtrl<EditDouble>(row, 1) <<= v.value;
+			}
+		}
 	}
 
 	void LoadTree(int parent, const String& folder) {
@@ -55,29 +139,69 @@ public:
 			models.Open(parent, count <= 1);
 		}
 	}
-	
-	Doc3D& GetSelected() {
-		if (selDoc) return selDoc;
+
+	String GetSelectedPath() {
 		Vector<int> sel = models.GetSel();
 		if (sel.GetCount() == 1 && sel[0]) {
 			Value e = models.Get(sel[0]);
-			if (!e.IsNull()) {
-				selDoc = std::move(Kompas3D::Open3D(String(e).ToStd(), false));
-			}
+			if (!e.IsNull()) return e;
 		}
-		return selDoc;
+		return Null;
+	}
+
+public:
+	StandardPartsSelector() {
+		CtrlLayout(*this, t_("Select model"));
+		Zoomable().Sizeable();
+		params.AddColumn(t_("Параметр"));
+		params.AddColumn(t_("Значение"));
+		bOk.Ok();
+		Acceptor(bOk, IDOK);
+		bCancel.Cancel();
+		Rejector(bCancel, IDCANCEL);
+		models.WhenSel = [=]() { OpenModel(); };
+		models.WhenLeftDouble = [=]() {
+			if (CanAccept()) AcceptBreak(IDOK);
+		};
+		embodiment.WhenAction = [=]() { LoadParams(); };
+	}
+
+	~StandardPartsSelector() {
+		CloseModel();
+	}
+
+	// Модель передаётся в choice открытой; закрывает её вызывающий
+	bool Choose(StandardPartChoice& choice) {
+		CloseModel();
+		models.Clear();
+		models.NoRoot();
+		LoadTree(0, AppendFileName(GetDocumentsFolder(), "Стандартные изделия"));
+		bOk.Disable();
+		if (Execute() != IDOK || !CanAccept()) {
+			CloseModel();
+			return false;
+		}
+		choice.embodiment = ~embodiment;
+		choice.title = GetFileTitle(docPath) + " " + AsString(embodiment.GetValue());
+		for (int i = 0; i < params.GetCount() && i < paramVars.GetCount(); ++i) {
+			double value = params.Get(i, 1);
+			if (IsNull(value)) continue;
+			choice.params.Add(paramVars[i], value);
+			choice.title << ", " << paramVars[i] << "=" << FormatDouble(value);
+		}
+		choice.doc = std::move(doc);
+		doc = Doc3D();
+		CloseModel();
+		return true;
 	}
 };
 
 class InsertModelProc : public Process3D<InsertModelProc> {
 public:
 	struct : Panel::Tab {
-		PropertyButton model      {"Выберите модель"};
-		PropertyList   embodiment {"Исполнение"};
+		PropertyButton model {"Выберите модель"};
 	} mainTab {"Основные"};
-	struct : Panel::Tab {
-	} paramsTab {"Параметры"};
-	
+
 	MateConstraint planeMate;
 	MateConstraint axisMate;
 
@@ -115,13 +239,17 @@ public:
 		return face.IsCylinder() || face.IsPlanar();
 	}
 };
-	
+
+// Изделие выбирается в окне до запуска процесса, фантом ставится до запуска и больше не меняется.
+// Для другого изделия процесс создаётся заново
 class StandardParts {
 	StandardPartsSelector selector;
 	InsertModelProc* proc = nullptr;
-	Part embodiment;
 	Doc3D doc;
-	bool restartProcess = false;
+	// Выбранные изделия. Фантом и сопряжения ссылаются на их модели, поэтому закрываем при выходе из команды
+	Array<StandardPartChoice> choices;
+	StandardPartChoice* choice = nullptr;
+	Part part; // фантом: деталь выбранного исполнения
 
 public:
 	void Start() {
@@ -133,83 +261,111 @@ public:
 	}
 
 private:
-	void StartProc() {
-		//if (!Kompas3D::Connect()) return;
-		doc = std::move(Kompas3D::GetActiveDocument3D());
-		if (!doc) return;
-		proc = &doc.CreatePorcess<InsertModelProc>();
+	void CloseDocs() {
+		for (StandardPartChoice& c : choices) {
+			if (c.doc) c.doc.Close();
+		}
+		choices.Clear();
+		choice = nullptr;
+	}
+
+	// Объект живёт между вызовами команды — сбрасываем состояние прошлого вызова
+	void Reset() {
+		part = Part();
+		CloseDocs();
+	}
+
+	bool Choose() {
+		StandardPartChoice& c = choices.Add();
+		if (!selector.Choose(c)) {
+			choices.Drop();
+			return false;
+		}
+		choice = &c;
+		// Значения параметров записываем в модель до того, как взять деталь исполнения для фантома
+		Doc3D& model = c.doc;
+		model.SetCurrentEmbodiment(c.embodiment);
+		Part top = model.GetTopPart();
+		for (int i = 0; i < c.params.GetCount(); ++i) {
+			bool set = top && top.SetVariable(c.params.GetKey(i).ToStd(), c.params[i]);
+			RLOG("StandardParts: set " << c.params.GetKey(i) << " = " << c.params[i] << ": " << set);
+		}
+		bool rebuilt = model.Rebuild();
+		part = model.GetEmbodiment(c.embodiment);
+		RLOG("StandardParts: " << c.title << ", rebuild " << rebuilt << ", part " << (bool)part);
+		for (const Part::Variable& v : part.GetVariables(true)) {
+			RLOG("StandardParts: phantom " << v.name << " = " << v.value);
+		}
+		return true;
+	}
+
+	void NewProcess() {
+		proc =&doc.CreatePorcess<InsertModelProc>(); // прежний процесс удаляется здесь
 		proc->SetCaption("Стандартные изделия");
+		if (choice) proc->mainTab.model.SetName(choice->title.ToStd());
+		SetupHandlers();
+		if (part) proc->SetPhantom(part);
+		bool run = proc->Run(false, false);
+		RLOG("StandardParts: new process, phantom " << (bool)part << ", run " << run);
+	}
 
+	void SetupHandlers() {
 		proc->mainTab.model.WhenClick = [=]() {
-			selector.Load();
-			if (selector.Execute() == IDOK) {
-				proc->paramsTab.Clear();
-				proc->mainTab.embodiment.Clear();
-				Doc3D& sel = selector.GetSelected();
-				if (sel) {
-					String name = GetFileName(sel.GetPath().c_str());
-					name.TrimLast(4);
-					proc->mainTab.model.SetName(name.ToStd());
-					int embCount = sel.GetEmbodimentsCount();
-					for (int i = 0; i < embCount; ++i) {
-						proc->mainTab.embodiment.Add(sel.GetEmbodimentName(i));
-					}
-				}
-			}
-		};
-
-		proc->mainTab.embodiment.WhenChange = [=]() {
-			restartProcess = true;
-			proc->Stop();
-			Doc3D& sel = selector.GetSelected();
-			int embIndex = proc->mainTab.embodiment.GetIndex();
-			if (sel && embIndex >= 0) {
-				sel.SetCurrentEmbodiment(embIndex);
-				embodiment = sel.GetEmbodiment(embIndex);
-				proc->SetPhantom(embodiment);
-				proc->Run(false, true);
-				for (const Part::Variable& v : embodiment.GetVariables(true)) {
-					String name = v.name;
-					Vector<String> values;
-					Vector<String> nameVal = Split(v.comment.c_str(), ':');
-					if (nameVal.GetCount() == 2) {
-						name = nameVal[0] + "(" + name + ")";
-						values = Split(nameVal[1], ',');
-					} else {
-						values = Split(v.comment.c_str(), ',');
-						if (values.GetCount() == 1) {
-							values.Clear();
-							name = v.comment + "(" + name + ")";
-						}
-					}
-					PropertyList& var = proc->paramsTab.Create<PropertyList>(name.Begin());
-					for (const String& s : values) var.Add(StrDbl(s));
-				}
-			}
-		};
-		
-		proc->WhenButtonClick = [=](int buttonId) {
 			try {
-				if (buttonId == 1 && embodiment && proc->planeMate && proc->axisMate) {
-					if (Part newPart = doc.AddPart(embodiment)) {
-						doc.AddMateConstraint(MateCoincidence, proc->planeMate.GetSecond(),
-								newPart.GetPlaneXOY(), MateDirSame, MateFixedNone);
-						doc.AddMateConstraint(MateConcentric, proc->axisMate.GetSecond(),
-								newPart.GetAxisOZ(), MateDirUndefined, MateFixedNone);
-					}
-				}
+				if (!Choose()) return;
 			} catch (const Kompas3DException& e) {
 				Kompas3D::Error(e.what());
+				return;
 			}
-			if (!restartProcess) {
-				Doc3D& sel = selector.GetSelected();
-				if (sel) sel.Close();
-				embodiment = Part();
-				restartProcess = false;
+			// Пересоздавать процесс из его же обработчика нельзя — откладываем
+			InsertModelProc* p = proc;
+			PostCallback([=]() {
+				if (p != proc) return;
+				try {
+					NewProcess();
+				} catch (const Kompas3DException& e) {
+					Kompas3D::Error(e.what());
+				}
+			});
+		};
+
+		proc->WhenButtonClick = [=](int buttonId) {
+			RLOG("StandardParts: button " << buttonId << ", plane " << (bool)proc->planeMate << ", axis " << (bool)proc->axisMate);
+			if (buttonId == 1) {
+				try {
+					if (part && choice && proc->planeMate && proc->axisMate) {
+						if (Part newPart = doc.AddPart(part)) {
+							// Вставленная деталь — копия исполнения, переносим в неё выбранные значения
+							for (int i = 0; i < choice->params.GetCount(); ++i) {
+								newPart.SetVariable(choice->params.GetKey(i).ToStd(), choice->params[i]);
+							}
+							if (choice->params.GetCount()) newPart.Rebuild();
+							doc.AddMateConstraint(MateCoincidence, proc->planeMate.GetSecond(),
+									newPart.GetPlaneXOY(), MateDirSame, MateFixedNone);
+							doc.AddMateConstraint(MateConcentric, proc->axisMate.GetSecond(),
+									newPart.GetAxisOZ(), MateDirUndefined, MateFixedNone);
+						}
+					}
+				} catch (const Kompas3DException& e) {
+					Kompas3D::Error(e.what());
+				}
+				return true;
 			}
+			// Выход из команды. Прежние процессы удаляются без остановки и сюда не попадают
+			part = Part();
+			CloseDocs();
 			return true;
 		};
-		proc->Run(false, false);
+	}
+
+	void StartProc() {
+		//if (!Kompas3D::Connect()) return;
+		doc = std::move(Kompas3D::GetActiveDocument3D()); // прежний процесс удаляется здесь
+		proc = nullptr;
+		Reset();
+		if (!doc) return;
+		if (!Choose()) return;
+		NewProcess();
 	}
 };
 

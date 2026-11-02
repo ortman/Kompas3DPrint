@@ -49,7 +49,13 @@ LAYOUT(SettingsLay, 400, 280)
 	ITEM(Upp::Button, bSave, SetLabel(t_("Сохранить")).RightPosZ(96, 84).BottomPosZ(5, 27))
 END_LAYOUT
 
-LAYOUT(StandardPartsModelsLay, 248, 356)
-	ITEM(Upp::TreeCtrl, models, HSizePosZ(0, 0).VSizePosZ(0, 0))
+LAYOUT(StandardPartsModelsLay, 480, 360)
+	ITEM(Upp::TreeCtrl, models, LeftPosZ(4, 220).VSizePosZ(4, 40))
+	ITEM(Upp::Label, dv___1, SetLabel(t_("Исполнение")).HSizePosZ(232, 4).TopPosZ(4, 19))
+	ITEM(Upp::DropList, embodiment, HSizePosZ(232, 4).TopPosZ(24, 19))
+	ITEM(Upp::Label, dv___3, SetLabel(t_("Параметры")).HSizePosZ(232, 4).TopPosZ(52, 19))
+	ITEM(Upp::ArrayCtrl, params, HSizePosZ(232, 4).VSizePosZ(72, 40))
+	ITEM(Upp::Button, bOk, SetLabel(t_("Выбрать")).RightPosZ(96, 84).BottomPosZ(5, 27))
+	ITEM(Upp::Button, bCancel, SetLabel(t_("Отмена")).RightPosZ(4, 84).BottomPosZ(5, 27))
 END_LAYOUT
 
