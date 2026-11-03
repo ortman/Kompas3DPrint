@@ -240,8 +240,8 @@ public:
 	}
 };
 
-// Изделие выбирается в окне до запуска процесса, фантом ставится до запуска и больше не меняется.
-// Для другого изделия процесс создаётся заново
+// Изделие выбирается в окне до запуска процесса, фантом ставится до запуска. Процесс живёт
+// до отмены: после вставки можно выбрать следующее отверстие, другое изделие меняет фантом
 class StandardParts {
 	StandardPartsSelector selector;
 	InsertModelProc* proc = nullptr;
@@ -250,6 +250,8 @@ class StandardParts {
 	Array<StandardPartChoice> choices;
 	StandardPartChoice* choice = nullptr;
 	Part part; // фантом: деталь выбранного исполнения
+	// После proc->Stop() КОМПАС присылает событие кнопки 2 — его нельзя принять за выход из команды
+	int pendingStops = 0;
 
 public:
 	void Start() {
@@ -273,6 +275,7 @@ private:
 	void Reset() {
 		part = Part();
 		CloseDocs();
+		pendingStops = 0;
 	}
 
 	bool Choose() {
@@ -309,31 +312,38 @@ private:
 		RLOG("StandardParts: new process, phantom " << (bool)part << ", run " << run);
 	}
 
+	// Перезапуск процесса с текущим фантомом: при смене изделия и после вставки — без него
+	// процесс перестаёт реагировать на выбор граней. Работает только из обработчика события
+	// КОМПАС; новый процесс, созданный не из команды, получает «мёртвый» фантом
+	void RestartWithPhantom() {
+		++pendingStops;
+		proc->Stop();
+		proc->SetPhantom(part);
+		bool run = proc->Run(false, true);
+		// Сопряжения процесса ссылаются на плоскость и ось прежнего фантома
+		if (proc->planeMate) proc->planeMate.SetFirst(part.GetPlaneXOY());
+		if (proc->axisMate) proc->axisMate.SetFirst(part.GetAxisOZ());
+		RLOG("StandardParts: restart with phantom, run " << run);
+	}
+
 	void SetupHandlers() {
 		proc->mainTab.model.WhenClick = [=]() {
 			try {
 				if (!Choose()) return;
+				if (choice) proc->mainTab.model.SetName(choice->title.ToStd());
+				RestartWithPhantom();
 			} catch (const Kompas3DException& e) {
 				Kompas3D::Error(e.what());
-				return;
 			}
-			// Пересоздавать процесс из его же обработчика нельзя — откладываем
-			InsertModelProc* p = proc;
-			PostCallback([=]() {
-				if (p != proc) return;
-				try {
-					NewProcess();
-				} catch (const Kompas3DException& e) {
-					Kompas3D::Error(e.what());
-				}
-			});
 		};
 
 		proc->WhenButtonClick = [=](int buttonId) {
-			RLOG("StandardParts: button " << buttonId << ", plane " << (bool)proc->planeMate << ", axis " << (bool)proc->axisMate);
+			RLOG("StandardParts: button " << buttonId << ", plane " << (bool)proc->planeMate.GetSecond()
+			     << ", axis " << (bool)proc->axisMate.GetSecond());
 			if (buttonId == 1) {
 				try {
-					if (part && choice && proc->planeMate && proc->axisMate) {
+					if (part && choice && proc->planeMate && proc->axisMate
+					    && proc->planeMate.GetSecond() && proc->axisMate.GetSecond()) {
 						if (Part newPart = doc.AddPart(part)) {
 							// Вставленная деталь — копия исполнения, переносим в неё выбранные значения
 							for (int i = 0; i < choice->params.GetCount(); ++i) {
@@ -346,12 +356,49 @@ private:
 									newPart.GetAxisOZ(), MateDirUndefined, MateFixedNone);
 						}
 					}
+					// Плоскость оставляем, а отверстие сбрасываем: фантом следует за указателем
+					// по той же грани до выбора следующего отверстия. Убрать одно сопряжение API
+					// не позволяет — удаляем все и создаём сопряжение с плоскостью заново
+					Node plane(nullptr);
+					if (proc->planeMate) plane = std::move(proc->planeMate.GetSecond());
+					bool cleared = proc->ClearMateConstraints();
+					proc->planeMate = MateConstraint();
+					proc->axisMate = MateConstraint();
+					// Деталь, переданная в AddPart, фантомом больше не показывается — берём её заново
+					part = choice->doc.GetEmbodiment(choice->embodiment);
+					RestartWithPhantom();
+					RLOG("StandardParts: mates cleared " << cleared);
+					// Процесс запускается отложенно (Run с PostMessage): сопряжение, созданное до запуска,
+					// фантом не держит, пока не выбрано отверстие. Создаём его после запуска и пересчитываем фантом
+					if (plane) {
+						auto face = std::make_shared<Node>(std::move(plane));
+						InsertModelProc* p = proc;
+						PostCallback([=]() {
+							if (p != proc || proc->planeMate) return;
+							try {
+								Part phantom = proc->GetPhantom();
+								if (!phantom) return;
+								proc->planeMate = proc->AddMateConstraint(MateCoincidence,
+									Node(phantom.GetPlaneXOY()), std::move(*face), MateDirSame);
+								proc->Update();
+								RLOG("StandardParts: plane restored " << (bool)proc->planeMate.GetSecond());
+							} catch (const Kompas3DException& e) {
+								Kompas3D::Error(e.what());
+							}
+						});
+					}
 				} catch (const Kompas3DException& e) {
 					Kompas3D::Error(e.what());
 				}
+				// false — процесс не завершается: можно выбрать следующее отверстие и вставить снова
+				return false;
+			}
+			// Событие от нашей же остановки процесса при смене изделия
+			if (pendingStops > 0) {
+				--pendingStops;
 				return true;
 			}
-			// Выход из команды. Прежние процессы удаляются без остановки и сюда не попадают
+			// Выход из команды
 			part = Part();
 			CloseDocs();
 			return true;
