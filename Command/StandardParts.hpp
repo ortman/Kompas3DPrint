@@ -8,6 +8,7 @@
 // Выбранное изделие: модель, исполнение и значения внешних переменных
 struct StandardPartChoice {
 	Doc3D doc;           // модель, открытая невидимой
+	String path;         // файл модели — из него вставляются компоненты
 	String title;        // «DIN912 M3, L=10» — для кнопки на панели
 	int embodiment = -1; // индекс исполнения КОМПАС
 	VectorMap<String, double> params;
@@ -189,6 +190,7 @@ public:
 			choice.params.Add(paramVars[i], value);
 			choice.title << ", " << paramVars[i] << "=" << FormatDouble(value);
 		}
+		choice.path = docPath;
 		choice.doc = std::move(doc);
 		doc = Doc3D();
 		CloseModel();
@@ -342,32 +344,42 @@ private:
 			     << ", axis " << (bool)proc->axisMate.GetSecond());
 			if (buttonId == 1) {
 				try {
-					if (part && choice && proc->planeMate && proc->axisMate
-					    && proc->planeMate.GetSecond() && proc->axisMate.GetSecond()) {
-						if (Part newPart = doc.AddPart(part)) {
-							// Вставленная деталь — копия исполнения, переносим в неё выбранные значения
-							for (int i = 0; i < choice->params.GetCount(); ++i) {
-								newPart.SetVariable(choice->params.GetKey(i).ToStd(), choice->params[i]);
-							}
-							if (choice->params.GetCount()) newPart.Rebuild();
-							doc.AddMateConstraint(MateCoincidence, proc->planeMate.GetSecond(),
-									newPart.GetPlaneXOY(), MateDirSame, MateFixedNone);
-							doc.AddMateConstraint(MateConcentric, proc->axisMate.GetSecond(),
-									newPart.GetAxisOZ(), MateDirUndefined, MateFixedNone);
-						}
+					if (!part || !choice || !proc->planeMate.GetSecond() || !proc->axisMate.GetSecond()) {
+						return false; // грани не выбраны — вставлять некуда
 					}
+					Node plane = std::move(proc->planeMate.GetSecond());
+					Node axis = std::move(proc->axisMate.GetSecond());
 					// Плоскость оставляем, а отверстие сбрасываем: фантом следует за указателем
 					// по той же грани до выбора следующего отверстия. Убрать одно сопряжение API
-					// не позволяет — удаляем все и создаём сопряжение с плоскостью заново
-					Node plane(nullptr);
-					if (proc->planeMate) plane = std::move(proc->planeMate.GetSecond());
+					// не позволяет — удаляем все и создаём сопряжение с плоскостью заново.
+					// Удаляем до вставки: DeleteTemporaryMateConstraints удаляет и сопряжения сборки,
+					// созданные во время процесса
 					bool cleared = proc->ClearMateConstraints();
 					proc->planeMate = MateConstraint();
 					proc->axisMate = MateConstraint();
+					// Компонент из файла каталога штатной вставкой API7. Вставка детали другого документа
+					// (AddPart → SetPartFromFile) работает, но сопряжения такого компонента появляются
+					// в дереве только после переоткрытия сборки
+					std::optional<Part::Placement> at = part.GetPlacement();
+					if (Part newPart = doc.AddComponent(choice->path.ToStd(), choice->embodiment)) {
+						for (int i = 0; i < choice->params.GetCount(); ++i) {
+							newPart.SetVariable(choice->params.GetKey(i).ToStd(), choice->params[i]);
+						}
+						if (choice->params.GetCount()) newPart.Rebuild();
+						// Компонент встаёт в начало координат — ставим его туда, где стоял фантом
+						bool placed = at && newPart.SetPlacement(*at);
+						bool planeOk = doc.AddMateConstraint(MateCoincidence, plane,
+								newPart.GetPlaneXOY(), MateDirSame, MateFixedNone);
+						bool axisOk = doc.AddMateConstraint(MateConcentric, axis,
+								newPart.GetAxisOZ(), MateDirUndefined, MateFixedNone);
+						RLOG("StandardParts: inserted, mates cleared " << cleared << ", placed " << placed
+						     << ", plane mate " << planeOk << ", axis mate " << axisOk);
+					} else {
+						RLOG("StandardParts: AddComponent failed " << choice->path);
+					}
 					// Деталь, переданная в AddPart, фантомом больше не показывается — берём её заново
 					part = choice->doc.GetEmbodiment(choice->embodiment);
 					RestartWithPhantom();
-					RLOG("StandardParts: mates cleared " << cleared);
 					// Процесс запускается отложенно (Run с PostMessage): сопряжение, созданное до запуска,
 					// фантом не держит, пока не выбрано отверстие. Создаём его после запуска и пересчитываем фантом
 					if (plane) {
@@ -398,11 +410,25 @@ private:
 				--pendingStops;
 				return true;
 			}
-			// Выход из команды
-			part = Part();
-			CloseDocs();
+			// Выход из команды. КОМПАС завершает процесс после выхода из обработчика, а фантом —
+			// деталь открытой модели: закрытие модели до этого портит сборку, и она падает при сохранении.
+			// Поэтому всё освобождаем отложенно, когда процесс уже завершён
+			InsertModelProc* p = proc;
+			PostCallback([=]() {
+				if (p == proc) Release();
+			});
 			return true;
 		};
+	}
+
+	// Сначала объект процесса (отписка от событий, фантом), затем модели изделий
+	void Release() {
+		part = Part();
+		proc = nullptr;
+		doc = Doc3D();
+		CloseDocs();
+		pendingStops = 0;
+		RLOG("StandardParts: released");
 	}
 
 	void StartProc() {
