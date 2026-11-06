@@ -112,35 +112,35 @@ private:
 		double think = panel.main.think;
 		double depth = panel.main.depth;
 		Sketch sketchBlank;
-		BaseExtrusion blank;
+		BaseExtrusion blankBase;
+		BossExtrusion blankBoss;
 		Sketch sketchToth;
 		CutExtrusion toth;
 		MeshCopy tothArray;
 		for (auto& node : edit.GetNodes()) {
-/*
- * 			if (node.IsType(Sketch::TYPE) && node.GetName() == "BlankSketch") {
- * 				sketchBlank = Sketch(node);
- * 			} else if ((node.IsType(BaseExtrusion::TYPE)
- * 				|| node.IsType(25))
- * 				&& node.GetName() == "Blank") {
- * 				blank = BaseExtrusion(node);
- * 			} else if (node.IsType(Sketch::TYPE) && node.GetName() == "TothSketch") {
- * 				sketchToth = Sketch(node);
- * 			} else if (node.IsType(CutExtrusion::TYPE) && node.GetName() == "TothCut") {
- * 				toth = CutExtrusion(node);
- * 			} else if (node.IsType(MeshCopy::TYPE) && node.GetName() == "TothCutArray") {
- * 				tothArray = MeshCopy(node);
- * 			}
- */
+			if (node.IsType(Sketch::TYPE) && node.GetName() == "BlankSketch") {
+				sketchBlank = Sketch(node);
+			} else if (node.IsType(BaseExtrusion::TYPE) && node.GetName() == "Blank") {
+				blankBase = BaseExtrusion(node);
+			} else if (node.IsType(BossExtrusion::TYPE) && node.GetName() == "Blank") {
+				blankBoss = BossExtrusion(node);
+			} else if (node.IsType(Sketch::TYPE) && node.GetName() == "TothSketch") {
+				sketchToth = Sketch(node);
+			} else if (node.IsType(CutExtrusion::TYPE) && node.GetName() == "TothCut") {
+				toth = CutExtrusion(node);
+			} else if (node.IsType(MeshCopy::TYPE) && node.GetName() == "TothCutArray") {
+				tothArray = MeshCopy(node);
+			}
 		}
-		if (!sketchBlank || !blank || !sketchToth || !toth || !tothArray) return;
+		if (!sketchBlank || (!blankBase && !blankBoss) || !sketchToth || !toth || !tothArray) return;
 		RackParameters rackParam = {m, length, think, depth};
 		edit.SetUserParam(&rackParam, sizeof(rackParam), MENU_RACK);
 		std::ostringstream name;
 		name << "Рейка " << m << " x " << length;
 		edit.SetName(name.str());
 		sketchBlank.Clear().Rect(0, 0, length, depth).EndEdit();
-		blank.SetDepth1(think);
+		if (blankBase) blankBase.SetDepth1(think);
+		else blankBoss.SetDepth1(think);
 		DrawTothSketch(sketchToth.Clear(), m);
 		sketchToth.EndEdit();
 		toth.SetDepth2(think);

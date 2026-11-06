@@ -107,17 +107,18 @@ private:
 		int count = panel.main.count;
 		double think = panel.main.think;
 		Sketch sketchBlank;
-		BaseExtrusion blank;
+		BaseExtrusion blankBase;
+		BossExtrusion blankBoss;
 		Sketch sketchToth;
 		CutExtrusion toth;
 		CircularCopy tothArray;
 		for (Node& node : edit.GetNodes()) {
 			if (node.IsType(Sketch::TYPE) && node.GetName() == "BlankSketch") {
 				sketchBlank = Sketch(node);
-			} else if ((node.IsType(BaseExtrusion::TYPE)
-				|| node.IsType(25))
-				&& node.GetName() == "Blank") {
-				blank = BaseExtrusion(node);
+			} else if (node.IsType(BaseExtrusion::TYPE) && node.GetName() == "Blank") {
+				blankBase = BaseExtrusion(node);
+			} else if (node.IsType(BossExtrusion::TYPE) && node.GetName() == "Blank") {
+				blankBoss = BossExtrusion(node);
 			} else if (node.IsType(Sketch::TYPE) && node.GetName() == "TothSketch") {
 				sketchToth = Sketch(node);
 			} else if (node.IsType(CutExtrusion::TYPE) && node.GetName() == "TothCut") {
@@ -126,14 +127,15 @@ private:
 				tothArray = CircularCopy(node);
 			}
 		}
-		if (!sketchBlank || !blank || !sketchToth || !toth || !tothArray) return;
+		if (!sketchBlank || (!blankBase && !blankBoss) || !sketchToth || !toth || !tothArray) return;
 		GearParameters gearParam = {m, count, think};
 		edit.SetUserParam(&gearParam, sizeof(gearParam), MENU_GEAR);
 		std::ostringstream name;
 		name << "Шестерня " << m << " x " << count;
 		edit.SetName(name.str());
 		sketchBlank.Clear().Circle(0, 0, (m * (count + 2.0)) / 2.0).EndEdit();
-		blank.SetDepth1(think);
+		if (blankBase) blankBase.SetDepth1(think);
+		else blankBoss.SetDepth1(think);
 		DrawTothSketch(sketchToth.Clear(), m, count);
 		sketchToth.EndEdit();
 		toth.SetDepth2(think);
