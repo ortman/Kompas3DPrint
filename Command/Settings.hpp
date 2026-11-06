@@ -2,6 +2,7 @@
 #define _Kompas3DPrint_Settings_hpp_
 
 #include <CtrlLib/CtrlLib.h>
+#include "Slicer.hpp"
 #include "../KompasAPI/Include/Kompas3D.h"
 #include "../Resources.h"
 
@@ -30,6 +31,7 @@ private:
 public:
 	Settings(const std::vector<Doc3D::Format>& exportTypes) {
 		CtrlLayout(*this, t_("Settings"));
+		Sizeable();
 		for (const Doc3D::Format& type : exportTypes) {
 			dlAEFormat.Add(type.value, type.Name());
 			dlSlicerFormat.Add(type.value, type.Name());
@@ -53,6 +55,16 @@ public:
 		sRidge.WhenAction  = [=]() { eRidge  <<= double(int(~sRidge))  / 1000.; };
 		eRidge.WhenAction  = [=]() { sRidge  <<= int(double(~eRidge)   * 1000.);};
 		
+		bChangeSlicer << [=] {
+			FileSel select;
+			select.Type("Слайсер (*.exe)", "*.exe");
+			String currentPath = ~dlSlicerPath;
+			if (!currentPath.IsEmpty()) select.Set(currentPath);
+			if (select.ExecuteOpen("Выберите исполняемый файл слайсера")) {
+				AddSlicerPath(select.Get());
+				dlSlicerPath <<= select.Get();
+			}
+		};
 		bSave << [=] {
 			Save();
 			Close();
@@ -65,7 +77,7 @@ public:
 	
 	const Doc3D::ExportParams& GetExportParams() { return params;	}
 	
-	String GetSlicerPath() { return ~eSlicerPath; }
+	String GetSlicerPath() { return ~dlSlicerPath; }
 	
 	Doc3D::Format GetSlicerFormat() { return (Doc3D::Format::Value)(int)~dlSlicerFormat; }
 	
@@ -94,7 +106,7 @@ public:
 		eRidge          <<= params.ridgeVal   = GetIniDbl( ini, SETTINGS_INI_RIDGE_VAL,     1);
 		sRidge          <<= int(params.ridgeVal * 1000.);
 		
-		eSlicerPath     <<= GetIniStr(ini, SETTINGS_INI_SLICER_PATH,   GetIniStr(ini, "CuraPath", ""));
+		SetSlicerPaths(GetIniStr(ini, SETTINGS_INI_SLICER_PATH, GetIniStr(ini, "CuraPath", "")));
 		dlSlicerFormat  <<= GetIniFmt(ini, SETTINGS_INI_SLICER_FORMAT, Doc3D::Format(Doc3D::Format::STL)).value;
 		return true;
 	}
@@ -118,13 +130,27 @@ public:
 		SetIniBool(ini, SETTINGS_INI_AUTOEXPORT_EN, (bool)~oAutoExportEn);
 		SetIniBool(ini, SETTINGS_INI_CREATE_FOLDER, (bool)~oCreateFolder);
 		SetIniBool(ini, SETTINGS_INI_AUTOEXPORT_WHEN_EXISTS, (bool)~oRewriteOnly);
-		SetIniStr( ini, SETTINGS_INI_SLICER_PATH, ~eSlicerPath);
+		SetIniStr( ini, SETTINGS_INI_SLICER_PATH, ~dlSlicerPath);
 		SetIniStr( ini, SETTINGS_INI_SLICER_FORMAT, Doc3D::Format((Doc3D::Format::Value)(int)~dlSlicerFormat).Name());
 		ini.Close();
 		return false;
 	}
 	
 private:
+	void AddSlicerPath(const String& path, const String& name = "Другой слайсер") {
+		if (path.IsEmpty() || dlSlicerPath.HasKey(path)) return;
+		dlSlicerPath.Add(path, name + " — " + path);
+	}
+
+	void SetSlicerPaths(String selectedPath) {
+		dlSlicerPath.ClearList();
+		Vector<Slicer::Installation> found = Slicer::FindInstalled();
+		for (const Slicer::Installation& item : found) AddSlicerPath(item.path, item.name);
+		if (selectedPath.IsEmpty() && dlSlicerPath.GetCount()) selectedPath = dlSlicerPath.GetKey(0);
+		AddSlicerPath(selectedPath);
+		dlSlicerPath <<= selectedPath;
+	}
+
 	bool GetIniBool(VectorMap<String, String>& ini, const String& key, bool def) {
 		int i = ini.Find(key);
 		if (i < 0) return def;

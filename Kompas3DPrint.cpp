@@ -60,7 +60,7 @@ void Kompas3D::RunCommand(uint32_t comm) {
 			if (exportPath.IsEmpty()) {
 				Kompas3D::Error("Ошибка экспорта");
 			} else {
-				slicer.Open(exportPath);
+				slicer.Open(exportPath, settings->GetSlicerPath());
 			}
 			break;
 		}
