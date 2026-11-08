@@ -15,5 +15,7 @@ BEGIN
     MENUITEM "Экспорт в VRLM",       MENU_EXPORT_VRLM
     MENUITEM "Создать шестерню",     MENU_GEAR
     MENUITEM "Создать рейку",        MENU_RACK
+    MENUITEM "Реальные резьбы",      MENU_THREADS
+    MENUITEM "Стандартные изделия",  MENU_STANDARD
     MENUITEM "О программе",          MENU_ABOUT
 END
