@@ -83,7 +83,6 @@ public:
 	
 	bool Load() {
 		String dir = Kompas3D::ConfigPath();
-		LOG(dir);
 		if (dir.IsEmpty()) return false;
 		VectorMap<String, String> ini = LoadIniFile(dir + "/Kompas3DPrint.ini");
 		oAutoExportEn   <<= GetIniBool(ini, SETTINGS_INI_AUTOEXPORT_EN, true);
